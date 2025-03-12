@@ -18,6 +18,9 @@ import OrderConfirmation from "./pages/store/OrderConfirmation";
 import { CartProvider } from "./contexts/CartContext";
 import Categories from "./pages/dashboard/Categories";
 import Promotions from "./pages/dashboard/Promotions";
+import Products from "./pages/dashboard/Products";
+import Orders from "./pages/dashboard/Orders";
+import Customers from "./pages/dashboard/Customers";
 import SettingsAccount from "./pages/dashboard/settings/Account";
 import SettingsStore from "./pages/dashboard/settings/Store";
 import SettingsBilling from "./pages/dashboard/settings/Billing";
@@ -49,11 +52,11 @@ const App = () => (
             {/* Dashboard Routes */}
             <Route path="/dashboard" element={<DashboardLayout />}>
               <Route index element={<Dashboard />} />
-              <Route path="products" element={<div className="text-2xl font-bold">صفحة المنتجات</div>} />
+              <Route path="products" element={<Products />} />
               <Route path="categories" element={<Categories />} />
               <Route path="promotions" element={<Promotions />} />
-              <Route path="orders" element={<div className="text-2xl font-bold">صفحة الطلبات</div>} />
-              <Route path="customers" element={<div className="text-2xl font-bold">صفحة العملاء</div>} />
+              <Route path="orders" element={<Orders />} />
+              <Route path="customers" element={<Customers />} />
               
               {/* Settings Routes */}
               <Route path="settings" element={<SettingsAccount />} />
