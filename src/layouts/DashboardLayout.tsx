@@ -33,7 +33,7 @@ type SidebarItemType = {
   icon: React.ElementType;
   label: string;
   href: string;
-  items?: { label: string; href: string }[];
+  submenu?: { label: string; href: string; icon: React.ElementType }[];
 };
 
 const sidebarItems: SidebarItemType[] = [
@@ -71,27 +71,16 @@ const sidebarItems: SidebarItemType[] = [
     icon: Settings,
     label: 'الإعدادات',
     href: '/dashboard/settings',
+    submenu: [
+      { label: 'الحساب', href: '/dashboard/settings/account', icon: User },
+      { label: 'المتجر', href: '/dashboard/settings/store', icon: Store },
+      { label: 'الاشتراك والفواتير', href: '/dashboard/settings/billing', icon: CreditCard },
+      { label: 'الإشعارات', href: '/dashboard/settings/notifications', icon: Bell },
+      { label: 'الأمان', href: '/dashboard/settings/security', icon: Shield },
+      { label: 'النطاقات', href: '/dashboard/settings/domains', icon: Globe },
+      { label: 'المساعدة والدعم', href: '/dashboard/settings/support', icon: HelpCircle },
+    ],
   },
-];
-
-const settingsIcons: Record<string, React.ElementType> = {
-  'account': User,
-  'store': Store,
-  'billing': CreditCard,
-  'notifications': Bell,
-  'security': Shield,
-  'domains': Globe,
-  'support': HelpCircle,
-};
-
-const settingsRoutes = [
-  { label: 'الحساب', href: '/dashboard/settings/account', icon: User },
-  { label: 'المتجر', href: '/dashboard/settings/store', icon: Store },
-  { label: 'الاشتراك والفواتير', href: '/dashboard/settings/billing', icon: CreditCard },
-  { label: 'الإشعارات', href: '/dashboard/settings/notifications', icon: Bell },
-  { label: 'الأمان', href: '/dashboard/settings/security', icon: Shield },
-  { label: 'النطاقات', href: '/dashboard/settings/domains', icon: Globe },
-  { label: 'المساعدة والدعم', href: '/dashboard/settings/support', icon: HelpCircle },
 ];
 
 const DashboardLayout = () => {
@@ -159,22 +148,53 @@ const DashboardLayout = () => {
 
           <div className="px-3 py-4 flex-1 overflow-y-auto">
             <nav className="space-y-2">
-              {sidebarItems.map((item) => (
-                <div key={item.label}>
-                  <Link
-                    to={item.href}
-                    className={cn(
-                      "flex items-center gap-3 p-2 rounded-md transition-colors",
-                      location.pathname === item.href
-                        ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                        : "hover:bg-sidebar-accent/50"
+              {sidebarItems.map((item) => {
+                const isActive = item.href === location.pathname ||
+                                (item.href !== '/dashboard' && location.pathname.startsWith(item.href));
+                const hasSubmenu = item.submenu && item.submenu.length > 0;
+                const isSettingsItem = item.href === '/dashboard/settings';
+                
+                return (
+                  <div key={item.label} className="space-y-1">
+                    <Link
+                      to={item.href}
+                      className={cn(
+                        "flex items-center gap-3 p-2 rounded-md transition-colors",
+                        isActive
+                          ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                          : "hover:bg-sidebar-accent/50"
+                      )}
+                    >
+                      <item.icon size={20} />
+                      <span>{item.label}</span>
+                    </Link>
+                    
+                    {hasSubmenu && isSettingsItem && isSettingsPage && (
+                      <div className="mr-6 mt-2 border-r pr-2 border-sidebar-border space-y-1">
+                        {item.submenu.map((subItem) => {
+                          const isSubActive = location.pathname === subItem.href;
+                          
+                          return (
+                            <Link
+                              key={subItem.href}
+                              to={subItem.href}
+                              className={cn(
+                                "flex items-center gap-3 p-2 rounded-md text-sm transition-colors",
+                                isSubActive
+                                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                                  : "hover:bg-sidebar-accent/50"
+                              )}
+                            >
+                              <subItem.icon size={18} />
+                              <span>{subItem.label}</span>
+                            </Link>
+                          );
+                        })}
+                      </div>
                     )}
-                  >
-                    <item.icon size={20} />
-                    <span>{item.label}</span>
-                  </Link>
-                </div>
-              ))}
+                  </div>
+                );
+              })}
             </nav>
           </div>
 
@@ -219,8 +239,8 @@ const DashboardLayout = () => {
                     <div className="flex items-center">
                       <span className="mx-2 text-muted-foreground">/</span>
                       <span className="text-sm font-medium">
-                        {settingsRoutes.find(item => 
-                          item.href.includes(currentSettingsPage))?.label || ''}
+                        {sidebarItems.find(item => item.href === '/dashboard/settings')?.submenu?.find(subItem => 
+                          subItem.href.includes(currentSettingsPage))?.label || ''}
                       </span>
                     </div>
                   )}
@@ -260,7 +280,7 @@ const DashboardLayout = () => {
           <div className="bg-background border-b p-0 w-full">
             <div className="container flex-shrink-0 h-14 flex items-center overflow-x-auto">
               <nav className="flex items-center space-x-4 rtl:space-x-reverse">
-                {settingsRoutes.map((item) => {
+                {sidebarItems.find(item => item.href === '/dashboard/settings')?.submenu?.map((item) => {
                   const isActive = location.pathname === item.href;
                   
                   return (
