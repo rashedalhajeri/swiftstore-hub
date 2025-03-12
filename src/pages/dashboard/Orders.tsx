@@ -1,30 +1,33 @@
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { 
-  Search, 
-  Filter, 
-  ArrowUpDown, 
-  MoreHorizontal, 
-  Eye, 
   Package, 
-  Truck, 
-  CheckCircle, 
-  XCircle, 
-  Clock
+  Search, 
+  Filter,
+  ChevronRight,
+  Calendar,
+  Clock,
+  CreditCard,
+  Truck,
+  XCircle,
+  Phone,
+  Mail,
+  MapPin,
+  CheckCircle2,
+  MoreHorizontal
 } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -33,224 +36,307 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
 } from "@/components/ui/dialog";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { format } from "date-fns";
-import { Link } from 'react-router-dom';
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerClose
+} from "@/components/ui/drawer";
+import { OrderDetails } from "@/components/dashboard/OrderDetails";
+import { UpdateOrderStatus } from "@/components/dashboard/UpdateOrderStatus";
+import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
+import { Order } from "@/types/store";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-// تعريف أنواع البيانات
-type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
-
-interface OrderItem {
-  id: string;
-  name: string;
-  quantity: number;
-  price: number;
-}
-
-interface Order {
-  id: string;
-  customerName: string;
-  customerEmail: string;
-  date: Date;
-  status: OrderStatus;
-  items: OrderItem[];
-  total: number;
-  paymentMethod: string;
-  shippingAddress: string;
-}
-
-const getStatusBadge = (status: OrderStatus) => {
-  switch (status) {
-    case 'pending':
-      return <Badge variant="outline" className="border-yellow-500 text-yellow-500">قيد الانتظار</Badge>;
-    case 'processing':
-      return <Badge className="bg-blue-500 hover:bg-blue-600">قيد المعالجة</Badge>;
-    case 'shipped':
-      return <Badge className="bg-indigo-500 hover:bg-indigo-600">تم الشحن</Badge>;
-    case 'delivered':
-      return <Badge className="bg-green-500 hover:bg-green-600">تم التسليم</Badge>;
-    case 'cancelled':
-      return <Badge variant="destructive">ملغي</Badge>;
-    default:
-      return null;
+// Sample orders data
+const SAMPLE_ORDERS: Order[] = [
+  {
+    id: "ORD-001",
+    createdAt: "2023-06-15T14:30:00Z",
+    status: "processing",
+    total: 599.97,
+    items: [
+      {
+        product: {
+          id: 1,
+          name: "هاتف ذكي Samsung Galaxy S22",
+          price: 299.99,
+          image: "https://via.placeholder.com/150",
+          category: "إلكترونيات",
+          featured: true,
+        },
+        quantity: 1
+      },
+      {
+        product: {
+          id: 2,
+          name: "سماعات لاسلكية Sony WH-1000XM4",
+          price: 149.99,
+          image: "https://via.placeholder.com/150",
+          category: "إلكترونيات",
+          featured: false,
+        },
+        quantity: 2
+      }
+    ],
+    shipping: {
+      name: "أحمد محمد",
+      address: "شارع 123، مبنى 45",
+      city: "الكويت",
+      state: "العاصمة",
+      zipCode: "12345",
+      email: "ahmed@example.com",
+      phone: "+965 1234 5678"
+    },
+    payment: {
+      method: "credit_card",
+      cardNumber: "**** **** **** 4242",
+      cardHolder: "أحمد محمد",
+      expiryMonth: "06",
+      expiryYear: "2025",
+      transactionId: "txn_123456789"
+    }
+  },
+  {
+    id: "ORD-002",
+    createdAt: "2023-06-14T10:15:00Z",
+    status: "shipped",
+    total: 349.99,
+    items: [
+      {
+        product: {
+          id: 7,
+          name: "مكنسة كهربائية Dyson V11",
+          price: 349.99,
+          image: "https://via.placeholder.com/150",
+          category: "أثاث منزلي",
+          featured: false,
+        },
+        quantity: 1
+      }
+    ],
+    shipping: {
+      name: "سارة عبدالله",
+      address: "شارع الخليج، مبنى 12",
+      city: "الكويت",
+      state: "حولي",
+      zipCode: "54321",
+      email: "sara@example.com",
+      phone: "+965 9876 5432"
+    },
+    payment: {
+      method: "paypal",
+      transactionId: "txn_987654321"
+    }
+  },
+  {
+    id: "ORD-003",
+    createdAt: "2023-06-13T16:45:00Z",
+    status: "delivered",
+    total: 89.99,
+    items: [
+      {
+        product: {
+          id: 8,
+          name: "مجموعة أواني طبخ",
+          price: 89.99,
+          image: "https://via.placeholder.com/150",
+          category: "مستلزمات المطبخ",
+          featured: false,
+        },
+        quantity: 1
+      }
+    ],
+    shipping: {
+      name: "خالد عبدالرحمن",
+      address: "شارع التعاون، مبنى 33",
+      city: "الكويت",
+      state: "السالمية",
+      zipCode: "13579",
+      email: "khaled@example.com",
+      phone: "+965 5555 8888"
+    },
+    payment: {
+      method: "credit_card",
+      cardNumber: "**** **** **** 5555",
+      cardHolder: "خالد عبدالرحمن",
+      expiryMonth: "08",
+      expiryYear: "2024",
+      transactionId: "txn_555555555"
+    }
+  },
+  {
+    id: "ORD-004",
+    createdAt: "2023-06-12T13:20:00Z",
+    status: "pending",
+    total: 209.97,
+    items: [
+      {
+        product: {
+          id: 5,
+          name: "قميص رجالي كلاسيكي",
+          price: 39.99,
+          image: "https://via.placeholder.com/150",
+          category: "ملابس",
+          featured: false,
+        },
+        quantity: 3
+      },
+      {
+        product: {
+          id: 6,
+          name: "كتاب التفكير السريع والبطيء",
+          price: 15.99,
+          image: "https://via.placeholder.com/150",
+          category: "كتب",
+          featured: true,
+        },
+        quantity: 1
+      }
+    ],
+    shipping: {
+      name: "نورة أحمد",
+      address: "شارع فهد السالم، مبنى 9",
+      city: "الكويت",
+      state: "الفروانية",
+      zipCode: "24680",
+      email: "noura@example.com",
+      phone: "+965 1122 3344"
+    },
+    payment: {
+      method: "cod"
+    }
+  },
+  {
+    id: "ORD-005",
+    createdAt: "2023-06-11T09:00:00Z",
+    status: "cancelled",
+    total: 799.99,
+    items: [
+      {
+        product: {
+          id: 10,
+          name: "كاميرا Canon EOS 90D",
+          price: 799.99,
+          image: "https://via.placeholder.com/150",
+          category: "إلكترونيات",
+          featured: false,
+        },
+        quantity: 1
+      }
+    ],
+    shipping: {
+      name: "محمد جاسم",
+      address: "شارع المباركية، مبنى 25",
+      city: "الكويت",
+      state: "الجهراء",
+      zipCode: "97531",
+      email: "mohammad@example.com",
+      phone: "+965 6677 9900"
+    },
+    payment: {
+      method: "debit_card",
+      cardNumber: "**** **** **** 7777",
+      cardHolder: "محمد جاسم",
+      expiryMonth: "12",
+      expiryYear: "2023",
+      transactionId: "txn_777777777"
+    }
   }
-};
-
-const getStatusIcon = (status: OrderStatus) => {
-  switch (status) {
-    case 'pending':
-      return <Clock className="h-5 w-5 text-yellow-500" />;
-    case 'processing':
-      return <Package className="h-5 w-5 text-blue-500" />;
-    case 'shipped':
-      return <Truck className="h-5 w-5 text-indigo-500" />;
-    case 'delivered':
-      return <CheckCircle className="h-5 w-5 text-green-500" />;
-    case 'cancelled':
-      return <XCircle className="h-5 w-5 text-red-500" />;
-    default:
-      return null;
-  }
-};
+];
 
 const Orders = () => {
-  // بيانات نموذجية للطلبات
-  const [orders, setOrders] = useState<Order[]>([
-    {
-      id: "ORD-2023-1001",
-      customerName: "أحمد محمد",
-      customerEmail: "ahmed@example.com",
-      date: new Date(2023, 8, 28),
-      status: "delivered",
-      items: [
-        { id: "1", name: "هاتف ذكي Samsung Galaxy S22", quantity: 1, price: 299.99 },
-        { id: "2", name: "حافظة هاتف", quantity: 1, price: 19.99 }
-      ],
-      total: 319.98,
-      paymentMethod: "بطاقة ائتمان",
-      shippingAddress: "شارع الملك فهد، الرياض، المملكة العربية السعودية"
-    },
-    {
-      id: "ORD-2023-1002",
-      customerName: "نورة علي",
-      customerEmail: "noura@example.com",
-      date: new Date(2023, 8, 29),
-      status: "shipped",
-      items: [
-        { id: "3", name: "سماعات لاسلكية Sony WH-1000XM4", quantity: 1, price: 149.99 }
-      ],
-      total: 149.99,
-      paymentMethod: "باي بال",
-      shippingAddress: "شارع السلام، الدوحة، قطر"
-    },
-    {
-      id: "ORD-2023-1003",
-      customerName: "خالد إبراهيم",
-      customerEmail: "khalid@example.com",
-      date: new Date(2023, 8, 30),
-      status: "processing",
-      items: [
-        { id: "4", name: "حقيبة ظهر للرحلات", quantity: 1, price: 59.99 },
-        { id: "5", name: "قميص رجالي كلاسيكي", quantity: 2, price: 39.99 }
-      ],
-      total: 139.97,
-      paymentMethod: "دفع عند الاستلام",
-      shippingAddress: "شارع مكة، جدة، المملكة العربية السعودية"
-    },
-    {
-      id: "ORD-2023-1004",
-      customerName: "فاطمة عبدالله",
-      customerEmail: "fatima@example.com",
-      date: new Date(2023, 9, 1),
-      status: "pending",
-      items: [
-        { id: "6", name: "ساعة ذكية Fitbit Versa 3", quantity: 1, price: 129.99 }
-      ],
-      total: 129.99,
-      paymentMethod: "بطاقة ائتمان",
-      shippingAddress: "شارع الاستقلال، دبي، الإمارات العربية المتحدة"
-    },
-    {
-      id: "ORD-2023-1005",
-      customerName: "عمر أحمد",
-      customerEmail: "omar@example.com",
-      date: new Date(2023, 9, 2),
-      status: "cancelled",
-      items: [
-        { id: "7", name: "مكنسة كهربائية Dyson V11", quantity: 1, price: 349.99 }
-      ],
-      total: 349.99,
-      paymentMethod: "بطاقة ائتمان",
-      shippingAddress: "شارع الملك عبدالله، عمان، الأردن"
-    },
-    {
-      id: "ORD-2023-1006",
-      customerName: "سارة محمد",
-      customerEmail: "sara@example.com",
-      date: new Date(2023, 9, 3),
-      status: "delivered",
-      items: [
-        { id: "8", name: "كتاب التفكير السريع والبطيء", quantity: 1, price: 15.99 },
-        { id: "9", name: "كتاب عادات العقل", quantity: 1, price: 13.99 }
-      ],
-      total: 29.98,
-      paymentMethod: "باي بال",
-      shippingAddress: "شارع المرسى، القاهرة، مصر"
-    },
-    {
-      id: "ORD-2023-1007",
-      customerName: "محمد علي",
-      customerEmail: "mohamed@example.com",
-      date: new Date(2023, 9, 4),
-      status: "processing",
-      items: [
-        { id: "10", name: "كاميرا Canon EOS 90D", quantity: 1, price: 799.99 }
-      ],
-      total: 799.99,
-      paymentMethod: "بطاقة ائتمان",
-      shippingAddress: "شارع الحمراء، بيروت، لبنان"
-    }
-  ]);
-
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [isOrderDetailsOpen, setIsOrderDetailsOpen] = useState(false);
-  const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
-  const [newStatus, setNewStatus] = useState<OrderStatus | "">("");
+  const [orders, setOrders] = useState<Order[]>(SAMPLE_ORDERS);
   const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isStatusUpdateOpen, setIsStatusUpdateOpen] = useState(false);
+  const { toast } = useToast();
+  const isMobile = useIsMobile();
 
-  const viewOrderDetails = (order: Order) => {
+  // Filtered orders based on search term and status filter
+  const filteredOrders = orders.filter(order => {
+    const matchesSearch = 
+      order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.shipping.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      order.shipping.email.toLowerCase().includes(searchTerm.toLowerCase());
+      
+    const matchesStatus = filterStatus === "all" || order.status === filterStatus;
+    
+    return matchesSearch && matchesStatus;
+  });
+
+  const handleViewOrderDetails = (order: Order) => {
     setSelectedOrder(order);
-    setIsOrderDetailsOpen(true);
+    setIsDetailsOpen(true);
   };
 
-  const openStatusDialog = (order: Order) => {
-    setSelectedOrder(order);
-    setNewStatus(order.status);
-    setIsStatusDialogOpen(true);
+  const handleUpdateOrderStatus = (orderId: string, newStatus: Order['status']) => {
+    setOrders(orders.map(order => 
+      order.id === orderId 
+        ? { ...order, status: newStatus } 
+        : order
+    ));
+    
+    setIsStatusUpdateOpen(false);
+    
+    toast({
+      title: "تم تحديث حالة الطلب",
+      description: `تم تغيير حالة الطلب ${orderId} إلى ${getStatusText(newStatus)}`,
+    });
   };
 
-  const updateOrderStatus = () => {
-    if (selectedOrder && newStatus) {
-      setOrders(
-        orders.map((order) =>
-          order.id === selectedOrder.id ? { ...order, status: newStatus as OrderStatus } : order
-        )
-      );
-      setIsStatusDialogOpen(false);
+  const getStatusBadge = (status: Order['status']) => {
+    switch (status) {
+      case 'pending':
+        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200">قيد الانتظار</Badge>;
+      case 'processing':
+        return <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">قيد المعالجة</Badge>;
+      case 'shipped':
+        return <Badge className="bg-indigo-500 hover:bg-indigo-600">تم الشحن</Badge>;
+      case 'delivered':
+        return <Badge className="bg-green-500 hover:bg-green-600">تم التوصيل</Badge>;
+      case 'cancelled':
+        return <Badge variant="destructive">ملغي</Badge>;
+      default:
+        return null;
     }
   };
 
-  const filteredOrders = orders.filter(
-    (order) =>
-      order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customerEmail.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const getStatusText = (status: Order['status']) => {
+    switch (status) {
+      case 'pending': return 'قيد الانتظار';
+      case 'processing': return 'قيد المعالجة';
+      case 'shipped': return 'تم الشحن';
+      case 'delivered': return 'تم التوصيل';
+      case 'cancelled': return 'ملغي';
+      default: return '';
+    }
+  };
 
-  // حساب إحصائيات الطلبات
-  const pendingCount = orders.filter((order) => order.status === "pending").length;
-  const processingCount = orders.filter((order) => order.status === "processing").length;
-  const shippedCount = orders.filter((order) => order.status === "shipped").length;
-  const deliveredCount = orders.filter((order) => order.status === "delivered").length;
-  const cancelledCount = orders.filter((order) => order.status === "cancelled").length;
-
-  const totalRevenue = orders
-    .filter((order) => order.status !== "cancelled")
-    .reduce((sum, order) => sum + order.total, 0);
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Intl.DateTimeFormat('ar-KW', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date);
+  };
 
   return (
     <div className="space-y-6" style={{ direction: "rtl" }}>
@@ -258,218 +344,218 @@ const Orders = () => {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">الطلبات</h1>
           <p className="text-muted-foreground">
-            إدارة طلبات العملاء ومتابعة حالتها
+            إدارة طلبات العملاء وتتبع حالتها ومعالجتها
           </p>
         </div>
-        <Button variant="outline" className="button-hover-effect">
-          <Filter className="ml-2 h-4 w-4" />
+        <Button
+          variant="outline" 
+          className="button-hover-effect"
+          onClick={() => {
+            toast({
+              title: "قريباً",
+              description: "سيتم إضافة ميزة تصدير الطلبات قريباً",
+            });
+          }}
+        >
+          <Package className="mr-2 h-4 w-4" />
           تصدير الطلبات
         </Button>
-      </div>
-
-      {/* بطاقات الإحصائيات */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card>
-          <CardHeader className="py-3">
-            <CardTitle className="text-sm font-medium flex items-center justify-between">
-              <span>قيد الانتظار</span>
-              <Clock className="h-4 w-4 text-yellow-500" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{pendingCount}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="py-3">
-            <CardTitle className="text-sm font-medium flex items-center justify-between">
-              <span>قيد المعالجة</span>
-              <Package className="h-4 w-4 text-blue-500" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{processingCount}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="py-3">
-            <CardTitle className="text-sm font-medium flex items-center justify-between">
-              <span>تم الشحن</span>
-              <Truck className="h-4 w-4 text-indigo-500" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{shippedCount}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="py-3">
-            <CardTitle className="text-sm font-medium flex items-center justify-between">
-              <span>تم التسليم</span>
-              <CheckCircle className="h-4 w-4 text-green-500" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{deliveredCount}</div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader className="py-3">
-            <CardTitle className="text-sm font-medium flex items-center justify-between">
-              <span>ملغية</span>
-              <XCircle className="h-4 w-4 text-red-500" />
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{cancelledCount}</div>
-          </CardContent>
-        </Card>
       </div>
 
       <div className="flex flex-col md:flex-row items-center gap-4 mb-4">
         <div className="relative w-full md:w-96">
           <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
           <Input 
-            placeholder="بحث عن رقم الطلب، اسم العميل..." 
+            placeholder="بحث عن طلب..." 
             className="pr-10" 
             value={searchTerm} 
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <Button variant="outline" className="flex gap-2">
-          <Filter size={16} />
-          <span>تصفية</span>
-        </Button>
+        <Select value={filterStatus} onValueChange={setFilterStatus}>
+          <SelectTrigger className="w-full md:w-[180px]">
+            <SelectValue placeholder="تصفية حسب الحالة" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">جميع الحالات</SelectItem>
+            <SelectItem value="pending">قيد الانتظار</SelectItem>
+            <SelectItem value="processing">قيد المعالجة</SelectItem>
+            <SelectItem value="shipped">تم الشحن</SelectItem>
+            <SelectItem value="delivered">تم التوصيل</SelectItem>
+            <SelectItem value="cancelled">ملغي</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       <Tabs defaultValue="all" className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="all">جميع الطلبات</TabsTrigger>
-          <TabsTrigger value="pending">قيد الانتظار</TabsTrigger>
+          <TabsTrigger value="recent">الطلبات الحديثة</TabsTrigger>
           <TabsTrigger value="processing">قيد المعالجة</TabsTrigger>
-          <TabsTrigger value="shipped">تم الشحن</TabsTrigger>
-          <TabsTrigger value="delivered">تم التسليم</TabsTrigger>
-          <TabsTrigger value="cancelled">ملغية</TabsTrigger>
+          <TabsTrigger value="completed">مكتملة</TabsTrigger>
         </TabsList>
         
         <TabsContent value="all">
           <Card>
             <CardHeader className="pb-2">
-              <CardTitle>جميع الطلبات</CardTitle>
+              <CardTitle>قائمة الطلبات</CardTitle>
               <CardDescription>
-                إجمالي {filteredOrders.length} طلب | الإيرادات: {totalRevenue.toFixed(2)} KWD
+                إجمالي {filteredOrders.length} طلب
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[100px]">رقم الطلب</TableHead>
-                    <TableHead>العميل</TableHead>
-                    <TableHead className="w-[120px]">
-                      <div className="flex items-center gap-1">
-                        <span>التاريخ</span>
-                        <ArrowUpDown size={14} />
-                      </div>
-                    </TableHead>
-                    <TableHead>حالة الطلب</TableHead>
-                    <TableHead>المبلغ</TableHead>
-                    <TableHead>طريقة الدفع</TableHead>
-                    <TableHead className="text-left">إجراءات</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+              {filteredOrders.length > 0 ? (
+                <div className="space-y-4">
                   {filteredOrders.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell className="font-medium">{order.id}</TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{order.customerName}</div>
-                          <div className="text-sm text-muted-foreground">{order.customerEmail}</div>
+                    <Card key={order.id} className="overflow-hidden">
+                      <div className="flex flex-col md:flex-row border-b">
+                        <div className="p-4 md:w-3/4 space-y-3">
+                          <div className="flex flex-col md:flex-row md:items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <h3 className="font-semibold text-lg">طلب #{order.id}</h3>
+                              {getStatusBadge(order.status)}
+                            </div>
+                            <div className="flex items-center text-sm text-muted-foreground mt-2 md:mt-0">
+                              <Calendar className="h-4 w-4 mr-1" />
+                              <span dir="ltr">{formatDate(order.createdAt)}</span>
+                            </div>
+                          </div>
+                          
+                          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-2">
+                            <div className="flex flex-col">
+                              <span className="text-sm text-muted-foreground">العميل</span>
+                              <span className="font-medium">{order.shipping.name}</span>
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-sm text-muted-foreground">طريقة الدفع</span>
+                              <div className="flex items-center">
+                                <CreditCard className="h-4 w-4 mr-1" />
+                                <span className="font-medium">
+                                  {order.payment.method === 'credit_card' ? 'بطاقة ائتمان' : 
+                                   order.payment.method === 'debit_card' ? 'بطاقة سحب' :
+                                   order.payment.method === 'paypal' ? 'PayPal' : 'الدفع عند الاستلام'}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-sm text-muted-foreground">إجمالي الطلب</span>
+                              <span className="font-medium">{order.total.toFixed(2)} KWD</span>
+                            </div>
+                          </div>
+                          
+                          <div className="flex flex-wrap items-center gap-3 pt-2 text-sm">
+                            <span className="text-muted-foreground">المنتجات:</span>
+                            {order.items.map((item, idx) => (
+                              <span key={idx}>
+                                {item.product.name} ({item.quantity})
+                                {idx < order.items.length - 1 ? '، ' : ''}
+                              </span>
+                            ))}
+                          </div>
                         </div>
-                      </TableCell>
-                      <TableCell>{format(order.date, "dd/MM/yyyy")}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          {getStatusBadge(order.status)}
+                        
+                        <div className="flex-shrink-0 border-t md:border-t-0 md:border-r p-4 md:w-1/4">
+                          <div className="flex flex-col h-full justify-between gap-2">
+                            <Button 
+                              variant="default" 
+                              className="w-full justify-between"
+                              onClick={() => handleViewOrderDetails(order)}
+                            >
+                              <span>عرض التفاصيل</span>
+                              <ChevronRight className="h-4 w-4" />
+                            </Button>
+                            
+                            <Button 
+                              variant="outline" 
+                              className="w-full justify-between"
+                              onClick={() => {
+                                setSelectedOrder(order);
+                                setIsStatusUpdateOpen(true);
+                              }}
+                            >
+                              <span>تحديث الحالة</span>
+                              <Clock className="h-4 w-4" />
+                            </Button>
+                            
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="w-full justify-between">
+                                  <span>المزيد من الخيارات</span>
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>خيارات الطلب</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => {
+                                  toast({
+                                    title: "قريباً",
+                                    description: "سيتم إضافة ميزة طباعة الفاتورة قريباً",
+                                  });
+                                }}>
+                                  طباعة الفاتورة
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => {
+                                  toast({
+                                    title: "قريباً",
+                                    description: "سيتم إضافة ميزة إرسال تأكيد البريد الإلكتروني قريباً",
+                                  });
+                                }}>
+                                  إرسال تأكيد بالبريد الإلكتروني
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem 
+                                  className="text-red-500 focus:text-red-500"
+                                  onClick={() => {
+                                    if (order.status !== 'cancelled') {
+                                      handleUpdateOrderStatus(order.id, 'cancelled');
+                                    } else {
+                                      toast({
+                                        title: "تم إلغاء الطلب بالفعل",
+                                        description: "هذا الطلب ملغى بالفعل",
+                                      });
+                                    }
+                                  }}
+                                >
+                                  إلغاء الطلب
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
                         </div>
-                      </TableCell>
-                      <TableCell>{order.total.toFixed(2)} KWD</TableCell>
-                      <TableCell>{order.paymentMethod}</TableCell>
-                      <TableCell>
-                        <div className="flex justify-end gap-2">
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
-                            onClick={() => viewOrderDetails(order)}
-                          >
-                            <Eye size={16} />
-                          </Button>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon">
-                                <MoreHorizontal size={16} />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>خيارات</DropdownMenuLabel>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem onClick={() => viewOrderDetails(order)}>
-                                <Eye className="ml-2" size={16} />
-                                <span>عرض تفاصيل الطلب</span>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => openStatusDialog(order)}>
-                                <Package className="ml-2" size={16} />
-                                <span>تحديث الحالة</span>
-                              </DropdownMenuItem>
-                              <DropdownMenuItem asChild>
-                                <Link to="/dashboard/orders/invoice" className="flex items-center">
-                                  <svg className="ml-2" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                    <polyline points="14 2 14 8 20 8"></polyline>
-                                    <line x1="16" y1="13" x2="8" y2="13"></line>
-                                    <line x1="16" y1="17" x2="8" y2="17"></line>
-                                    <polyline points="10 9 9 9 8 9"></polyline>
-                                  </svg>
-                                  <span>طباعة الفاتورة</span>
-                                </Link>
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                      </div>
+                    </Card>
                   ))}
-                  
-                  {filteredOrders.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={7} className="h-24 text-center">
-                        لا توجد طلبات مطابقة لبحثك
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
+                </div>
+              ) : (
+                <div className="text-center py-10">
+                  <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                  <h3 className="font-medium text-lg">لا توجد طلبات</h3>
+                  <p className="text-muted-foreground mt-1">
+                    لم يتم العثور على طلبات تطابق معايير البحث الخاصة بك
+                  </p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
         
-        <TabsContent value="pending">
+        <TabsContent value="recent">
           <Card>
             <CardHeader>
-              <CardTitle>الطلبات قيد الانتظار</CardTitle>
+              <CardTitle>الطلبات الحديثة</CardTitle>
               <CardDescription>
-                الطلبات التي تنتظر بدء المعالجة
+                الطلبات التي تم استلامها خلال آخر 24 ساعة
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-center text-muted-foreground py-8">
-                سيتم عرض قائمة الطلبات قيد الانتظار هنا
-              </p>
+              <div className="text-center py-10">
+                <Clock className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="font-medium text-lg">قريباً</h3>
+                <p className="text-muted-foreground mt-1">
+                  سيتم تفعيل هذه الميزة قريباً
+                </p>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -479,189 +565,97 @@ const Orders = () => {
             <CardHeader>
               <CardTitle>الطلبات قيد المعالجة</CardTitle>
               <CardDescription>
-                الطلبات التي يتم تجهيزها حاليًا
+                الطلبات التي تحتاج إلى معالجة وشحن
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-center text-muted-foreground py-8">
-                سيتم عرض قائمة الطلبات قيد المعالجة هنا
-              </p>
+              <div className="text-center py-10">
+                <Truck className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="font-medium text-lg">قريباً</h3>
+                <p className="text-muted-foreground mt-1">
+                  سيتم تفعيل هذه الميزة قريباً
+                </p>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
         
-        <TabsContent value="shipped">
+        <TabsContent value="completed">
           <Card>
             <CardHeader>
-              <CardTitle>الطلبات المشحونة</CardTitle>
+              <CardTitle>الطلبات المكتملة</CardTitle>
               <CardDescription>
-                الطلبات التي تم شحنها وفي طريقها للعملاء
+                الطلبات التي تم تسليمها بنجاح
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <p className="text-center text-muted-foreground py-8">
-                سيتم عرض قائمة الطلبات المشحونة هنا
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="delivered">
-          <Card>
-            <CardHeader>
-              <CardTitle>الطلبات المسلّمة</CardTitle>
-              <CardDescription>
-                الطلبات التي تم تسليمها للعملاء
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-center text-muted-foreground py-8">
-                سيتم عرض قائمة الطلبات المسلّمة هنا
-              </p>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="cancelled">
-          <Card>
-            <CardHeader>
-              <CardTitle>الطلبات الملغاة</CardTitle>
-              <CardDescription>
-                الطلبات التي تم إلغاؤها
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-center text-muted-foreground py-8">
-                سيتم عرض قائمة الطلبات الملغاة هنا
-              </p>
+              <div className="text-center py-10">
+                <CheckCircle2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <h3 className="font-medium text-lg">قريباً</h3>
+                <p className="text-muted-foreground mt-1">
+                  سيتم تفعيل هذه الميزة قريباً
+                </p>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
 
-      {/* حوار تفاصيل الطلب */}
-      <Dialog open={isOrderDetailsOpen} onOpenChange={setIsOrderDetailsOpen}>
-        <DialogContent className="sm:max-w-[600px]">
-          {selectedOrder && (
-            <>
-              <DialogHeader>
-                <DialogTitle className="flex items-center gap-2">
-                  <span>تفاصيل الطلب | {selectedOrder.id}</span>
-                  <div>
-                    {getStatusBadge(selectedOrder.status)}
-                  </div>
-                </DialogTitle>
-                <DialogDescription>
-                  تاريخ الطلب: {format(selectedOrder.date, "dd/MM/yyyy")}
-                </DialogDescription>
-              </DialogHeader>
-              
-              <div className="space-y-4 my-2">
-                <div className="flex justify-between items-start border-b pb-3">
-                  <div>
-                    <h4 className="font-medium">معلومات العميل</h4>
-                    <p className="text-sm text-muted-foreground">{selectedOrder.customerName}</p>
-                    <p className="text-sm text-muted-foreground">{selectedOrder.customerEmail}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {getStatusIcon(selectedOrder.status)}
-                    <Button variant="outline" size="sm" onClick={() => openStatusDialog(selectedOrder)}>
-                      تحديث الحالة
-                    </Button>
-                  </div>
-                </div>
-                
-                <div>
-                  <h4 className="font-medium mb-2">المنتجات</h4>
-                  <div className="space-y-2">
-                    {selectedOrder.items.map((item) => (
-                      <div key={item.id} className="flex justify-between">
-                        <div>
-                          <p className="text-sm">{item.name}</p>
-                          <p className="text-xs text-muted-foreground">الكمية: {item.quantity}</p>
-                        </div>
-                        <p className="text-sm">{(item.price * item.quantity).toFixed(2)} KWD</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                
-                <div className="border-t pt-3">
-                  <div className="flex justify-between">
-                    <p className="font-medium">الإجمالي</p>
-                    <p className="font-bold">{selectedOrder.total.toFixed(2)} KWD</p>
-                  </div>
-                  <div className="flex justify-between text-sm text-muted-foreground">
-                    <p>طريقة الدفع</p>
-                    <p>{selectedOrder.paymentMethod}</p>
-                  </div>
-                </div>
-                
-                <div className="border-t pt-3">
-                  <h4 className="font-medium mb-1">عنوان الشحن</h4>
-                  <p className="text-sm text-muted-foreground">{selectedOrder.shippingAddress}</p>
-                </div>
-              </div>
-              
-              <DialogFooter className="gap-2">
-                <Button variant="outline" onClick={() => setIsOrderDetailsOpen(false)}>
-                  إغلاق
-                </Button>
-                <Button asChild>
-                  <Link to="/dashboard/orders/invoice">
-                    طباعة الفاتورة
-                  </Link>
-                </Button>
-              </DialogFooter>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Order Details Dialog/Drawer */}
+      {isMobile ? (
+        <Drawer open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+          <DrawerContent>
+            <DrawerHeader>
+              <DrawerTitle>تفاصيل الطلب #{selectedOrder?.id}</DrawerTitle>
+              <DrawerDescription>
+                عرض معلومات الطلب والمنتجات والشحن والدفع
+              </DrawerDescription>
+            </DrawerHeader>
+            <div className="px-4 pb-4">
+              {selectedOrder && <OrderDetails order={selectedOrder} />}
+            </div>
+            <DrawerFooter>
+              <Button variant="outline" onClick={() => setIsDetailsOpen(false)}>
+                إغلاق
+              </Button>
+            </DrawerFooter>
+          </DrawerContent>
+        </Drawer>
+      ) : (
+        <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+          <DialogContent className="max-w-3xl">
+            <DialogHeader>
+              <DialogTitle>تفاصيل الطلب #{selectedOrder?.id}</DialogTitle>
+              <DialogDescription>
+                عرض معلومات الطلب والمنتجات والشحن والدفع
+              </DialogDescription>
+            </DialogHeader>
+            {selectedOrder && <OrderDetails order={selectedOrder} />}
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsDetailsOpen(false)}>
+                إغلاق
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
 
-      {/* حوار تحديث حالة الطلب */}
-      <Dialog open={isStatusDialogOpen} onOpenChange={setIsStatusDialogOpen}>
-        <DialogContent className="sm:max-w-[400px]">
+      {/* Update Order Status Dialog */}
+      <Dialog open={isStatusUpdateOpen} onOpenChange={setIsStatusUpdateOpen}>
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>تحديث حالة الطلب</DialogTitle>
             <DialogDescription>
-              تغيير حالة الطلب {selectedOrder?.id}
+              تغيير حالة الطلب #{selectedOrder?.id}
             </DialogDescription>
           </DialogHeader>
-          
-          <div className="space-y-4 my-2">
-            <div className="flex items-center gap-2">
-              <p className="text-sm">الحالة الحالية:</p>
-              {selectedOrder && getStatusBadge(selectedOrder.status)}
-            </div>
-            
-            <div className="space-y-2">
-              <label className="text-sm font-medium">الحالة الجديدة</label>
-              <Select
-                value={newStatus}
-                onValueChange={(value) => setNewStatus(value as OrderStatus)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="اختر حالة جديدة" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="pending">قيد الانتظار</SelectItem>
-                  <SelectItem value="processing">قيد المعالجة</SelectItem>
-                  <SelectItem value="shipped">تم الشحن</SelectItem>
-                  <SelectItem value="delivered">تم التسليم</SelectItem>
-                  <SelectItem value="cancelled">ملغي</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsStatusDialogOpen(false)}>
-              إلغاء
-            </Button>
-            <Button onClick={updateOrderStatus}>
-              تحديث الحالة
-            </Button>
-          </DialogFooter>
+          {selectedOrder && (
+            <UpdateOrderStatus 
+              order={selectedOrder} 
+              onStatusUpdate={(status) => handleUpdateOrderStatus(selectedOrder.id, status)} 
+              onCancel={() => setIsStatusUpdateOpen(false)}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>
