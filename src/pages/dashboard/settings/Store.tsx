@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Store, Globe, Upload, Facebook, Instagram, Twitter } from "lucide-react";
+import { StoreIcon, Globe, Upload, Facebook, Instagram, Twitter } from "lucide-react";
 
 const storeFormSchema = z.object({
   name: z.string().min(2, {
@@ -49,7 +49,7 @@ const defaultValues: Partial<StoreFormValues> = {
   isPublished: true,
 };
 
-const Store = () => {
+const SettingsStore = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   
   const form = useForm<StoreFormValues>({
@@ -109,7 +109,7 @@ const Store = () => {
                           <FormLabel>اسم المتجر</FormLabel>
                           <FormControl>
                             <div className="relative">
-                              <Store className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                              <StoreIcon className="absolute right-3 top-2.5 h-4 w-4 text-muted-foreground" />
                               <Input className="pl-3 pr-10" placeholder="اسم متجرك" {...field} />
                             </div>
                           </FormControl>
@@ -348,4 +348,4 @@ const Store = () => {
   );
 };
 
-export default Store;
+export default SettingsStore;
