@@ -19,6 +19,8 @@ import { CartProvider } from "./contexts/CartContext";
 import Categories from "./pages/dashboard/Categories";
 import Promotions from "./pages/dashboard/Promotions";
 import Products from "./pages/dashboard/Products";
+import NewProduct from "./pages/dashboard/products/NewProduct";
+import EditProduct from "./pages/dashboard/products/EditProduct";
 import Orders from "./pages/dashboard/Orders";
 import Customers from "./pages/dashboard/Customers";
 import SettingsAccount from "./pages/dashboard/settings/Account";
@@ -53,6 +55,8 @@ const App = () => (
             <Route path="/dashboard" element={<DashboardLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="products" element={<Products />} />
+              <Route path="products/new" element={<NewProduct />} />
+              <Route path="products/:id/edit" element={<EditProduct />} />
               <Route path="categories" element={<Categories />} />
               <Route path="promotions" element={<Promotions />} />
               <Route path="orders" element={<Orders />} />
