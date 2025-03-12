@@ -6,11 +6,13 @@ import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Check, Zap } from "lucide-react";
 
+type PlanId = "free" | "basic" | "pro";
+
 const SettingsBilling = () => {
-  const currentPlan = "basic";
+  const currentPlan: PlanId = "basic";
   const plans = [
     {
-      id: "free",
+      id: "free" as PlanId,
       name: "المجاني",
       price: "0$",
       description: "مناسب للمتاجر الصغيرة والمبتدئين",
@@ -23,7 +25,7 @@ const SettingsBilling = () => {
       isCurrent: currentPlan === "free",
     },
     {
-      id: "basic",
+      id: "basic" as PlanId,
       name: "الأساسي",
       price: "19$",
       period: "شهريًا",
@@ -39,7 +41,7 @@ const SettingsBilling = () => {
       isCurrent: currentPlan === "basic",
     },
     {
-      id: "pro",
+      id: "pro" as PlanId,
       name: "الاحترافي",
       price: "49$",
       period: "شهريًا",
