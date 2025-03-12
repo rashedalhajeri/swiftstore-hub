@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,6 +19,17 @@ const Register = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // Remember store URL between steps
+  useEffect(() => {
+    // If coming back to step 1, retrieve the previously entered store URL if any
+    if (step === 1) {
+      const savedStoreUrl = sessionStorage.getItem('tempStoreUrl');
+      if (savedStoreUrl) {
+        setStoreUrl(savedStoreUrl);
+      }
+    }
+  }, [step]);
+
   const handleGenerateStoreUrl = () => {
     if (storeName) {
       // Generate a URL-friendly slug from the store name
@@ -30,6 +41,9 @@ const Register = () => {
         .replace(/^-+|-+$/g, '');
       
       setStoreUrl(slug);
+      
+      // Save the storeUrl temporarily
+      sessionStorage.setItem('tempStoreUrl', slug);
     }
   };
 
@@ -74,6 +88,9 @@ const Register = () => {
   const handleRegister = async () => {
     setIsLoading(true);
     
+    // Save store URL permanently
+    localStorage.setItem('storeUrl', storeUrl);
+    
     // Simulate API request
     setTimeout(() => {
       setIsLoading(false);
@@ -82,6 +99,9 @@ const Register = () => {
         title: "تم إنشاء حسابك بنجاح!",
         description: "جاري تحويلك إلى لوحة التحكم...",
       });
+      
+      // Remove temporary storage
+      sessionStorage.removeItem('tempStoreUrl');
       
       // Redirect to dashboard
       setTimeout(() => {
@@ -142,6 +162,9 @@ const Register = () => {
                     onChange={(e) => setPassword(e.target.value)}
                   />
                 </div>
+                <div className="pt-2 text-center text-sm text-muted-foreground">
+                  موقعك: الكويت | العملة: الدينار الكويتي (KWD)
+                </div>
               </>
             ) : (
               // Step 2: Store Info
@@ -154,8 +177,7 @@ const Register = () => {
                     value={storeName}
                     onChange={(e) => {
                       setStoreName(e.target.value);
-                      // Clear store URL if store name changes
-                      setStoreUrl('');
+                      // Don't automatically clear store URL when editing name
                     }}
                     onBlur={handleGenerateStoreUrl}
                   />

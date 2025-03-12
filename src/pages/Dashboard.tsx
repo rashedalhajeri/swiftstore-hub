@@ -5,15 +5,15 @@ import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recha
 import { Link } from "react-router-dom";
 import { ArrowRight, ArrowUp, ArrowDown, DollarSign, ShoppingBag, Users, Store, Plus } from "lucide-react";
 
-// Sample data for the dashboard charts and stats
+// Sample data for the dashboard charts and stats with English months
 const revenueData = [
-  { name: "يناير", total: 1200 },
-  { name: "فبراير", total: 2100 },
-  { name: "مارس", total: 1800 },
-  { name: "أبريل", total: 2400 },
-  { name: "مايو", total: 3100 },
-  { name: "يونيو", total: 2900 },
-  { name: "يوليو", total: 3800 },
+  { name: "January", total: 1200 },
+  { name: "February", total: 2100 },
+  { name: "March", total: 1800 },
+  { name: "April", total: 2400 },
+  { name: "May", total: 3100 },
+  { name: "June", total: 2900 },
+  { name: "July", total: 3800 },
 ];
 
 const Dashboard = () => {
@@ -43,7 +43,7 @@ const Dashboard = () => {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">﷼43,500</div>
+            <div className="text-2xl font-bold">43,500 KWD</div>
             <div className="flex items-center pt-1 text-xs text-muted-foreground">
               <ArrowUp className="mr-1 h-3 w-3 text-green-500" />
               <span className="text-green-500 font-medium">+20.1%</span>
@@ -124,10 +124,10 @@ const Dashboard = () => {
                   fontSize={12} 
                   tickLine={false} 
                   axisLine={false} 
-                  tickFormatter={(value) => `﷼${value}`} 
+                  tickFormatter={(value) => `${value} KWD`} 
                 />
                 <Tooltip 
-                  formatter={(value) => [`﷼${value}`, 'الإيرادات']} 
+                  formatter={(value) => [`${value} KWD`, 'الإيرادات']} 
                   labelFormatter={(label) => `شهر: ${label}`} 
                 />
                 <Bar 
@@ -162,7 +162,7 @@ const Dashboard = () => {
                     منذ 10 دقائق
                   </p>
                 </div>
-                <div className="font-medium">﷼299</div>
+                <div className="font-medium">299 KWD</div>
               </div>
               
               {/* Activity 2 */}
@@ -205,7 +205,7 @@ const Dashboard = () => {
                     منذ ساعتين
                   </p>
                 </div>
-                <div className="font-medium">﷼150</div>
+                <div className="font-medium">150 KWD</div>
               </div>
             </div>
             

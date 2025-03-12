@@ -17,7 +17,8 @@ import {
   Bell,
   Shield,
   Globe,
-  HelpCircle
+  HelpCircle,
+  Edit
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Logo from '@/components/Logo';
@@ -83,6 +84,8 @@ const settingsIcons: Record<string, React.ElementType> = {
 const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
+  const [userName, setUserName] = useState('مستخدم متجر.أنا');
+  const [storeUrl, setStoreUrl] = useState('linok.me/store');
   const location = useLocation();
   const isMobile = useIsMobile();
 
@@ -102,6 +105,14 @@ const DashboardLayout = () => {
     }
   }, [location.pathname, isMobile]);
 
+  // Retrieve store URL from localStorage if available
+  useEffect(() => {
+    const savedStoreUrl = localStorage.getItem('storeUrl');
+    if (savedStoreUrl) {
+      setStoreUrl(`linok.me/${savedStoreUrl}`);
+    }
+  }, []);
+
   const handleItemClick = (label: string) => {
     if (expandedItem === label) {
       setExpandedItem(null);
@@ -113,6 +124,13 @@ const DashboardLayout = () => {
   const isSettingsPage = location.pathname.includes('/dashboard/settings');
   const currentSettingsPage = isSettingsPage ? 
     location.pathname.split('/dashboard/settings/')[1] || 'account' : '';
+
+  // Ensure the Settings menu is expanded when on a settings page
+  useEffect(() => {
+    if (isSettingsPage && expandedItem !== 'الإعدادات') {
+      setExpandedItem('الإعدادات');
+    }
+  }, [isSettingsPage]);
 
   return (
     <div className="min-h-screen flex bg-secondary/20">
@@ -214,8 +232,8 @@ const DashboardLayout = () => {
                 <AvatarFallback>U</AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">مستخدم متجر.أنا</p>
-                <p className="text-xs text-sidebar-foreground/70 truncate">linok.me/store</p>
+                <p className="text-sm font-medium truncate">{userName}</p>
+                <p className="text-xs text-sidebar-foreground/70 truncate">{storeUrl}</p>
               </div>
               <Button variant="ghost" size="icon" className="text-sidebar-foreground">
                 <LogOut size={18} />
@@ -261,12 +279,23 @@ const DashboardLayout = () => {
               <Button 
                 variant="outline" 
                 size="sm" 
+                className="h-9"
+                asChild
+              >
+                <Link to="/store" className="flex items-center gap-2">
+                  <Store size={16} />
+                  <span>عرض المتجر</span>
+                </Link>
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
                 className="h-9 border-dashed"
                 asChild
               >
-                <Link to="/dashboard/store" className="flex items-center gap-2">
-                  <Store size={16} />
-                  <span>عرض المتجر</span>
+                <Link to="/dashboard/store/edit" className="flex items-center gap-2">
+                  <Edit size={16} />
+                  <span>تحرير المتجر</span>
                 </Link>
               </Button>
             </div>
