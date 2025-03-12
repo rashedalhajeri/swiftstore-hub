@@ -121,12 +121,14 @@ const Logo: React.FC<LogoProps> = ({ className, animated = true, size = 'md', va
         )}
       </div>
       
-      <style jsx>{`
-        @keyframes slide-right {
-          from { transform: translateX(-100%); }
-          to { transform: translateX(200%); }
-        }
-      `}</style>
+      <style>
+        {`
+          @keyframes slide-right {
+            from { transform: translateX(-100%); }
+            to { transform: translateX(200%); }
+          }
+        `}
+      </style>
     </Link>
   );
 };

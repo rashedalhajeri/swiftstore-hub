@@ -280,7 +280,8 @@ const DashboardLayout = () => {
               <nav className="flex items-center space-x-4 rtl:space-x-reverse">
                 {sidebarItems[4].items?.map((item) => {
                   const isActive = location.pathname === item.href;
-                  const icon = settingsIcons[item.href.split('/').pop() || ''];
+                  const settingKey = item.href.split('/').pop() || '';
+                  const IconComponent = settingsIcons[settingKey];
                   
                   return (
                     <Link
@@ -293,7 +294,7 @@ const DashboardLayout = () => {
                           : "hover:bg-muted"
                       )}
                     >
-                      {icon && <icon size={16} />}
+                      {IconComponent && <IconComponent size={16} />}
                       <span>{item.label}</span>
                     </Link>
                   );
