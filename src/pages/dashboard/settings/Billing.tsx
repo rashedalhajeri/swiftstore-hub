@@ -8,11 +8,22 @@ import { Check, Zap } from "lucide-react";
 
 type PlanId = "free" | "basic" | "pro";
 
+interface Plan {
+  id: PlanId;
+  name: string;
+  price: string;
+  period?: string;
+  description: string;
+  features: string[];
+  isCurrent: boolean;
+}
+
 const SettingsBilling = () => {
   const currentPlan: PlanId = "basic";
-  const plans = [
+  
+  const plans: Plan[] = [
     {
-      id: "free" as PlanId,
+      id: "free",
       name: "المجاني",
       price: "0$",
       description: "مناسب للمتاجر الصغيرة والمبتدئين",
@@ -25,7 +36,7 @@ const SettingsBilling = () => {
       isCurrent: currentPlan === "free",
     },
     {
-      id: "basic" as PlanId,
+      id: "basic",
       name: "الأساسي",
       price: "19$",
       period: "شهريًا",
@@ -41,7 +52,7 @@ const SettingsBilling = () => {
       isCurrent: currentPlan === "basic",
     },
     {
-      id: "pro" as PlanId,
+      id: "pro",
       name: "الاحترافي",
       price: "49$",
       period: "شهريًا",
