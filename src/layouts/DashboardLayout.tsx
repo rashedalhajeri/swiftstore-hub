@@ -9,6 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+
 type SidebarItemType = {
   icon: React.ElementType;
   label: string;
@@ -19,64 +20,74 @@ type SidebarItemType = {
     icon: React.ElementType;
   }[];
 };
-const sidebarItems: SidebarItemType[] = [{
-  icon: LayoutDashboard,
-  label: 'لوحة التحكم',
-  href: '/dashboard'
-}, {
-  icon: Package,
-  label: 'المنتجات',
-  href: '/dashboard/products'
-}, {
-  icon: ListFilter,
-  label: 'الفئات',
-  href: '/dashboard/categories'
-}, {
-  icon: Percent,
-  label: 'العروض والخصومات',
-  href: '/dashboard/promotions'
-}, {
-  icon: ShoppingCart,
-  label: 'الطلبات',
-  href: '/dashboard/orders'
-}, {
-  icon: Users,
-  label: 'العملاء',
-  href: '/dashboard/customers'
-}, {
-  icon: Settings,
-  label: 'الإعدادات',
-  href: '/dashboard/settings',
-  submenu: [{
-    label: 'الحساب',
-    href: '/dashboard/settings/account',
-    icon: User
-  }, {
-    label: 'المتجر',
-    href: '/dashboard/settings/store',
-    icon: Store
-  }, {
-    label: 'الاشتراك والفواتير',
-    href: '/dashboard/settings/billing',
-    icon: CreditCard
-  }, {
-    label: 'الإشعارات',
-    href: '/dashboard/settings/notifications',
-    icon: Bell
-  }, {
-    label: 'الأمان',
-    href: '/dashboard/settings/security',
-    icon: Shield
-  }, {
-    label: 'النطاقات',
-    href: '/dashboard/settings/domains',
-    icon: Globe
-  }, {
-    label: 'المساعدة والدعم',
-    href: '/dashboard/settings/support',
-    icon: HelpCircle
-  }]
-}];
+
+const sidebarItems: SidebarItemType[] = [
+  {
+    icon: LayoutDashboard,
+    label: 'لوحة التحكم',
+    href: '/dashboard'
+  },
+  {
+    icon: Package,
+    label: 'المنتجات',
+    href: '/dashboard/products'
+  },
+  {
+    icon: ListFilter,
+    label: 'الفئات',
+    href: '/dashboard/categories'
+  },
+  {
+    icon: Percent,
+    label: 'العروض والخصومات',
+    href: '/dashboard/promotions'
+  },
+  {
+    icon: ShoppingCart,
+    label: 'الطلبات',
+    href: '/dashboard/orders'
+  },
+  {
+    icon: Users,
+    label: 'العملاء',
+    href: '/dashboard/customers'
+  },
+  {
+    icon: Settings,
+    label: 'الإعدادات',
+    href: '/dashboard/settings',
+    submenu: [{
+      label: 'الحساب',
+      href: '/dashboard/settings/account',
+      icon: User
+    }, {
+      label: 'المتجر',
+      href: '/dashboard/settings/store',
+      icon: Store
+    }, {
+      label: 'الاشتراك والفواتير',
+      href: '/dashboard/settings/billing',
+      icon: CreditCard
+    }, {
+      label: 'الإشعارات',
+      href: '/dashboard/settings/notifications',
+      icon: Bell
+    }, {
+      label: 'الأمان',
+      href: '/dashboard/settings/security',
+      icon: Shield
+    }, {
+      label: 'النطاقات',
+      href: '/dashboard/settings/domains',
+      icon: Globe
+    }, {
+      label: 'المساعدة والدعم',
+      href: '/dashboard/settings/support',
+      icon: HelpCircle
+    }]
+  }
+];
+
 const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [userFullName, setUserFullName] = useState('');
@@ -89,7 +100,6 @@ const DashboardLayout = () => {
   } = useAuth();
   const navigate = useNavigate();
 
-  // Auto collapse sidebar on mobile
   useEffect(() => {
     if (isMobile) {
       setSidebarOpen(false);
@@ -98,14 +108,12 @@ const DashboardLayout = () => {
     }
   }, [isMobile]);
 
-  // Close sidebar on route change for mobile
   useEffect(() => {
     if (isMobile) {
       setSidebarOpen(false);
     }
   }, [location.pathname, isMobile]);
 
-  // Fetch user profile data from Supabase
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (user) {
@@ -131,19 +139,18 @@ const DashboardLayout = () => {
     };
     fetchUserProfile();
   }, [user]);
+
   const handleSignOut = async () => {
     await signOut();
-    // Remove explicit navigation as we're now handling it in the AuthContext
   };
+
   const isSettingsPage = location.pathname.includes('/dashboard/settings');
   const currentSettingsPage = isSettingsPage ? location.pathname.split('/dashboard/settings/')[1] || 'account' : '';
+
   return <div className="flex h-screen bg-secondary/20 overflow-hidden">
-      {/* Sidebar Overlay */}
       {isMobile && sidebarOpen && <div className="fixed inset-0 bg-black/50 z-20" onClick={() => setSidebarOpen(false)} />}
 
-      {/* Sidebar - Fixed */}
       <aside className={cn("bg-sidebar text-sidebar-foreground fixed inset-y-0 right-0 z-30 w-64 flex flex-col h-screen", sidebarOpen ? "translate-x-0" : "translate-x-full", "transition-all duration-300 ease-in-out md:translate-x-0")}>
-        {/* Sidebar Header */}
         <div className="p-4 flex items-center justify-between border-b border-sidebar-border shrink-0">
           <Logo variant="light" size="md" />
           {isMobile && <button onClick={() => setSidebarOpen(false)}>
@@ -151,7 +158,6 @@ const DashboardLayout = () => {
             </button>}
         </div>
 
-        {/* Sidebar Content - Scrollable */}
         <div className="flex-1 overflow-y-auto py-2">
           <nav className="px-3 space-y-1">
             {sidebarItems.map(item => {
@@ -178,7 +184,6 @@ const DashboardLayout = () => {
           </nav>
         </div>
 
-        {/* Sidebar Footer */}
         <div className="p-4 border-t border-sidebar-border shrink-0">
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-3">
@@ -197,7 +202,6 @@ const DashboardLayout = () => {
               </Button>
             </div>
             
-            {/* Store Control Buttons */}
             <div className="grid grid-cols-2 gap-2 mt-1">
               <Button variant="outline" size="sm" className="bg-sidebar-accent/50 border-sidebar-border text-sidebar-foreground w-full" asChild>
                 <Link to="/store" className="flex items-center justify-center gap-1">
@@ -216,12 +220,10 @@ const DashboardLayout = () => {
         </div>
       </aside>
 
-      {/* Main Content */}
       <div className={cn("flex-1 flex flex-col h-screen w-full", sidebarOpen ? "md:mr-64" : "")}>
         {/* Header */}
         
 
-        {/* Settings Sub-navigation for larger screens */}
         {isSettingsPage && !isMobile && <div className="bg-background border-b p-0 w-full sticky top-16 z-10">
             <div className="container flex-shrink-0 h-14 flex items-center overflow-x-auto">
               <nav className="flex items-center space-x-4 rtl:space-x-reverse">
@@ -236,7 +238,6 @@ const DashboardLayout = () => {
             </div>
           </div>}
 
-        {/* Page Content - Scrollable */}
         <main className="flex-1 overflow-y-auto">
           <div className="container py-6 px-4 md:px-6">
             <Outlet />
@@ -245,4 +246,5 @@ const DashboardLayout = () => {
       </div>
     </div>;
 };
+
 export default DashboardLayout;
