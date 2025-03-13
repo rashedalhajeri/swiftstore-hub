@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User, AuthChangeEvent } from '@supabase/supabase-js';
@@ -96,7 +97,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
       
-      if (newSession) {
+      if (event === 'SIGNED_IN' as AuthChangeEvent && newSession) {
+        console.log('User signed in, setting session:', newSession.user.id);
+        setSession(newSession);
+        setUser(newSession.user);
+        
+        try {
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', newSession.user.id)
+            .single();
+          
+          if (profileError) {
+            console.error('Error fetching profile on auth change:', profileError);
+            setIsAdmin(false);
+          } else {
+            setIsAdmin(!!profileData?.is_admin);
+          }
+        } catch (err) {
+          console.error('Error checking admin status on auth change:', err);
+          setIsAdmin(false);
+        } finally {
+          setLoading(false); // Ensure loading is set to false after fetching profile
+        }
+      } else if (newSession) {
         console.log('Session updated:', newSession.user.id);
         setSession(newSession);
         setUser(newSession.user);
@@ -153,15 +178,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return { error };
       }
 
+      // نعيّن المستخدم والجلسة مباشرة بعد تسجيل الدخول لضمان التوجيه السريع
+      setSession(data.session);
+      setUser(data.user);
+
       // Success is handled by the auth listener, but we'll still show a toast
       toast({
         title: "تم تسجيل الدخول بنجاح",
         description: "مرحباً بك مرة أخرى!",
       });
       
-      // Don't set loading to false here as onAuthStateChange will handle that
-      // after fetching the user profile
-
+      // نقوم بتحديث حالة isAdmin بعد تسجيل الدخول مباشرة
+      if (data.user) {
+        try {
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', data.user.id)
+            .single();
+          
+          if (!profileError && profileData) {
+            setIsAdmin(!!profileData.is_admin);
+          }
+        } catch (err) {
+          console.error('Error checking admin status after sign in:', err);
+        }
+      }
+      
+      setLoading(false);
       return undefined;
     } catch (error) {
       console.error('Unexpected error during sign in:', error);

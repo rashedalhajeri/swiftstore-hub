@@ -25,7 +25,7 @@ const Login = () => {
   useEffect(() => {
     if (user) {
       console.log("User is authenticated, redirecting to dashboard");
-      navigate('/dashboard');
+      navigate('/dashboard', { replace: true });
     }
   }, [user, navigate]);
 
@@ -55,6 +55,10 @@ const Login = () => {
       
       if (!result) {
         console.log("Sign in successful, user will be redirected by useEffect when user state updates");
+        // هنا نضيف محاولة إضافية للتوجيه في حال لم يعمل useEffect
+        if (user) {
+          navigate('/dashboard', { replace: true });
+        }
       } else {
         console.log("Sign in failed", result.error);
         setIsSubmitting(false);
