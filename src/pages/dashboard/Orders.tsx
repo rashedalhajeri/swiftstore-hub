@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { 
   Package, 
@@ -9,11 +10,13 @@ import {
   XCircle, 
   Package2, 
   Clock,
-  Loader2
+  Loader2,
+  Eye, 
+  Trash2
 } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Table, 
@@ -37,8 +40,7 @@ import {
   DialogContent, 
   DialogDescription, 
   DialogHeader, 
-  DialogTitle, 
-  DialogTrigger,
+  DialogTitle,
   DialogFooter
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
@@ -364,7 +366,7 @@ const Orders = () => {
                       <TableCell>{order.total.toFixed(3)} KWD</TableCell>
                       <TableCell>
                         <Badge className={`bg-${statusMap[order.status].color}-500 hover:bg-${statusMap[order.status].color}-600`}>
-                          <statusMap[order.status].icon className="ml-2 h-4 w-4" />
+                          {React.createElement(statusMap[order.status].icon, { className: "ml-2 h-4 w-4" })}
                           {statusMap[order.status].label}
                         </Badge>
                       </TableCell>
@@ -442,7 +444,7 @@ const Orders = () => {
                           <TableCell>{order.total.toFixed(3)} KWD</TableCell>
                           <TableCell>
                             <Badge className={`bg-${statusMap[order.status].color}-500 hover:bg-${statusMap[order.status].color}-600`}>
-                              <statusMap[order.status].icon className="ml-2 h-4 w-4" />
+                              {React.createElement(statusMap[order.status].icon, { className: "ml-2 h-4 w-4" })}
                               {statusMap[order.status].label}
                             </Badge>
                           </TableCell>
@@ -576,5 +578,3 @@ const Orders = () => {
 };
 
 export default Orders;
-
-import { Eye, Trash2 } from 'lucide-react';
