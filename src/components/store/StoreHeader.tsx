@@ -1,11 +1,9 @@
 
 import React from 'react';
 import { Store } from '@/types/store';
-import { Bell, Heart, Home, Search, ShoppingCart, User } from 'lucide-react';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Link, useLocation, useSearchParams } from 'react-router-dom';
-import { useCart } from '@/contexts/CartContext';
+import { Link, useSearchParams, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -20,13 +18,24 @@ const StoreHeader = ({
   error,
   isLoading
 }: StoreHeaderProps) => {
-  const { totalItems } = useCart();
   const isMobile = useIsMobile();
   const [searchParams] = useSearchParams();
+  const params = useParams();
   const storeParam = searchParams.get('store');
   
   // بناء الروابط مع الحفاظ على معلمة المتجر
   const buildStoreLink = (path: string) => {
+    // If we're using the direct slug approach
+    if (params.storeSlug) {
+      // For the home page (remove the trailing slash if any)
+      if (path === '/store') {
+        return `/${params.storeSlug}`;
+      }
+      // For other paths, replace /store/ with /{storeSlug}/
+      return path.replace('/store', `/${params.storeSlug}`);
+    }
+    
+    // Legacy approach with query parameter
     return storeParam ? `${path}?store=${storeParam}` : path;
   };
 
@@ -51,33 +60,9 @@ const StoreHeader = ({
       </Alert>;
   }
 
-  return <div className="w-full bg-background">
-      {/* Top header with profile and notification */}
-      <div className="flex items-center justify-between py-3 px-4">
-        <div className="flex items-center gap-2">
-          {/* Only show store logo if available, otherwise no avatar fallback */}
-          {store?.logo ? (
-            <img 
-              src={store.logo} 
-              alt={store.name || 'Store Logo'} 
-              className="w-8 h-8 rounded-full object-cover border" 
-            />
-          ) : null}
-          
-          {/* Display store name if available */}
-          {store?.name && (
-            <span className="font-semibold text-sm">
-              {store.name.toUpperCase()}
-            </span>
-          )}
-        </div>
-        
-        <Button variant="ghost" size="icon" className="rounded-full">
-          <Bell className="h-5 w-5" />
-        </Button>
-      </div>
-      
-      {/* Black promotional banner */}
+  return (
+    <div className="w-full bg-background">
+      {/* Top promotional banner */}
       <div className="mx-4 mb-6">
         <div className="w-full rounded-xl overflow-hidden relative">
           <img 
@@ -111,37 +96,8 @@ const StoreHeader = ({
         <h2 className="text-base font-semibold">POPULAR PRODUCTS</h2>
         <Link to={buildStoreLink('/store')} className="text-xs text-gray-500">View All</Link>
       </div>
-      
-      {/* Bottom navigation - Fixed at bottom */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t py-3 md:hidden z-50">
-        <div className="flex justify-around items-center">
-          <Link to={buildStoreLink('/store')} className="flex flex-col items-center text-black">
-            <Home className="w-6 h-6" />
-          </Link>
-          
-          <Link to={buildStoreLink('/store/favorites')} className="flex flex-col items-center text-gray-500">
-            <Heart className="w-6 h-6" />
-          </Link>
-          
-          <Link to={buildStoreLink('/store/cart')} className="flex flex-col items-center relative">
-            <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center -mt-5">
-              <ShoppingCart className="w-6 h-6" />
-              {totalItems > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center">
-                  {totalItems}
-                </span>}
-            </div>
-          </Link>
-          
-          <Link to={buildStoreLink('/store/search')} className="flex flex-col items-center text-gray-500">
-            <Search className="w-6 h-6" />
-          </Link>
-          
-          <Link to={buildStoreLink('/store/account')} className="flex flex-col items-center text-gray-500">
-            <User className="w-6 h-6" />
-          </Link>
-        </div>
-      </div>
-    </div>;
+    </div>
+  );
 };
 
 export default StoreHeader;
