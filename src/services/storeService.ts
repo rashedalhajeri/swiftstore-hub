@@ -94,19 +94,19 @@ export const storeService = {
   // Get products for a store
   async getStoreProducts(storeId: string): Promise<Product[]> {
     try {
-      // Get store owner's user ID first
+      // First check if the store exists
       const { data: storeData, error: storeError } = await supabase
         .from('stores')
-        .select('user_id')
+        .select('*')
         .eq('id', storeId)
-        .single();
+        .maybeSingle();
       
-      if (storeError) {
-        console.error('Error fetching store owner:', storeError);
-        throw storeError;
+      if (storeError || !storeData) {
+        console.error('Error fetching store:', storeError);
+        return [];
       }
       
-      // Then get products created by that user
+      // Then get products related to that store
       const { data, error } = await supabase
         .from('products')
         .select('*, category:categories(name)')
@@ -114,7 +114,7 @@ export const storeService = {
       
       if (error) {
         console.error('Error fetching store products:', error);
-        throw error;
+        return [];
       }
       
       if (!data) return [];

@@ -1,117 +1,73 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Store } from '@/types/store';
 import { storeService } from '@/services/storeService';
-import { toast } from 'sonner';
-import { useAuth } from './AuthContext';
+import { useAuthSession } from '@/hooks/useAuthSession';
 
 interface StoreContextType {
   store: Store | null;
   isLoading: boolean;
   error: string | null;
-  fetchStoreBySlug: (slug: string) => Promise<Store | null>;
-  fetchUserStore: () => Promise<Store | null>;
+  refetch: () => Promise<void>;
 }
 
-const StoreContext = createContext<StoreContextType | undefined>(undefined);
+const StoreContext = createContext<StoreContextType>({
+  store: null,
+  isLoading: false,
+  error: null,
+  refetch: async () => {}
+});
 
-export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const useStore = () => useContext(StoreContext);
+
+export const StoreProvider = ({ children }: { children: ReactNode }) => {
   const [store, setStore] = useState<Store | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const location = useLocation();
+  const { session } = useAuthSession();
   const [searchParams] = useSearchParams();
-  const { user } = useAuth();
+  const storeSlug = searchParams.get('store');
 
-  const fetchStoreBySlug = async (slug: string): Promise<Store | null> => {
+  const fetchStore = async () => {
     setIsLoading(true);
     setError(null);
     
     try {
-      console.log('Fetching store by slug:', slug);
-      const storeData = await storeService.getStoreBySlug(slug);
-      
-      if (!storeData) {
-        setError('المتجر غير موجود');
-        setStore(null);
-        return null;
+      // If we have a store slug, fetch store by slug
+      if (storeSlug) {
+        console.log('Fetching store by slug:', storeSlug);
+        const storeData = await storeService.getStoreBySlug(storeSlug);
+        if (storeData) {
+          setStore(storeData);
+        } else {
+          setError('لم يتم العثور على المتجر');
+        }
+      } 
+      // If we're logged in but don't have a store slug, fetch the user's store
+      else if (session?.user?.id) {
+        console.log('Fetching store for user:', session.user.id);
+        const storeData = await storeService.getStoreByUserId(session.user.id);
+        if (storeData) {
+          setStore(storeData);
+        }
       }
-      
-      if (!storeData.is_published) {
-        setError('المتجر غير منشور');
-        setStore(null);
-        return null;
-      }
-      
-      console.log('Store found:', storeData);
-      setStore(storeData);
-      return storeData;
     } catch (err) {
       console.error('Error fetching store:', err);
       setError('حدث خطأ أثناء تحميل المتجر');
-      setStore(null);
-      return null;
     } finally {
       setIsLoading(false);
     }
   };
 
-  const fetchUserStore = async (): Promise<Store | null> => {
-    if (!user) return null;
-    
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      console.log('Fetching user store for ID:', user.id);
-      const storeData = await storeService.getStoreByUserId(user.id);
-      
-      if (!storeData) {
-        console.log('No store found for user');
-        setStore(null);
-        return null;
-      }
-      
-      console.log('User store found:', storeData);
-      setStore(storeData);
-      return storeData;
-    } catch (err) {
-      console.error('Error fetching user store:', err);
-      setStore(null);
-      return null;
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Check for store slug in URL on location change
+  // Fetch store when component mounts or when store slug or user session changes
   useEffect(() => {
-    const storeSlug = searchParams.get('store');
-    
-    if (storeSlug && location.pathname.includes('/store')) {
-      console.log('Found store slug in URL:', storeSlug);
-      fetchStoreBySlug(storeSlug);
-    }
-  }, [location.pathname, searchParams]);
+    fetchStore();
+  }, [storeSlug, session?.user?.id]);
 
   return (
-    <StoreContext.Provider value={{ 
-      store, 
-      isLoading, 
-      error, 
-      fetchStoreBySlug,
-      fetchUserStore
-    }}>
+    <StoreContext.Provider value={{ store, isLoading, error, refetch: fetchStore }}>
       {children}
     </StoreContext.Provider>
   );
-};
-
-export const useStore = () => {
-  const context = useContext(StoreContext);
-  if (context === undefined) {
-    throw new Error('useStore must be used within a StoreProvider');
-  }
-  return context;
 };
