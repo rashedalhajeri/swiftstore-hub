@@ -70,7 +70,7 @@ const SettingsNotifications = () => {
   };
 
   return (
-    <div className="space-y-6" style={{ direction: "rtl" }}>
+    <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">إعدادات الإشعارات</h1>
         <p className="text-muted-foreground">
@@ -83,17 +83,17 @@ const SettingsNotifications = () => {
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold">تنبيهات المتجر</h2>
-          <div className="flex items-center space-x-4 space-x-reverse">
+          <div className="flex items-center gap-4">
             <Badge variant="outline" className="border-primary">
-              <Mail className="w-3 h-3 ml-1" />
+              <Mail className="w-3 h-3 me-1" />
               بريد
             </Badge>
             <Badge variant="outline" className="border-primary">
-              <Bell className="w-3 h-3 ml-1" />
+              <Bell className="w-3 h-3 me-1" />
               تنبيه
             </Badge>
             <Badge variant="outline" className="border-primary">
-              <Phone className="w-3 h-3 ml-1" />
+              <Phone className="w-3 h-3 me-1" />
               رسالة
             </Badge>
           </div>
@@ -103,7 +103,7 @@ const SettingsNotifications = () => {
           <CardContent className="p-6 space-y-5">
             {notifications.map((item) => (
               <div key={item.id} className="flex items-start pb-5 border-b last:border-b-0 last:pb-0">
-                <div className="p-2 rounded-md bg-primary/10 text-primary ml-5">
+                <div className="p-2 rounded-md bg-primary/10 text-primary me-5">
                   <item.icon className="h-5 w-5" />
                 </div>
                 
@@ -112,7 +112,7 @@ const SettingsNotifications = () => {
                   <p className="text-sm text-muted-foreground mt-1">{item.description}</p>
                 </div>
                 
-                <div className="flex items-center space-x-5 space-x-reverse">
+                <div className="flex items-center gap-5">
                   <div className="flex items-center justify-center w-12">
                     <Switch 
                       checked={item.email} 

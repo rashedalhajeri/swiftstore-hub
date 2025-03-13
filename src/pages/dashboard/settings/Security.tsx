@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
-import { AlertTriangle, LockIcon, Shield, Smartphone } from "lucide-react";
+import { AlertTriangle, Shield, Smartphone } from "lucide-react";
 
 const SettingsSecurity = () => {
   const [is2FAEnabled, setIs2FAEnabled] = useState(false);
@@ -14,7 +14,7 @@ const SettingsSecurity = () => {
   const [passwordExpiry, setPasswordExpiry] = useState(false);
   
   return (
-    <div className="space-y-6" style={{ direction: "rtl" }}>
+    <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">إعدادات الأمان</h1>
         <p className="text-muted-foreground">
@@ -65,7 +65,7 @@ const SettingsSecurity = () => {
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <CardTitle className="flex items-center">
-                  <Smartphone className="mr-2 h-5 w-5" />
+                  <Smartphone className="me-2 h-5 w-5" />
                   المصادقة الثنائية (2FA)
                 </CardTitle>
                 <CardDescription>
@@ -82,7 +82,7 @@ const SettingsSecurity = () => {
             <CardContent>
               <div className="pb-4 pt-2">
                 <div className="rounded-md bg-primary/10 p-4 flex items-start">
-                  <Shield className="h-5 w-5 text-primary mt-0.5 ml-3" />
+                  <Shield className="h-5 w-5 text-primary mt-0.5 me-3" />
                   <div>
                     <h4 className="font-medium">المصادقة الثنائية مُفعّلة</h4>
                     <p className="text-sm text-muted-foreground mt-1">
@@ -137,7 +137,7 @@ const SettingsSecurity = () => {
         <Card className="border-destructive/50 bg-destructive/5">
           <CardHeader>
             <CardTitle className="text-destructive flex items-center">
-              <AlertTriangle className="mr-2 h-5 w-5" />
+              <AlertTriangle className="me-2 h-5 w-5" />
               حذف الحساب
             </CardTitle>
             <CardDescription className="text-destructive/90">

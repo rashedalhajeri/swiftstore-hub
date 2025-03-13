@@ -94,7 +94,7 @@ const SettingsSupport = () => {
   };
 
   return (
-    <div className="space-y-6" style={{ direction: "rtl" }}>
+    <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">المساعدة والدعم</h1>
         <p className="text-muted-foreground">
@@ -110,7 +110,7 @@ const SettingsSupport = () => {
             <div className="flex items-center justify-between">
               <h2 className="text-xl font-semibold">تذاكر الدعم الفني</h2>
               <Button variant="outline">
-                <Search className="h-4 w-4 ml-2" />
+                <Search className="h-4 w-4 me-2" />
                 بحث متقدم
               </Button>
             </div>
@@ -172,7 +172,7 @@ const SettingsSupport = () => {
                         <div className="flex-1 space-y-1">
                           <div className="flex items-center">
                             <span className="font-medium">{ticket.title}</span>
-                            <Badge variant="outline" className="mr-2 px-1.5 py-0 text-xs">
+                            <Badge variant="outline" className="me-2 px-1.5 py-0 text-xs">
                               {ticket.id}
                             </Badge>
                           </div>
@@ -255,7 +255,7 @@ const SettingsSupport = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
-                <HelpCircle className="h-5 w-5 ml-2" />
+                <HelpCircle className="h-5 w-5 me-2" />
                 مركز المساعدة
               </CardTitle>
               <CardDescription>
@@ -265,7 +265,7 @@ const SettingsSupport = () => {
             <CardContent className="space-y-4">
               <div className="cursor-pointer hover:bg-muted rounded-md p-3 transition-colors">
                 <div className="flex items-start">
-                  <FileText className="h-5 w-5 ml-3 mt-0.5 text-primary" />
+                  <FileText className="h-5 w-5 me-3 mt-0.5 text-primary" />
                   <div>
                     <h4 className="font-medium">دليل إضافة المنتجات</h4>
                     <p className="text-sm text-muted-foreground mt-1">
@@ -277,7 +277,7 @@ const SettingsSupport = () => {
               
               <div className="cursor-pointer hover:bg-muted rounded-md p-3 transition-colors">
                 <div className="flex items-start">
-                  <FileText className="h-5 w-5 ml-3 mt-0.5 text-primary" />
+                  <FileText className="h-5 w-5 me-3 mt-0.5 text-primary" />
                   <div>
                     <h4 className="font-medium">إدارة الطلبات والشحن</h4>
                     <p className="text-sm text-muted-foreground mt-1">
@@ -289,7 +289,7 @@ const SettingsSupport = () => {
               
               <div className="cursor-pointer hover:bg-muted rounded-md p-3 transition-colors">
                 <div className="flex items-start">
-                  <FileText className="h-5 w-5 ml-3 mt-0.5 text-primary" />
+                  <FileText className="h-5 w-5 me-3 mt-0.5 text-primary" />
                   <div>
                     <h4 className="font-medium">إعداد طرق الدفع</h4>
                     <p className="text-sm text-muted-foreground mt-1">
