@@ -128,13 +128,14 @@ export const storeService = {
         price: Number(item.price) || 0,
         image: item.image || '',
         featured: Boolean(item.featured) || false,
-        category: typeof item.category === 'object' ? item.category.name : (item.category_id || ''),
+        category: typeof item.category === 'object' && item.category ? item.category.name : (item.category_id || ''),
         description: item.description || '',
         sku: item.sku || '',
         stock: item.stock !== undefined ? Number(item.stock) : undefined,
         rating: item.rating !== undefined ? Number(item.rating) : undefined,
-        images: Array.isArray(item.images) ? item.images as string[] : [],
-        attributes: item.attributes ? (item.attributes as Record<string, string>) : {}
+        images: Array.isArray(item.images) ? item.images : [],
+        attributes: item.attributes && typeof item.attributes === 'object' ? item.attributes : {},
+        store_id: item.store_id || ''
       }));
     } catch (error) {
       console.error('Error in getStoreProducts:', error);
