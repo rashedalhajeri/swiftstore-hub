@@ -121,42 +121,59 @@ export const storeService = {
       
       if (!data || !Array.isArray(data)) return [];
       
-      // Use a simpler approach to avoid deep type instantiation
-      return data.map(item => {
+      // Rewrite using a standard for loop to avoid complex type transformations
+      const products: Product[] = [];
+      
+      for (const item of data) {
+        let categoryValue: string | { name: string } = '';
+        
         // Handle category safely
-        let category: string | { name: string } = '';
         if (item.category && typeof item.category === 'object' && 'name' in item.category) {
-          category = { name: String(item.category.name || '') };
+          categoryValue = { name: String(item.category.name || '') };
         } else if (typeof item.category === 'string') {
-          category = item.category;
+          categoryValue = item.category;
         }
         
-        // Create the product object manually
-        return {
+        // Create a product object with explicit type casting to avoid deep type instantiation
+        const product: Product = {
           id: String(item.id || ''),
           name: String(item.name || ''),
           price: typeof item.price === 'number' ? item.price : Number(item.price) || 0,
           image: String(item.image || ''),
           featured: Boolean(item.featured || false),
-          category,
-          description: item.description ? String(item.description) : '',
-          sku: item.sku ? String(item.sku) : '',
-          stock: item.stock !== undefined ? Number(item.stock) : undefined,
-          rating: item.rating !== undefined ? Number(item.rating) : undefined,
-          images: Array.isArray(item.images) ? item.images.filter(Boolean).map(String) : [],
-          attributes: typeof item.attributes === 'object' && item.attributes ? 
-            Object.entries(item.attributes).reduce((acc, [key, value]) => {
-              if (value !== null && value !== undefined) {
-                acc[key] = String(value);
-              }
-              return acc;
-            }, {} as Record<string, string>) : {},
+          category: categoryValue,
           store_id: String(storeId)
-        } as Product;
-      });
+        };
+        
+        // Add optional fields only if they exist
+        if (item.description) product.description = String(item.description);
+        if (item.sku) product.sku = String(item.sku);
+        if (item.stock !== undefined) product.stock = Number(item.stock);
+        if (item.rating !== undefined) product.rating = Number(item.rating);
+        
+        // Handle images array
+        if (Array.isArray(item.images)) {
+          product.images = item.images.filter(Boolean).map(String);
+        }
+        
+        // Handle attributes object
+        if (typeof item.attributes === 'object' && item.attributes) {
+          product.attributes = {};
+          for (const [key, value] of Object.entries(item.attributes)) {
+            if (value !== null && value !== undefined) {
+              product.attributes[key] = String(value);
+            }
+          }
+        }
+        
+        products.push(product);
+      }
+      
+      return products;
     } catch (error) {
       console.error('Error in getStoreProducts:', error);
       return [];
     }
   }
 };
+
