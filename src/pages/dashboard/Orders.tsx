@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   Package, 
@@ -50,7 +49,6 @@ import { Order } from "@/types/store";
 import { orderService } from "@/services/api";
 import { toast } from 'sonner';
 
-// تعريف خريطة لحالات الطلب مع الألوان والأيقونات المناسبة
 const statusMap: { [key: string]: { label: string; color: string; icon: React.ComponentType<any> } } = {
   pending: { label: "قيد الانتظار", color: "yellow", icon: Clock },
   processing: { label: "جاري المعالجة", color: "blue", icon: Package2 },
@@ -68,16 +66,13 @@ const Orders = () => {
   const [isUpdateStatusOpen, setIsUpdateStatusOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // جلب الطلبات من قاعدة البيانات عند تحميل الصفحة
   useEffect(() => {
     const fetchOrders = async () => {
       try {
         setLoading(true);
         const data = await orderService.getUserOrders();
         
-        // تحويل بيانات الطلبات من قاعدة البيانات إلى الصيغة المطلوبة للواجهة
         const formattedOrders = data.map((dbOrder: any) => {
-          // تنسيق عناصر الطلب
           const items = dbOrder.order_items.map((item: any) => ({
             product: item.product,
             quantity: item.quantity
@@ -132,7 +127,6 @@ const Orders = () => {
       try {
         await orderService.updateOrderStatus(selectedOrder.id, newStatus);
         
-        // تحديث القائمة المحلية بالحالة الجديدة
         setOrders(orders.map(order =>
           order.id === selectedOrder.id ? { ...order, status: newStatus as any } : order
         ));
@@ -396,7 +390,6 @@ const Orders = () => {
             <UpdateOrderStatus
               order={selectedOrder}
               onStatusUpdate={handleStatusUpdate}
-              isLoading={isLoading}
             />
           )}
           <DialogFooter>

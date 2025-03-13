@@ -1,10 +1,10 @@
 
 export interface Product {
-  id: string; // Changed from number to string to match Supabase
+  id: string;
   name: string;
   price: number;
   image: string;
-  category: string | { name: string }; // يمكن أن تكون نصًا أو كائنًا يحتوي على اسم
+  category: string | { name: string };
   featured: boolean;
   description?: string;
   images?: string[];

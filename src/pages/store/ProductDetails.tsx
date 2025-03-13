@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Minus, Plus, ShoppingCart, Heart, Share2, Star } from 'lucide-react';
@@ -31,15 +30,12 @@ const ProductDetails = () => {
         try {
           const fetchedProduct = await productService.getProductById(id);
           
-          // Convert the Supabase response to match our Product interface
           const productData: Product = {
             id: fetchedProduct.id,
             name: fetchedProduct.name,
             price: fetchedProduct.price,
             image: fetchedProduct.image,
-            category: typeof fetchedProduct.category === 'string' 
-              ? fetchedProduct.category 
-              : fetchedProduct.category?.name || '',
+            category: fetchedProduct.category,
             category_id: fetchedProduct.category_id,
             featured: !!fetchedProduct.featured,
             description: fetchedProduct.description,
@@ -55,10 +51,8 @@ const ProductDetails = () => {
           setProduct(productData);
           setSelectedImage(productData.image);
           
-          // Fetch related products
           const allProducts = await productService.getAllProducts();
           
-          // Convert all products to match our Product interface
           const relatedProductsData: Product[] = allProducts
             .filter(p => p.category_id === productData.category_id && p.id !== productData.id)
             .map(p => ({
@@ -79,7 +73,7 @@ const ProductDetails = () => {
               updated_at: p.updated_at
             }));
             
-          setRelatedProducts(relatedProductsData.slice(0, 4)); // Get first 4 related products
+          setRelatedProducts(relatedProductsData.slice(0, 4));
         } catch (error) {
           console.error("Failed to fetch product:", error);
           toast({
@@ -112,30 +106,17 @@ const ProductDetails = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <StoreLayout>
-        <div className="container mx-auto px-4 py-8">
-          <p>Loading product details...</p>
-        </div>
-      </StoreLayout>
-    );
+  if (loading || !product) {
+    return null;
   }
 
-  if (!product) {
-    return (
-      <StoreLayout>
-        <div className="container mx-auto px-4 py-8">
-          <p>Product not found.</p>
-        </div>
-      </StoreLayout>
-    );
-  }
+  const categoryName = typeof product.category === 'string' 
+    ? product.category 
+    : product.category?.name || '';
 
   return (
     <StoreLayout>
       <div className="container mx-auto px-4 py-8">
-        {/* Breadcrumbs */}
         <div className="text-sm breadcrumbs mb-4">
           <ul>
             <li>
@@ -149,7 +130,6 @@ const ProductDetails = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Product Images */}
           <div>
             <div className="relative rounded-lg overflow-hidden shadow-md">
               <img
@@ -185,7 +165,6 @@ const ProductDetails = () => {
             </div>
           </div>
 
-          {/* Product Details */}
           <div>
             <h1 className="text-2xl font-bold mb-2">{product.name}</h1>
             <div className="flex items-center mb-4">
@@ -195,7 +174,7 @@ const ProductDetails = () => {
               </span>
             </div>
             <div className="flex items-center mb-4">
-              <Badge className="bg-secondary border-0 text-sm">{product.category}</Badge>
+              <Badge className="bg-secondary border-0 text-sm">{categoryName}</Badge>
               {product.featured && (
                 <Badge className="bg-primary text-primary-foreground border-0 text-sm mr-2">مميز</Badge>
               )}
@@ -258,7 +237,6 @@ const ProductDetails = () => {
           </div>
         </div>
 
-        {/* Product Tabs */}
         <Tabs defaultValue="description" className="mt-8">
           <TabsList>
             <TabsTrigger value="description">الوصف</TabsTrigger>
@@ -299,7 +277,6 @@ const ProductDetails = () => {
           </TabsContent>
         </Tabs>
 
-        {/* Related Products */}
         {relatedProducts.length > 0 && (
           <div className="mt-16">
             <h2 className="text-2xl font-bold mb-6">منتجات ذات صلة</h2>

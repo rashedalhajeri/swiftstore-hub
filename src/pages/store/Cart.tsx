@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { 
@@ -23,7 +22,6 @@ const Cart = () => {
   const shippingFee = 2.000;
   const total = subtotal + shippingFee;
   
-  // اختر بعض المنتجات العشوائية للاقتراحات
   const suggestedProducts = products
     .filter(p => !cartItems.some(item => item.product.id === p.id))
     .sort(() => 0.5 - Math.random())
@@ -41,7 +39,6 @@ const Cart = () => {
     if (cartItems.length === 0) return;
     
     setIsSubmitting(true);
-    // في التطبيق الحقيقي، يمكن إضافة تحقق من توفر المخزون هنا
     setTimeout(() => {
       setIsSubmitting(false);
       navigate('/store/checkout');
@@ -68,7 +65,6 @@ const Cart = () => {
 
         {cartItems.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* قائمة المنتجات في السلة */}
             <div className="lg:col-span-2 space-y-4">
               <div className="bg-white rounded-lg shadow-sm border p-4">
                 <div className="hidden md:grid grid-cols-12 gap-4 pb-2 text-sm text-muted-foreground">
@@ -80,10 +76,14 @@ const Cart = () => {
                 <Separator className="mb-4 hidden md:block" />
 
                 <div className="space-y-4 md:space-y-0 divide-y md:divide-y-0">
-                  {cartItems.map((item) => (
+                  {cartItems.map((item) => {
+                    const categoryName = typeof item.product.category === 'string' 
+                      ? item.product.category 
+                      : item.product.category?.name || '';
+                      
+                    return (
                     <div key={item.product.id} className="py-4 md:py-2 md:mb-4 md:border-b md:last:border-b-0">
                       <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-                        {/* معلومات المنتج */}
                         <div className="col-span-1 md:col-span-6 flex items-center">
                           <div className="w-20 h-20 flex-shrink-0 rounded-md overflow-hidden">
                             <img 
@@ -101,7 +101,7 @@ const Cart = () => {
                             </Link>
                             <div className="flex items-center justify-between mt-2">
                               <span className="text-sm text-muted-foreground">
-                                {item.product.category}
+                                {categoryName}
                               </span>
                               <Button 
                                 variant="ghost" 
@@ -116,13 +116,11 @@ const Cart = () => {
                           </div>
                         </div>
 
-                        {/* السعر */}
                         <div className="md:col-span-2 text-center flex justify-between md:block">
                           <div className="md:hidden text-sm text-muted-foreground">السعر:</div>
                           <div className="font-bold">{item.product.price.toFixed(3)} KWD</div>
                         </div>
 
-                        {/* الكمية */}
                         <div className="md:col-span-2 flex items-center justify-between md:justify-center">
                           <div className="md:hidden text-sm text-muted-foreground">الكمية:</div>
                           <div className="flex items-center">
@@ -150,7 +148,6 @@ const Cart = () => {
                           </div>
                         </div>
 
-                        {/* المجموع */}
                         <div className="md:col-span-2 flex items-center justify-between md:justify-center">
                           <div className="md:hidden text-sm text-muted-foreground">المجموع:</div>
                           <div className="font-bold">{(item.product.price * item.quantity).toFixed(3)} KWD</div>
@@ -165,11 +162,10 @@ const Cart = () => {
                         </div>
                       </div>
                     </div>
-                  ))}
+                  )})}
                 </div>
               </div>
 
-              {/* أزرار التحكم في السلة */}
               <div className="flex items-center justify-between">
                 <Button 
                   variant="outline" 
@@ -182,7 +178,6 @@ const Cart = () => {
               </div>
             </div>
 
-            {/* ملخص الطلب */}
             <div className="lg:col-span-1">
               <div className="bg-white rounded-lg shadow-sm border p-6 sticky top-24">
                 <h3 className="font-bold text-lg mb-4">ملخص الطلب</h3>
@@ -250,7 +245,6 @@ const Cart = () => {
           </div>
         )}
 
-        {/* اقتراحات منتجات مشابهة */}
         {cartItems.length > 0 && suggestedProducts.length > 0 && (
           <div className="mt-16">
             <h2 className="text-2xl font-bold mb-6">قد يعجبك أيضاً</h2>

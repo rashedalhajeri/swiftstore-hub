@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Product, Order, CartItem } from '@/types/store';
 import { Json } from '@/integrations/supabase/types';
@@ -52,13 +51,24 @@ export const productService = {
 
   // إضافة منتج جديد
   async addProduct(product: Omit<Product, 'id'>) {
+    // Handle category properly
+    let category_id = product.category_id;
+    
+    // If category is an object with a name property, use it as category_id
+    if (typeof product.category === 'object' && product.category !== null) {
+      category_id = product.category_id;
+    } else if (typeof product.category === 'string') {
+      // If category is just a string, we'll use that value
+      category_id = product.category;
+    }
+    
     const { data, error } = await supabase
       .from('products')
       .insert({
         name: product.name,
         price: product.price,
         image: product.image,
-        category_id: product.category_id || product.category,
+        category_id: category_id,
         featured: product.featured,
         description: product.description,
         images: product.images as unknown as Json,
@@ -300,7 +310,7 @@ export const orderService = {
 
 // خدمات الملف الشخصي
 export const profileService = {
-  // الحصول على الملف الشخصي للمستخدم الحالي
+  // الحصول ع��ى الملف الشخصي للمستخدم الحالي
   async getCurrentUserProfile() {
     const userId = (await supabase.auth.getUser()).data.user?.id;
     

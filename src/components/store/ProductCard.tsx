@@ -14,6 +14,11 @@ interface ProductCardProps {
 
 const ProductCard = ({ product }: ProductCardProps) => {
   const { addToCart } = useCart();
+  
+  // Extract category name
+  const categoryName = typeof product.category === 'string' 
+    ? product.category 
+    : product.category?.name || '';
 
   return (
     <Card className="group h-full flex flex-col">
@@ -50,7 +55,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           </CardTitle>
         </Link>
         <div className="text-sm text-muted-foreground mb-2">
-          {product.category}
+          {categoryName}
         </div>
         {product.rating && (
           <div className="mb-3">
