@@ -15,6 +15,7 @@ export interface Product {
   reviews?: Review[];
   // Add fields to help with API responses
   category_id?: string;
+  store_id?: string; // Add store_id field
   created_at?: string;
   updated_at?: string;
 }

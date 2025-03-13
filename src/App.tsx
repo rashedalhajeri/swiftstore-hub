@@ -36,13 +36,15 @@ import SettingsDomains from "./pages/dashboard/settings/Domains";
 import SettingsSupport from "./pages/dashboard/settings/Support";
 import LoadingScreen from "./components/LoadingScreen";
 
-// تكوين مخزن مؤقت أكثر فعالية
+// Configure QueryClient with no caching for fresh data
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      refetchOnWindowFocus: false, // منع إعادة جلب البيانات عند تغيير التركيز على النافذة
-      retry: 1, // تقليل عدد محاولات إعادة المحاولة
-      staleTime: 1000 * 60 * 5, // 5 دقائق قبل اعتبار البيانات قديمة
+      refetchOnWindowFocus: true, // Always refetch when window gets focus
+      refetchOnMount: 'always', // Always refetch when component mounts
+      staleTime: 0, // Data is immediately stale
+      cacheTime: 0, // Don't cache the data at all
+      retry: 1, // Only retry once on failure
     },
   },
 });
@@ -144,6 +146,8 @@ const App = () => (
                   <UpdatePassword />
                 </PublicOnlyRoute>
               } />
+              
+              {/* Store Routes - Independent from the rest of the app */}
               <Route path="/store" element={<StoreFront />} />
               <Route path="/store/product/:id" element={<ProductDetails />} />
               <Route path="/store/cart" element={<Cart />} />
