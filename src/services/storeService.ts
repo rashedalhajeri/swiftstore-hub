@@ -121,38 +121,45 @@ export const storeService = {
       
       if (!data) return [];
 
-      // Fixed approach to avoid excessive type instantiation
+      // Simplified approach to avoid excessive type instantiation
       return data.map(item => {
+        // Create a base product with required fields
         const product: Product = {
           id: item.id || '',
           name: item.name || '',
           price: Number(item.price) || 0,
           image: item.image || '',
-          category: typeof item.category === 'object' && item.category && 'name' in item.category 
-            ? { name: item.category.name || '' } 
-            : item.category_id || '', // Set a default string value
           featured: Boolean(item.featured) || false,
-          description: item.description || '',
-          sku: item.sku || '',
-          stock: Number(item.stock) || 0,
-          rating: Number(item.rating) || 0,
         };
         
-        // Handle images array
-        if (Array.isArray(item.images)) {
-          product.images = item.images.filter((img): img is string => typeof img === 'string');
+        // Add optional fields if they exist
+        if (item.description) product.description = item.description;
+        if (item.sku) product.sku = item.sku;
+        if (item.stock !== undefined) product.stock = Number(item.stock);
+        if (item.rating !== undefined) product.rating = Number(item.rating);
+        
+        // Handle category with simple type checking
+        if (item.category) {
+          if (typeof item.category === 'object' && 'name' in item.category) {
+            product.category = { name: item.category.name || '' };
+          } else {
+            product.category = item.category_id || '';
+          }
+        } else {
+          product.category = '';
         }
         
-        // Handle attributes object
-        if (item.attributes && typeof item.attributes === 'object') {
+        // Handle images array if it exists
+        if (Array.isArray(item.images)) {
+          product.images = item.images.filter(img => typeof img === 'string');
+        }
+        
+        // Handle attributes object if it exists
+        if (item.attributes && typeof item.attributes === 'object' && !Array.isArray(item.attributes)) {
           product.attributes = {};
-          
-          // Only process if it's not an array
-          if (!Array.isArray(item.attributes)) {
-            for (const [key, value] of Object.entries(item.attributes)) {
-              if (product.attributes) {
-                product.attributes[key] = String(value);
-              }
+          for (const [key, value] of Object.entries(item.attributes)) {
+            if (product.attributes) {
+              product.attributes[key] = String(value);
             }
           }
         }
