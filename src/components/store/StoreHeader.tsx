@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Store } from '@/types/store';
 import { Bell, Heart, Home, Search, ShoppingCart, User } from 'lucide-react';
@@ -48,11 +49,24 @@ const StoreHeader = ({
       {/* Top header with profile and notification */}
       <div className="flex items-center justify-between py-3 px-4">
         <div className="flex items-center gap-2">
-          <Avatar className="w-8 h-8 border">
-            <AvatarImage src="https://github.com/shadcn.png" alt="User" />
-            <AvatarFallback>CN</AvatarFallback>
-          </Avatar>
-          <span className="font-semibold text-sm">TARIQUL ISLAM</span>
+          {/* Show store logo if available, otherwise fallback to Avatar */}
+          {store?.logo ? (
+            <img 
+              src={store.logo} 
+              alt={store.name || 'Store Logo'} 
+              className="w-8 h-8 rounded-full object-cover border"
+            />
+          ) : (
+            <Avatar className="w-8 h-8 border">
+              <AvatarImage src="https://github.com/shadcn.png" alt="User" />
+              <AvatarFallback>CN</AvatarFallback>
+            </Avatar>
+          )}
+          
+          {/* Display store name if available */}
+          <span className="font-semibold text-sm">
+            {store?.name ? store.name.toUpperCase() : "TARIQUL ISLAM"}
+          </span>
         </div>
         
         <Button variant="ghost" size="icon" className="rounded-full">
