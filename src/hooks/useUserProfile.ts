@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 type UseUserProfileResult = {
   isAdmin: boolean;
   fetchUserProfile: (userId: string) => Promise<boolean>;
+  getUserStore: (userId: string) => Promise<any>;
 };
 
 export const useUserProfile = (): UseUserProfileResult => {
@@ -59,8 +60,30 @@ export const useUserProfile = (): UseUserProfileResult => {
     }
   };
 
+  // New function to check if a user has a store and get store information
+  const getUserStore = async (userId: string) => {
+    try {
+      const { data: storeData, error: storeError } = await supabase
+        .from('stores')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle();
+      
+      if (storeError) {
+        console.error('Error fetching store data:', storeError);
+        return null;
+      }
+      
+      return storeData; // Will be null if no store found
+    } catch (err) {
+      console.error('Error checking store:', err);
+      return null;
+    }
+  };
+
   return {
     isAdmin,
-    fetchUserProfile
+    fetchUserProfile,
+    getUserStore
   };
 };
