@@ -1,26 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Package, 
-  ShoppingCart, 
-  Users, 
-  Settings, 
-  Menu, 
-  X, 
-  LogOut,
-  User,
-  Store,
-  CreditCard,
-  Bell,
-  Shield,
-  Globe,
-  HelpCircle,
-  Edit,
-  Tags,
-  Percent,
-  ListFilter
-} from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, Users, Settings, Menu, X, LogOut, User, Store, CreditCard, Bell, Shield, Globe, HelpCircle, Edit, Tags, Percent, ListFilter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Logo from '@/components/Logo';
 import { Button } from '@/components/ui/button';
@@ -29,68 +9,84 @@ import { Separator } from '@/components/ui/separator';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-
 type SidebarItemType = {
   icon: React.ElementType;
   label: string;
   href: string;
-  submenu?: { label: string; href: string; icon: React.ElementType }[];
+  submenu?: {
+    label: string;
+    href: string;
+    icon: React.ElementType;
+  }[];
 };
-
-const sidebarItems: SidebarItemType[] = [
-  {
-    icon: LayoutDashboard,
-    label: 'لوحة التحكم',
-    href: '/dashboard',
-  },
-  {
-    icon: Package,
-    label: 'المنتجات',
-    href: '/dashboard/products',
-  },
-  {
-    icon: ListFilter,
-    label: 'الفئات',
-    href: '/dashboard/categories',
-  },
-  {
-    icon: Percent,
-    label: 'العروض والخصومات',
-    href: '/dashboard/promotions',
-  },
-  {
-    icon: ShoppingCart,
-    label: 'الطلبات',
-    href: '/dashboard/orders',
-  },
-  {
-    icon: Users,
-    label: 'العملاء',
-    href: '/dashboard/customers',
-  },
-  {
-    icon: Settings,
-    label: 'الإعدادات',
-    href: '/dashboard/settings',
-    submenu: [
-      { label: 'الحساب', href: '/dashboard/settings/account', icon: User },
-      { label: 'المتجر', href: '/dashboard/settings/store', icon: Store },
-      { label: 'الاشتراك والفواتير', href: '/dashboard/settings/billing', icon: CreditCard },
-      { label: 'الإشعارات', href: '/dashboard/settings/notifications', icon: Bell },
-      { label: 'الأمان', href: '/dashboard/settings/security', icon: Shield },
-      { label: 'النطاقات', href: '/dashboard/settings/domains', icon: Globe },
-      { label: 'المساعدة والدعم', href: '/dashboard/settings/support', icon: HelpCircle },
-    ],
-  },
-];
-
+const sidebarItems: SidebarItemType[] = [{
+  icon: LayoutDashboard,
+  label: 'لوحة التحكم',
+  href: '/dashboard'
+}, {
+  icon: Package,
+  label: 'المنتجات',
+  href: '/dashboard/products'
+}, {
+  icon: ListFilter,
+  label: 'الفئات',
+  href: '/dashboard/categories'
+}, {
+  icon: Percent,
+  label: 'العروض والخصومات',
+  href: '/dashboard/promotions'
+}, {
+  icon: ShoppingCart,
+  label: 'الطلبات',
+  href: '/dashboard/orders'
+}, {
+  icon: Users,
+  label: 'العملاء',
+  href: '/dashboard/customers'
+}, {
+  icon: Settings,
+  label: 'الإعدادات',
+  href: '/dashboard/settings',
+  submenu: [{
+    label: 'الحساب',
+    href: '/dashboard/settings/account',
+    icon: User
+  }, {
+    label: 'المتجر',
+    href: '/dashboard/settings/store',
+    icon: Store
+  }, {
+    label: 'الاشتراك والفواتير',
+    href: '/dashboard/settings/billing',
+    icon: CreditCard
+  }, {
+    label: 'الإشعارات',
+    href: '/dashboard/settings/notifications',
+    icon: Bell
+  }, {
+    label: 'الأمان',
+    href: '/dashboard/settings/security',
+    icon: Shield
+  }, {
+    label: 'النطاقات',
+    href: '/dashboard/settings/domains',
+    icon: Globe
+  }, {
+    label: 'المساعدة والدعم',
+    href: '/dashboard/settings/support',
+    icon: HelpCircle
+  }]
+}];
 const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [userFullName, setUserFullName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const location = useLocation();
   const isMobile = useIsMobile();
-  const { user, signOut } = useAuth();
+  const {
+    user,
+    signOut
+  } = useAuth();
   const navigate = useNavigate();
 
   // Auto collapse sidebar on mobile
@@ -114,17 +110,14 @@ const DashboardLayout = () => {
     const fetchUserProfile = async () => {
       if (user) {
         try {
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('first_name, last_name, email')
-            .eq('id', user.id)
-            .single();
-          
+          const {
+            data,
+            error
+          } = await supabase.from('profiles').select('first_name, last_name, email').eq('id', user.id).single();
           if (error) {
             console.error('Error fetching user profile:', error);
             return;
           }
-          
           if (data) {
             const firstName = data.first_name || '';
             const lastName = data.last_name || '';
@@ -136,97 +129,52 @@ const DashboardLayout = () => {
         }
       }
     };
-    
     fetchUserProfile();
   }, [user]);
-
   const handleSignOut = async () => {
     await signOut();
     // Remove explicit navigation as we're now handling it in the AuthContext
   };
-
   const isSettingsPage = location.pathname.includes('/dashboard/settings');
-  const currentSettingsPage = isSettingsPage ? 
-    location.pathname.split('/dashboard/settings/')[1] || 'account' : '';
-
-  return (
-    <div className="flex h-screen bg-secondary/20 overflow-hidden">
+  const currentSettingsPage = isSettingsPage ? location.pathname.split('/dashboard/settings/')[1] || 'account' : '';
+  return <div className="flex h-screen bg-secondary/20 overflow-hidden">
       {/* Sidebar Overlay */}
-      {isMobile && sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-20"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
+      {isMobile && sidebarOpen && <div className="fixed inset-0 bg-black/50 z-20" onClick={() => setSidebarOpen(false)} />}
 
       {/* Sidebar - Fixed */}
-      <aside 
-        className={cn(
-          "bg-sidebar text-sidebar-foreground fixed inset-y-0 right-0 z-30 w-64 flex flex-col h-screen",
-          sidebarOpen ? "translate-x-0" : "translate-x-full",
-          "transition-all duration-300 ease-in-out md:translate-x-0"
-        )}
-      >
+      <aside className={cn("bg-sidebar text-sidebar-foreground fixed inset-y-0 right-0 z-30 w-64 flex flex-col h-screen", sidebarOpen ? "translate-x-0" : "translate-x-full", "transition-all duration-300 ease-in-out md:translate-x-0")}>
         {/* Sidebar Header */}
         <div className="p-4 flex items-center justify-between border-b border-sidebar-border shrink-0">
           <Logo variant="light" size="md" />
-          {isMobile && (
-            <button onClick={() => setSidebarOpen(false)}>
+          {isMobile && <button onClick={() => setSidebarOpen(false)}>
               <X size={20} className="text-sidebar-foreground" />
-            </button>
-          )}
+            </button>}
         </div>
 
         {/* Sidebar Content - Scrollable */}
         <div className="flex-1 overflow-y-auto py-2">
           <nav className="px-3 space-y-1">
-            {sidebarItems.map((item) => {
-              const isActive = item.href === location.pathname ||
-                              (item.href !== '/dashboard' && location.pathname.startsWith(item.href));
-              const hasSubmenu = item.submenu && item.submenu.length > 0;
-              const isSettingsItem = item.href === '/dashboard/settings';
-              
-              return (
-                <div key={item.label} className="space-y-1">
-                  <Link
-                    to={item.href}
-                    className={cn(
-                      "flex items-center gap-3 p-2.5 rounded-md transition-colors",
-                      isActive
-                        ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                        : "hover:bg-sidebar-accent/50"
-                    )}
-                  >
+            {sidebarItems.map(item => {
+            const isActive = item.href === location.pathname || item.href !== '/dashboard' && location.pathname.startsWith(item.href);
+            const hasSubmenu = item.submenu && item.submenu.length > 0;
+            const isSettingsItem = item.href === '/dashboard/settings';
+            return <div key={item.label} className="space-y-1">
+                  <Link to={item.href} className={cn("flex items-center gap-3 p-2.5 rounded-md transition-colors", isActive ? "bg-sidebar-accent text-sidebar-accent-foreground" : "hover:bg-sidebar-accent/50")}>
                     <item.icon size={20} />
                     <span>{item.label}</span>
                   </Link>
                   
-                  {hasSubmenu && isSettingsItem && isSettingsPage && (
-                    <div className="mr-6 mt-1 border-r pr-2 border-sidebar-border space-y-1">
-                      {item.submenu.map((subItem) => {
-                        const isSubActive = location.pathname === subItem.href;
-                        
-                        return (
-                          <Link
-                            key={subItem.href}
-                            to={subItem.href}
-                            className={cn(
-                              "flex items-center gap-3 p-2 rounded-md text-sm transition-colors",
-                              isSubActive
-                                ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                                : "hover:bg-sidebar-accent/50"
-                            )}
-                          >
+                  {hasSubmenu && isSettingsItem && isSettingsPage && <div className="mr-6 mt-1 border-r pr-2 border-sidebar-border space-y-1">
+                      {item.submenu.map(subItem => {
+                  const isSubActive = location.pathname === subItem.href;
+                  return <Link key={subItem.href} to={subItem.href} className={cn("flex items-center gap-3 p-2 rounded-md text-sm transition-colors", isSubActive ? "bg-sidebar-accent text-sidebar-accent-foreground" : "hover:bg-sidebar-accent/50")}>
                             <subItem.icon size={18} />
                             <span>{subItem.label}</span>
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+                          </Link>;
+                })}
+                    </div>}
+                </div>;
+          })}
           </nav>
         </div>
 
@@ -244,35 +192,20 @@ const DashboardLayout = () => {
                 <p className="text-sm font-medium truncate">{userFullName}</p>
                 <p className="text-xs text-sidebar-foreground/70 truncate">{userEmail}</p>
               </div>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="text-sidebar-foreground"
-                onClick={handleSignOut}
-              >
+              <Button variant="ghost" size="icon" className="text-sidebar-foreground" onClick={handleSignOut}>
                 <LogOut size={18} />
               </Button>
             </div>
             
             {/* Store Control Buttons */}
             <div className="grid grid-cols-2 gap-2 mt-1">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="bg-sidebar-accent/50 border-sidebar-border text-sidebar-foreground w-full"
-                asChild
-              >
+              <Button variant="outline" size="sm" className="bg-sidebar-accent/50 border-sidebar-border text-sidebar-foreground w-full" asChild>
                 <Link to="/store" className="flex items-center justify-center gap-1">
                   <Store size={14} />
                   <span className="text-xs">عرض المتجر</span>
                 </Link>
               </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="bg-sidebar-accent/50 border-sidebar-border text-sidebar-foreground w-full"
-                asChild
-              >
+              <Button variant="outline" size="sm" className="bg-sidebar-accent/50 border-sidebar-border text-sidebar-foreground w-full" asChild>
                 <Link to="/dashboard/settings/store" className="flex items-center justify-center gap-1">
                   <Edit size={14} />
                   <span className="text-xs">تحرير المتجر</span>
@@ -284,70 +217,24 @@ const DashboardLayout = () => {
       </aside>
 
       {/* Main Content */}
-      <div className={cn(
-        "flex-1 flex flex-col h-screen w-full",
-        sidebarOpen ? "md:mr-64" : ""
-      )}>
+      <div className={cn("flex-1 flex flex-col h-screen w-full", sidebarOpen ? "md:mr-64" : "")}>
         {/* Header */}
-        <header className="bg-background/95 backdrop-blur-md border-b h-16 flex items-center px-4 sticky top-0 z-10">
-          <div className="flex w-full items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button 
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="md:hidden"
-              >
-                <Menu size={20} />
-              </button>
-              
-              {/* Settings Breadcrumb */}
-              {isSettingsPage && (
-                <div className="flex items-center">
-                  <Link to="/dashboard/settings" className="text-sm font-medium">
-                    الإعدادات
-                  </Link>
-                  {currentSettingsPage && (
-                    <div className="flex items-center">
-                      <span className="mx-2 text-muted-foreground">/</span>
-                      <span className="text-sm font-medium">
-                        {sidebarItems.find(item => item.href === '/dashboard/settings')?.submenu?.find(subItem => 
-                          subItem.href.includes(currentSettingsPage))?.label || ''}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
+        
 
         {/* Settings Sub-navigation for larger screens */}
-        {isSettingsPage && !isMobile && (
-          <div className="bg-background border-b p-0 w-full sticky top-16 z-10">
+        {isSettingsPage && !isMobile && <div className="bg-background border-b p-0 w-full sticky top-16 z-10">
             <div className="container flex-shrink-0 h-14 flex items-center overflow-x-auto">
               <nav className="flex items-center space-x-4 rtl:space-x-reverse">
-                {sidebarItems.find(item => item.href === '/dashboard/settings')?.submenu?.map((item) => {
-                  const isActive = location.pathname === item.href;
-                  
-                  return (
-                    <Link
-                      key={item.href}
-                      to={item.href}
-                      className={cn(
-                        "flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors",
-                        isActive 
-                          ? "bg-primary text-primary-foreground" 
-                          : "hover:bg-muted"
-                      )}
-                    >
+                {sidebarItems.find(item => item.href === '/dashboard/settings')?.submenu?.map(item => {
+              const isActive = location.pathname === item.href;
+              return <Link key={item.href} to={item.href} className={cn("flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-colors", isActive ? "bg-primary text-primary-foreground" : "hover:bg-muted")}>
                       {item.icon && <item.icon size={16} />}
                       <span>{item.label}</span>
-                    </Link>
-                  );
-                })}
+                    </Link>;
+            })}
               </nav>
             </div>
-          </div>
-        )}
+          </div>}
 
         {/* Page Content - Scrollable */}
         <main className="flex-1 overflow-y-auto">
@@ -356,8 +243,6 @@ const DashboardLayout = () => {
           </div>
         </main>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default DashboardLayout;
