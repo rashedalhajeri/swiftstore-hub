@@ -121,26 +121,49 @@ export const storeService = {
       
       if (!data) return [];
 
-      // Fixed processing to handle type issues
-      return data.map(item => ({
-        id: item.id || '',
-        name: item.name || '',
-        price: Number(item.price) || 0,
-        image: item.image || '',
-        category: item.category || { name: '' },
-        featured: Boolean(item.featured) || false,
-        description: item.description || '',
-        images: Array.isArray(item.images) 
-          ? item.images.map(img => typeof img === 'string' ? img : '')
-          : [],
-        sku: item.sku || '',
-        stock: Number(item.stock) || 0,
-        attributes: item.attributes || {},
-        rating: Number(item.rating) || 0,
-        category_id: item.category_id || '',
-        created_at: item.created_at || '',
-        updated_at: item.updated_at || ''
-      }));
+      // Fixed processing with proper type handling
+      return data.map(item => {
+        let categoryData: string | { name: string } = { name: '' };
+        if (item.category && typeof item.category === 'object' && 'name' in item.category) {
+          categoryData = item.category;
+        } else if (typeof item.category === 'string') {
+          categoryData = item.category;
+        }
+
+        // Handle images properly
+        let processedImages: string[] = [];
+        if (Array.isArray(item.images)) {
+          processedImages = item.images.filter((img): img is string => typeof img === 'string');
+        }
+
+        // Handle attributes properly
+        let processedAttributes: Record<string, string> = {};
+        if (item.attributes && typeof item.attributes === 'object' && !Array.isArray(item.attributes)) {
+          processedAttributes = Object.keys(item.attributes).reduce((acc, key) => {
+            const value = item.attributes[key];
+            acc[key] = typeof value === 'string' ? value : String(value);
+            return acc;
+          }, {} as Record<string, string>);
+        }
+
+        return {
+          id: item.id || '',
+          name: item.name || '',
+          price: Number(item.price) || 0,
+          image: item.image || '',
+          category: categoryData,
+          featured: Boolean(item.featured) || false,
+          description: item.description || '',
+          images: processedImages,
+          sku: item.sku || '',
+          stock: Number(item.stock) || 0,
+          attributes: processedAttributes,
+          rating: Number(item.rating) || 0,
+          category_id: item.category_id || '',
+          created_at: item.created_at || '',
+          updated_at: item.updated_at || ''
+        };
+      });
     } catch (error) {
       console.error('Error in getStoreProducts:', error);
       return [];

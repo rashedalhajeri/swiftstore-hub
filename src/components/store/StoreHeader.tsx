@@ -1,9 +1,9 @@
 
 import React from 'react';
 import { Store } from '@/types/store';
-import { AlertCircle, ShoppingCart, Heart } from 'lucide-react';
+import { Heart, ShoppingCart, User } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
 
@@ -46,9 +46,9 @@ const StoreHeader = ({ store, error, isLoading }: StoreHeaderProps) => {
   }
 
   return (
-    <div className="relative w-full mb-20">
+    <div className="relative w-full">
       {/* البنر */}
-      <div className="w-full h-56 md:h-64 relative">
+      <div className="w-full h-56 md:h-40 sm:h-32 relative">
         {store.banner ? (
           <img 
             src={store.banner} 
@@ -58,45 +58,50 @@ const StoreHeader = ({ store, error, isLoading }: StoreHeaderProps) => {
         ) : (
           <div className="w-full h-full bg-gradient-to-r from-green-700 to-green-500"></div>
         )}
-        {/* Overlay for better visibility */}
-        <div className="absolute inset-0 bg-black/30"></div>
       </div>
 
       {/* الشعار واسم المتجر */}
-      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 flex flex-col items-center">
+      <div className="absolute bottom-0 left-6 transform translate-y-1/2 flex items-center space-x-4">
         {/* الشعار */}
-        {store.logo && (
+        {store.logo ? (
           <img 
             src={store.logo} 
-            alt={`${store.name} logo`} 
-            className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-white shadow-lg bg-white"
+            alt={`${store.name} Logo`} 
+            className="w-24 h-24 sm:w-16 sm:h-16 rounded-full border-4 border-white shadow-lg"
           />
+        ) : (
+          <div className="w-24 h-24 sm:w-16 sm:h-16 rounded-full border-4 border-white shadow-lg bg-gradient-to-r from-green-700 to-green-500"></div>
         )}
 
         {/* معلومات المتجر */}
-        <h1 className="text-2xl md:text-3xl font-bold mt-4">{store.name}</h1>
-        
-        {/* أزرار السلة والمفضلة */}
-        <div className="flex items-center gap-4 mt-4">
-          <Link to="/store/cart">
-            <Button variant="default" size="sm" className="group bg-primary hover:bg-primary/90 rounded-full px-4">
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              <span>السلة</span>
-              {totalItems > 0 && (
-                <span className="ml-2 bg-white text-primary text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                  {totalItems}
-                </span>
-              )}
-            </Button>
-          </Link>
-          
-          <Link to="/store/favorites">
-            <Button variant="outline" size="sm" className="bg-transparent border-primary text-primary hover:bg-primary/10 rounded-full px-4">
-              <Heart className="h-4 w-4 mr-2" />
-              <span>المفضلة</span>
-            </Button>
-          </Link>
+        <div className="rtl:mr-4 ltr:ml-4">
+          <h1 className="text-3xl sm:text-xl font-bold">{store.name}</h1>
+          <p className="text-gray-600 text-sm sm:text-xs">{store.description || 'وصف المتجر'}</p>
         </div>
+      </div>
+
+      {/* الأزرار */}
+      <div className="absolute bottom-0 right-6 transform translate-y-1/2 flex space-x-4">
+        <Link to="/store/favorites">
+          <button className="p-2 bg-white text-black rounded-full shadow-md hover:bg-gray-200">
+            <Heart className="w-5 h-5" />
+          </button>
+        </Link>
+        <Link to="/store/cart">
+          <button className="p-2 bg-white text-black rounded-full shadow-md hover:bg-gray-200 relative">
+            <ShoppingCart className="w-5 h-5" />
+            {totalItems > 0 && (
+              <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                {totalItems}
+              </span>
+            )}
+          </button>
+        </Link>
+        <Link to="/login">
+          <button className="p-2 bg-white text-black rounded-full shadow-md hover:bg-gray-200">
+            <User className="w-5 h-5" />
+          </button>
+        </Link>
       </div>
     </div>
   );
