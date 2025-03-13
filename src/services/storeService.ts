@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Product, Store } from '@/types/store';
 import { toast } from 'sonner';
@@ -121,22 +120,20 @@ export const storeService = {
       
       if (!data) return [];
 
-      // Fixed approach to avoid excessive type instantiation
+      // Simplified approach to avoid excessive type instantiation
       return data.map(item => ({
         id: item.id || '',
         name: item.name || '',
         price: Number(item.price) || 0,
         image: item.image || '',
         featured: Boolean(item.featured) || false,
-        category: item.category ? (typeof item.category === 'object' ? item.category.name : item.category_id) : '',
+        category: typeof item.category === 'object' ? item.category.name : (item.category_id || ''),
         description: item.description,
         sku: item.sku,
         stock: item.stock !== undefined ? Number(item.stock) : undefined,
         rating: item.rating !== undefined ? Number(item.rating) : undefined,
-        images: Array.isArray(item.images) ? item.images.filter(img => typeof img === 'string') : undefined,
-        attributes: item.attributes && typeof item.attributes === 'object' ? Object.fromEntries(
-          Object.entries(item.attributes).map(([key, value]) => [key, String(value)])
-        ) : undefined
+        images: Array.isArray(item.images) ? item.images : undefined,
+        attributes: item.attributes
       }));
     } catch (error) {
       console.error('Error in getStoreProducts:', error);
