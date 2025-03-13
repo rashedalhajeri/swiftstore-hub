@@ -12,7 +12,7 @@ export default defineConfig(({ mode }) => ({
   },
   plugins: [
     react({
-      jsxRuntime: 'automatic',  // إضافة هذا الخيار لضمان استيراد React تلقائياً
+      jsxImportSource: 'react',  // Use this instead of jsxRuntime
     }),
     mode === 'development' &&
     componentTagger(),
@@ -22,4 +22,7 @@ export default defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  esbuild: {
+    jsxInject: `import React from 'react'`  // This will inject React import into every file
+  }
 }));
