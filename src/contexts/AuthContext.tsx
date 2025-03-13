@@ -1,8 +1,10 @@
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Session, User, AuthChangeEvent } from '@supabase/supabase-js';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { Session, User } from '@supabase/supabase-js';
 import { useToast } from '@/hooks/use-toast';
+import { useAuthSession } from '@/hooks/useAuthSession';
+import { useUserProfile } from '@/hooks/useUserProfile';
+import { signInWithPassword, signUpWithPassword, signOutUser } from '@/utils/authUtils';
 
 interface AuthContextType {
   session: Session | null;
@@ -17,156 +19,22 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const { session, user, loading, fetchSession } = useAuthSession();
+  const { isAdmin, fetchUserProfile } = useUserProfile();
+  const [authLoading, setAuthLoading] = useState(false);
   const { toast } = useToast();
 
+  // Fetch user profile when user changes
   useEffect(() => {
-    let loadingTimeout: number;
-    
-    if (loading) {
-      loadingTimeout = window.setTimeout(() => {
-        console.log("Auth loading timeout reached - forcing loading state to false");
-        setLoading(false);
-      }, 3000); // تقليل وقت المهلة من 5000 إلى 3000 مللي ثانية
+    if (user) {
+      fetchUserProfile(user.id);
     }
-    
-    return () => {
-      if (loadingTimeout) window.clearTimeout(loadingTimeout);
-    };
-  }, [loading]);
-
-  const fetchUserProfile = async (userId: string) => {
-    try {
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('is_admin')
-        .eq('id', userId)
-        .maybeSingle();
-      
-      if (profileError) {
-        console.error('Error fetching profile:', profileError);
-        setIsAdmin(false);
-        return false;
-      } 
-      
-      if (profileData) {
-        setIsAdmin(!!profileData.is_admin);
-        return true;
-      } 
-      
-      const { error: insertError } = await supabase
-        .from('profiles')
-        .insert({
-          id: userId,
-          email: user?.email,
-          is_admin: false
-        });
-      
-      if (insertError) {
-        console.error('Error creating profile:', insertError);
-      } else {
-        console.log('Profile created successfully');
-      }
-      
-      setIsAdmin(false);
-      return false;
-    } catch (err) {
-      console.error('Error checking admin status:', err);
-      setIsAdmin(false);
-      return false;
-    }
-  };
-
-  useEffect(() => {
-    const getSession = async () => {
-      setLoading(true);
-      try {
-        console.log('Fetching session...');
-        const { data, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('Error getting session:', error);
-          setSession(null);
-          setUser(null);
-          setIsAdmin(false);
-          setLoading(false);
-          return;
-        }
-
-        if (!data.session) {
-          console.log('No active session found');
-          setSession(null);
-          setUser(null);
-          setIsAdmin(false);
-          setLoading(false);
-          return;
-        }
-
-        console.log('Active session found:', data.session.user.id);
-        setSession(data.session);
-        setUser(data.session.user);
-
-        await fetchUserProfile(data.session.user.id);
-        setLoading(false);
-      } catch (error) {
-        console.error('Unexpected error during session fetch:', error);
-        setSession(null);
-        setUser(null);
-        setIsAdmin(false);
-        setLoading(false);
-      } 
-    };
-
-    getSession();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, newSession) => {
-      console.log('Auth state changed:', event, newSession ? 'with session' : 'no session');
-      
-      if (event === 'SIGNED_OUT') {
-        console.log('User signed out, clearing state');
-        setSession(null);
-        setUser(null);
-        setIsAdmin(false);
-        setLoading(false);
-        return;
-      }
-      
-      if (newSession) {
-        console.log('Session updated:', newSession.user.id);
-        setSession(newSession);
-        setUser(newSession.user);
-        
-        if (event === 'SIGNED_IN') {
-          await fetchUserProfile(newSession.user.id);
-        }
-        
-        setLoading(false);
-      } else {
-        // التعامل مع جميع الأحداث الأخرى التي بدون جلسة
-        console.log('No session in auth change event');
-        setSession(null);
-        setUser(null);
-        setIsAdmin(false);
-        setLoading(false);
-      }
-    });
-
-    return () => {
-      console.log('Cleaning up auth listener');
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
+  }, [user]);
 
   const signIn = async (email: string, password: string) => {
     try {
-      setLoading(true);
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      setAuthLoading(true);
+      const { data, error } = await signInWithPassword(email, password);
 
       if (error) {
         toast({
@@ -174,12 +42,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           description: error.message,
           variant: "destructive",
         });
-        setLoading(false);
         return { error };
       }
-
-      setSession(data.session);
-      setUser(data.user);
 
       toast({
         title: "تم تسجيل الدخول بنجاح",
@@ -188,9 +52,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       if (data.user) {
         await fetchUserProfile(data.user.id);
+        await fetchSession(); // Update session after login
       }
       
-      setLoading(false);
       return undefined;
     } catch (error) {
       console.error('Unexpected error during sign in:', error);
@@ -199,21 +63,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: "يرجى المحاولة مرة أخرى لاحقاً",
         variant: "destructive",
       });
-      setLoading(false);
       return { error };
+    } finally {
+      setAuthLoading(false);
     }
   };
 
   const signUp = async (email: string, password: string, metadata?: any) => {
     try {
-      setLoading(true);
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: metadata,
-        },
-      });
+      setAuthLoading(true);
+      const { data, error } = await signUpWithPassword(email, password, metadata);
 
       if (error) {
         toast({
@@ -239,28 +98,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       return { error };
     } finally {
-      setLoading(false);
+      setAuthLoading(false);
     }
   };
 
   const signOut = async () => {
     try {
-      setLoading(true);
+      setAuthLoading(true);
       console.log('Attempting to sign out...');
       
-      // تعديل: حذف localStorage و sessionStorage للتأكد من إزالة أي بيانات تخزين محلية قد تتسبب في إعادة تسجيل الدخول
-      localStorage.clear();
-      sessionStorage.clear();
-      
-      // أولاً: مسح حالة الجلسة المحلية قبل استدعاء supabase.auth.signOut
-      setSession(null);
-      setUser(null);
-      setIsAdmin(false);
-      
-      // ثانياً: استدعاء واجهة تسجيل الخروج من supabase
-      const { error } = await supabase.auth.signOut({
-        scope: 'global'  // تسجيل خروج من جميع الأجهزة - مهم جداً
-      });
+      const { error } = await signOutUser();
       
       if (error) {
         console.error('Error during sign out:', error);
@@ -269,7 +116,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           description: error.message,
           variant: "destructive",
         });
-        setLoading(false);
         return;
       }
       
@@ -292,15 +138,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         variant: "destructive",
       });
     } finally {
-      setLoading(false);
+      setAuthLoading(false);
     }
   };
+
+  const combinedLoading = loading || authLoading;
 
   const value = {
     session,
     user,
     isAdmin,
-    loading,
+    loading: combinedLoading,
     signIn,
     signUp,
     signOut,
