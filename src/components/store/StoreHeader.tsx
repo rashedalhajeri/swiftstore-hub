@@ -2,9 +2,11 @@
 import React from 'react';
 import { Store } from '@/types/store';
 import { Separator } from '@/components/ui/separator';
-import { AlertCircle, Facebook, Instagram, Twitter } from 'lucide-react';
+import { AlertCircle, Facebook, Instagram, Twitter, ShoppingCart, Heart } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
+import { useCart } from '@/contexts/CartContext';
 
 interface StoreHeaderProps {
   store: Store | null;
@@ -13,6 +15,8 @@ interface StoreHeaderProps {
 }
 
 const StoreHeader = ({ store, error, isLoading }: StoreHeaderProps) => {
+  const { totalItems } = useCart();
+
   if (isLoading) {
     return (
       <div className="w-full flex flex-col gap-4">
@@ -44,76 +48,92 @@ const StoreHeader = ({ store, error, isLoading }: StoreHeaderProps) => {
 
   return (
     <div className="w-full mb-8">
-      {store.banner ? (
-        <div className="w-full h-48 md:h-72 overflow-hidden rounded-lg mb-6 shadow-md relative group">
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10"></div>
+      {/* Hero Banner with Background Image */}
+      <div className="w-full h-56 md:h-80 relative mb-0 overflow-hidden">
+        {/* Background Image */}
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-primary/30 z-10"></div>
+        {store.banner ? (
           <img 
             src={store.banner} 
-            alt={store.name} 
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+            alt="" 
+            className="w-full h-full object-cover"
           />
-          <div className="absolute bottom-0 left-0 right-0 z-20 p-6 text-white">
-            <h1 className="text-3xl md:text-4xl font-bold text-white/90 mb-2">{store.name}</h1>
-            {store.description && (
-              <p className="text-white/80 md:max-w-2xl line-clamp-2">{store.description}</p>
-            )}
-          </div>
-        </div>
-      ) : (
-        <div className="w-full h-32 md:h-40 bg-gradient-to-r from-primary/20 to-primary/10 flex items-center justify-center rounded-lg mb-6 relative overflow-hidden shadow-sm">
+        ) : (
           <div className="absolute inset-0 bg-[url('/placeholder.svg')] opacity-10 bg-repeat"></div>
-          <h1 className="text-3xl font-bold text-center relative z-10">{store.name}</h1>
-        </div>
-      )}
-      
-      <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-4">
-        {store.logo && (
-          <div className="w-16 h-16 md:w-20 md:h-20 rounded-full overflow-hidden border-2 border-primary shadow-md transform -translate-y-4 md:-translate-y-8 bg-white">
-            <img 
-              src={store.logo} 
-              alt={`${store.name} logo`}
-              className="w-full h-full object-cover"
-            />
-          </div>
         )}
         
-        <div className="md:mr-2">
-          {!store.banner && (
-            <>
-              <h2 className="text-2xl font-bold">{store.name}</h2>
-              {store.description && (
-                <p className="text-muted-foreground mt-1">{store.description}</p>
-              )}
-            </>
+        {/* Overlay for content */}
+        <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-background/90 to-transparent h-1/2 z-20"></div>
+      </div>
+      
+      {/* Store Header Info */}
+      <div className="container mx-auto px-4 relative z-30 -mt-16">
+        <div className="flex flex-col md:flex-row items-start md:items-end gap-4 mb-6">
+          {/* Store Logo */}
+          {store.logo && (
+            <div className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-background shadow-lg bg-white">
+              <img 
+                src={store.logo} 
+                alt={`${store.name} logo`}
+                className="w-full h-full object-cover"
+              />
+            </div>
           )}
-        </div>
-        
-        <div className="md:ml-auto flex gap-2">
-          {(store.facebook || store.twitter || store.instagram) && (
-            <div className="flex gap-2">
+          
+          {/* Store Info */}
+          <div className="flex-1">
+            <h1 className="text-3xl md:text-4xl font-bold">{store.name}</h1>
+            {store.description && (
+              <p className="text-muted-foreground mt-2 md:max-w-2xl line-clamp-2">{store.description}</p>
+            )}
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="flex items-center gap-3 md:self-end">
+            {/* Cart Button */}
+            <Link to="/store/cart">
+              <Button variant="outline" size="icon" className="rounded-full relative">
+                <ShoppingCart className="h-5 w-5" />
+                {totalItems > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    {totalItems}
+                  </span>
+                )}
+              </Button>
+            </Link>
+            
+            {/* Favorites Button */}
+            <Link to="/store/favorites">
+              <Button variant="outline" size="icon" className="rounded-full">
+                <Heart className="h-5 w-5" />
+              </Button>
+            </Link>
+            
+            {/* Social Media Links */}
+            <div className="hidden md:flex gap-2">
               {store.facebook && (
-                <Button variant="outline" size="icon" asChild className="rounded-full border-primary/20 hover:border-primary hover:bg-primary/10">
+                <Button variant="outline" size="icon" asChild className="rounded-full">
                   <a href={store.facebook} target="_blank" rel="noopener noreferrer" aria-label="فيسبوك">
-                    <Facebook size={18} className="text-primary" />
+                    <Facebook size={18} />
                   </a>
                 </Button>
               )}
               {store.twitter && (
-                <Button variant="outline" size="icon" asChild className="rounded-full border-primary/20 hover:border-primary hover:bg-primary/10">
+                <Button variant="outline" size="icon" asChild className="rounded-full">
                   <a href={store.twitter} target="_blank" rel="noopener noreferrer" aria-label="تويتر">
-                    <Twitter size={18} className="text-primary" />
+                    <Twitter size={18} />
                   </a>
                 </Button>
               )}
               {store.instagram && (
-                <Button variant="outline" size="icon" asChild className="rounded-full border-primary/20 hover:border-primary hover:bg-primary/10">
+                <Button variant="outline" size="icon" asChild className="rounded-full">
                   <a href={store.instagram} target="_blank" rel="noopener noreferrer" aria-label="انستجرام">
-                    <Instagram size={18} className="text-primary" />
+                    <Instagram size={18} />
                   </a>
                 </Button>
               )}
             </div>
-          )}
+          </div>
         </div>
       </div>
       
