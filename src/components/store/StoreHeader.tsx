@@ -1,11 +1,13 @@
 
 import React from 'react';
 import { Store } from '@/types/store';
-import { Heart, ShoppingCart, User } from 'lucide-react';
+import { Heart, ShoppingCart, User, Search } from 'lucide-react';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Link } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 
 interface StoreHeaderProps {
   store: Store | null;
@@ -41,67 +43,78 @@ const StoreHeader = ({ store, error, isLoading }: StoreHeaderProps) => {
     );
   }
 
-  if (!store) {
-    return null;
-  }
-
+  // Mobile header inspired by the image
   return (
-    <div className="relative w-full mb-16">
-      {/* البنر */}
-      <div className="w-full h-56 md:h-40 sm:h-32 relative">
-        {store.banner ? (
-          <img 
-            src={store.banner} 
-            alt="Store Banner" 
-            className="w-full h-full object-cover rounded-lg"
-          />
-        ) : (
-          <div className="w-full h-full bg-gradient-to-r from-green-700 to-green-500 rounded-lg"></div>
-        )}
-      </div>
-
-      {/* الشعار واسم المتجر */}
-      <div className="absolute bottom-0 left-6 transform translate-y-1/2 flex items-center space-x-4">
-        {/* الشعار */}
-        {store.logo ? (
-          <img 
-            src={store.logo} 
-            alt={`${store.name} Logo`} 
-            className="w-24 h-24 sm:w-20 sm:h-20 rounded-full border-4 border-white shadow-lg"
-          />
-        ) : (
-          <div className="w-24 h-24 sm:w-20 sm:h-20 rounded-full border-4 border-white shadow-lg bg-gradient-to-r from-green-700 to-green-500"></div>
-        )}
-
-        {/* معلومات المتجر */}
-        <div className="rtl:mr-4 ltr:ml-4">
-          <h1 className="text-3xl sm:text-2xl font-bold">{store.name}</h1>
-          <p className="text-gray-600 text-sm">{store.description || 'وصف المتجر'}</p>
+    <div className="w-full mb-8">
+      <div className="container mx-auto px-4">
+        {/* Top navigation bar */}
+        <div className="flex items-center justify-between py-4">
+          <div className="flex items-center">
+            <h1 className="text-lg font-bold md:text-xl">Explore</h1>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" size="icon" className="rounded-full">
+              <Search className="h-5 w-5" />
+            </Button>
+          </div>
+        </div>
+        
+        {/* Banner with promotion */}
+        <div className="w-full bg-gray-900 text-white rounded-2xl overflow-hidden mb-8">
+          <div className="flex items-center p-4 md:p-6">
+            <div className="flex-1">
+              <h3 className="font-bold text-lg md:text-xl">خصم 50% على طلبك الأول</h3>
+              <p className="text-sm text-gray-300 mb-3">استمتع بأفضل المنتجات بأفضل الأسعار</p>
+              <Button size="sm" className="bg-primary hover:bg-primary/90 rounded-full text-white">تسوق الآن</Button>
+            </div>
+            <div className="hidden md:block w-1/3">
+              <img 
+                src="/lovable-uploads/e3416c54-8cd7-4e20-9137-8996253aaf72.png" 
+                alt="Promotion" 
+                className="w-40 h-40 object-contain" 
+              />
+            </div>
+          </div>
         </div>
       </div>
-
-      {/* الأزرار */}
-      <div className="absolute bottom-0 right-6 transform translate-y-1/2 flex space-x-4">
-        <Link to="/store/favorites">
-          <button className="p-2 bg-white text-black rounded-full shadow-md hover:bg-gray-200">
-            <Heart className="w-5 h-5" />
-          </button>
-        </Link>
-        <Link to="/store/cart">
-          <button className="p-2 bg-white text-black rounded-full shadow-md hover:bg-gray-200 relative">
-            <ShoppingCart className="w-5 h-5" />
-            {totalItems > 0 && (
-              <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                {totalItems}
-              </span>
-            )}
-          </button>
-        </Link>
-        <Link to="/login">
-          <button className="p-2 bg-white text-black rounded-full shadow-md hover:bg-gray-200">
-            <User className="w-5 h-5" />
-          </button>
-        </Link>
+      
+      {/* Bottom navigation - Fixed at bottom on mobile */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t py-2 px-4 md:hidden z-50">
+        <div className="flex justify-around items-center">
+          <Link to="/store" className="flex flex-col items-center text-primary">
+            <div className="p-1 rounded-full">
+              <Heart className="w-5 h-5" />
+            </div>
+            <span className="text-xs">الرئيسية</span>
+          </Link>
+          
+          <Link to="/store/favorites" className="flex flex-col items-center text-gray-500">
+            <div className="p-1 rounded-full">
+              <ShoppingCart className="w-5 h-5" />
+            </div>
+            <span className="text-xs">التسوق</span>
+          </Link>
+          
+          <Link to="/store/cart" className="flex flex-col items-center text-gray-500 relative">
+            <div className="p-1 rounded-full">
+              <ShoppingCart className="w-5 h-5" />
+              {totalItems > 0 && (
+                <span className="absolute -top-1 -right-1 bg-primary text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                  {totalItems}
+                </span>
+              )}
+            </div>
+            <span className="text-xs">السلة</span>
+          </Link>
+          
+          <Link to="/login" className="flex flex-col items-center text-gray-500">
+            <div className="p-1 rounded-full">
+              <User className="w-5 h-5" />
+            </div>
+            <span className="text-xs">حسابي</span>
+          </Link>
+        </div>
       </div>
     </div>
   );

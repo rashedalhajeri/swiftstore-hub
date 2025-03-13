@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Product, Store } from '@/types/store';
 import { toast } from 'sonner';
@@ -121,50 +120,47 @@ export const storeService = {
       
       if (!data) return [];
 
-      // Fixed processing with proper type handling - simplified to avoid deep type instantiation
+      // Simplified approach to avoid excessive type instantiation
       return data.map(item => {
-        // Handle category safely
-        let categoryName = '';
-        if (item.category && typeof item.category === 'object' && 'name' in item.category) {
-          categoryName = item.category.name || '';
-        } else if (typeof item.category === 'string') {
-          categoryName = item.category;
-        }
-
-        // Handle images safely
-        let processedImages: string[] = [];
-        if (Array.isArray(item.images)) {
-          processedImages = item.images.filter(img => typeof img === 'string');
-        }
-
-        // Handle attributes safely
-        let processedAttributes: Record<string, string> = {};
-        if (item.attributes && typeof item.attributes === 'object' && !Array.isArray(item.attributes)) {
-          // Avoid recursive type issues by directly processing as Record
-          const attributes = item.attributes as Record<string, unknown>;
-          Object.keys(attributes).forEach(key => {
-            const value = attributes[key];
-            processedAttributes[key] = typeof value === 'string' ? value : String(value);
-          });
-        }
-
-        return {
+        // Basic product data
+        const product: Product = {
           id: item.id || '',
           name: item.name || '',
           price: Number(item.price) || 0,
           image: item.image || '',
-          category: { name: categoryName },
           featured: Boolean(item.featured) || false,
           description: item.description || '',
-          images: processedImages,
           sku: item.sku || '',
           stock: Number(item.stock) || 0,
-          attributes: processedAttributes,
           rating: Number(item.rating) || 0,
           category_id: item.category_id || '',
           created_at: item.created_at || '',
           updated_at: item.updated_at || ''
         };
+        
+        // Handle category
+        if (item.category && typeof item.category === 'object' && 'name' in item.category) {
+          product.category = { name: item.category.name || '' };
+        } else if (typeof item.category === 'string') {
+          product.category = item.category;
+        }
+        
+        // Handle images array
+        if (Array.isArray(item.images)) {
+          product.images = item.images.filter((img): img is string => typeof img === 'string');
+        }
+        
+        // Handle attributes object
+        if (item.attributes && typeof item.attributes === 'object' && !Array.isArray(item.attributes)) {
+          product.attributes = {};
+          Object.entries(item.attributes as Record<string, unknown>).forEach(([key, value]) => {
+            if (product.attributes) {
+              product.attributes[key] = typeof value === 'string' ? value : String(value);
+            }
+          });
+        }
+        
+        return product;
       });
     } catch (error) {
       console.error('Error in getStoreProducts:', error);

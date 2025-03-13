@@ -7,7 +7,7 @@ import { storeService } from '@/services/storeService';
 import ProductCard from '@/components/store/ProductCard';
 import StoreHeader from '@/components/store/StoreHeader';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, Package, Filter, ShoppingBag, Grid3X3, List } from 'lucide-react';
+import { AlertCircle, Package, Filter, ShoppingBag, Grid3X3, List, ChevronRight } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import LoadingScreen from '@/components/LoadingScreen';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -97,93 +97,98 @@ const StoreFront = () => {
   };
   
   return (
-    <div className="container py-8">
+    <div className="container pb-20 md:pb-8">
       <StoreHeader 
         store={store} 
         error={storeError} 
         isLoading={storeLoading} 
       />
       
-      {/* Featured Categories - Added mt-20 for more spacing after header */}
-      <div className="mt-20 mb-12">
-        <h2 className="text-xl font-bold mb-6 flex items-center">
-          <Package className="ml-2" size={20} />
-          تصفح حسب الفئة
-        </h2>
+      {/* Categories Section */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold">الفئات</h2>
+          <Button variant="ghost" size="sm" className="text-primary text-sm flex items-center">
+            عرض الكل
+            <ChevronRight className="ml-1 h-4 w-4" />
+          </Button>
+        </div>
         
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+        <div className="flex overflow-x-auto space-x-3 rtl:space-x-reverse pb-2 no-scrollbar">
           {categories.slice(0, 6).map((category) => (
             <Card 
               key={category}
-              className={`hover:shadow-md transition-all cursor-pointer border ${
-                categoryFilter === category ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'
+              className={`flex-shrink-0 w-24 hover:shadow-md transition-all cursor-pointer ${
+                categoryFilter === category 
+                  ? 'border-primary bg-primary/5' 
+                  : 'border-border hover:border-primary/50'
               }`}
               onClick={() => handleCategoryFilter(categoryFilter === category ? null : category)}
             >
-              <CardContent className="p-4 text-center">
-                <div className="text-sm font-medium truncate">{category}</div>
+              <CardContent className="p-3 text-center">
+                <div className="w-12 h-12 mx-auto bg-gray-100 rounded-full mb-2 flex items-center justify-center">
+                  <ShoppingBag size={20} className="text-primary" />
+                </div>
+                <div className="text-xs font-medium truncate">{category}</div>
               </CardContent>
             </Card>
           ))}
         </div>
       </div>
       
-      <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-2xl font-bold flex items-center">
-          <ShoppingBag className="ml-2" size={22} />
-          {categoryFilter ? `${categoryFilter}` : 'جميع المنتجات'}
-          {categoryFilter && (
-            <Button variant="ghost" size="sm" className="mr-2" onClick={() => handleCategoryFilter(null)}>
-              إلغاء التصفية
-            </Button>
-          )}
-        </h2>
+      {/* Products Section */}
+      <div className="mb-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-bold">
+            {categoryFilter ? `${categoryFilter}` : 'جميع المنتجات'}
+          </h2>
+          
+          <div className="flex items-center gap-2">
+            <Tabs defaultValue={viewType} onValueChange={(value) => setViewType(value as 'grid' | 'list')}>
+              <TabsList className="grid w-[80px] grid-cols-2">
+                <TabsTrigger value="grid" className="p-1">
+                  <Grid3X3 size={16} />
+                </TabsTrigger>
+                <TabsTrigger value="list" className="p-1">
+                  <List size={16} />
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+        </div>
         
-        <div className="flex items-center gap-2">
-          <Tabs defaultValue={viewType} onValueChange={(value) => setViewType(value as 'grid' | 'list')}>
-            <TabsList className="grid w-[120px] grid-cols-2">
-              <TabsTrigger value="grid">
-                <Grid3X3 size={16} />
-              </TabsTrigger>
-              <TabsTrigger value="list">
-                <List size={16} />
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
+        {isLoading ? (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 8 }).map((_, index) => (
+              <div key={index} className="h-64 bg-gray-100 animate-pulse rounded-md"></div>
+            ))}
+          </div>
+        ) : error ? (
+          <Alert variant="destructive" className="mb-6">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>خطأ</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        ) : products.length === 0 ? (
+          <div className="text-center py-16 bg-muted/30 rounded-lg">
+            <Package className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
+            <p className="text-xl text-muted-foreground mb-2">لا توجد منتجات متاحة حالياً</p>
+            {categoryFilter && (
+              <p className="text-muted-foreground mb-4">لا توجد منتجات في هذه الفئة، جرب فئة أخرى</p>
+            )}
+            <Button onClick={() => handleCategoryFilter(null)}>عرض جميع المنتجات</Button>
+          </div>
+        ) : (
+          <div className={viewType === 'grid' 
+            ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+            : "grid grid-cols-1 gap-4"
+          }>
+            {products.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        )}
       </div>
-      
-      {isLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {Array.from({ length: 8 }).map((_, index) => (
-            <div key={index} className="h-72 bg-gray-100 animate-pulse rounded-md"></div>
-          ))}
-        </div>
-      ) : error ? (
-        <Alert variant="destructive" className="mb-6">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>خطأ</AlertTitle>
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      ) : products.length === 0 ? (
-        <div className="text-center py-16 bg-muted/30 rounded-lg">
-          <Package className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-          <p className="text-xl text-muted-foreground mb-2">لا توجد منتجات متاحة حالياً</p>
-          {categoryFilter && (
-            <p className="text-muted-foreground mb-4">لا توجد منتجات في هذه الفئة، جرب فئة أخرى</p>
-          )}
-          <Button onClick={() => handleCategoryFilter(null)}>عرض جميع المنتجات</Button>
-        </div>
-      ) : (
-        <div className={viewType === 'grid' 
-          ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-          : "grid grid-cols-1 gap-4"
-        }>
-          {products.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      )}
     </div>
   );
 };
