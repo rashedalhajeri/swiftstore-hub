@@ -1,40 +1,13 @@
 
-import { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
-  Package, 
-  Search, 
-  Filter, 
-  MoreHorizontal, 
-  Truck, 
-  CheckCircle, 
-  XCircle, 
-  Package2, 
-  Clock,
   Loader2,
-  Eye,
-  Trash2
+  XCircle
 } from 'lucide-react';
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuLabel, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
 import { 
   Dialog, 
   DialogContent, 
@@ -46,18 +19,14 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { OrderDetails } from "@/components/dashboard/OrderDetails";
 import { UpdateOrderStatus } from "@/components/dashboard/UpdateOrderStatus";
+import { OrdersStats } from "@/components/dashboard/orders/OrdersStats";
+import { OrdersTable } from "@/components/dashboard/orders/OrdersTable";
+import { EmptyOrdersState } from "@/components/dashboard/orders/EmptyOrdersState";
+import { OrdersSearch } from "@/components/dashboard/orders/OrdersSearch";
+import { statusMap } from "@/components/dashboard/orders/StatusBadge";
 import { Order } from "@/types/store";
 import { orderService } from "@/services/api";
 import { toast } from 'sonner';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-
-const statusMap: { [key: string]: { label: string; color: string; icon: React.ComponentType<any> } } = {
-  pending: { label: "قيد الانتظار", color: "yellow", icon: Clock },
-  processing: { label: "جاري المعالجة", color: "blue", icon: Package2 },
-  shipped: { label: "تم الشحن", color: "purple", icon: Truck },
-  delivered: { label: "تم التسليم", color: "green", icon: CheckCircle },
-  cancelled: { label: "ملغى", color: "red", icon: XCircle },
-};
 
 const Orders = () => {
   const queryClient = useQueryClient();
@@ -93,7 +62,7 @@ const Orders = () => {
       });
     },
     staleTime: 1000 * 60 * 5, // 5 دقائق قبل إعادة جلب البيانات
-    gcTime: 1000 * 60 * 30, // 30 دقيقة للاحتفاظ بالبيانات في الذاكرة - replaced cacheTime with gcTime
+    gcTime: 1000 * 60 * 30, // 30 دقيقة للاحتفاظ بالبيانات في الذاكرة
   });
 
   const updateOrderMutation = useMutation({
@@ -179,32 +148,10 @@ const Orders = () => {
         </div>
       </div>
 
-      <div className="flex flex-col md:flex-row items-center gap-4 mb-4">
-        <div className="relative w-full md:w-96">
-          <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
-          <Input
-            placeholder="بحث عن طلب..."
-            className="pr-10"
-            value={searchTerm}
-            onChange={handleSearch}
-          />
-        </div>
-        <Button variant="outline" className="flex gap-2">
-          <Filter size={16} />
-          <span>تصفية</span>
-        </Button>
-      </div>
+      <OrdersSearch searchTerm={searchTerm} onSearchChange={handleSearch} />
 
       {orders.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-10">
-            <Package2 className="h-16 w-16 text-muted-foreground mb-4" />
-            <h3 className="text-xl font-medium mb-2">لا توجد طلبات</h3>
-            <p className="text-muted-foreground text-center max-w-md">
-              لم يتم تسجيل أي طلبات حتى الآن. عندما يقوم العملاء بإنشاء طلبات، ستظهر هنا.
-            </p>
-          </CardContent>
-        </Card>
+        <EmptyOrdersState />
       ) : (
         <Tabs defaultValue="all" className="w-full">
           <TabsList className="mb-4">
@@ -225,69 +172,11 @@ const Orders = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>رقم الطلب</TableHead>
-                      <TableHead>العميل</TableHead>
-                      <TableHead>تاريخ الطلب</TableHead>
-                      <TableHead>المجموع</TableHead>
-                      <TableHead>الحالة</TableHead>
-                      <TableHead className="text-left">إجراءات</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredOrders.map((order) => (
-                      <TableRow key={order.id}>
-                        <TableCell className="font-medium">{order.id}</TableCell>
-                        <TableCell>{order.shipping.name}</TableCell>
-                        <TableCell>
-                          {new Date(order.createdAt).toLocaleDateString('ar-KW', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric',
-                          })}
-                        </TableCell>
-                        <TableCell>{order.total.toFixed(3)} KWD</TableCell>
-                        <TableCell>
-                          <Badge className={`bg-${statusMap[order.status].color}-500 hover:bg-${statusMap[order.status].color}-600`}>
-                            {React.createElement(statusMap[order.status].icon, { 
-                              className: "ml-2 h-4 w-4" 
-                            })}
-                            {statusMap[order.status].label}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex justify-end gap-2">
-                            <Button variant="ghost" size="icon" onClick={() => handleOpenDetails(order)}>
-                              <Eye size={16} />
-                            </Button>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon">
-                                  <MoreHorizontal size={16} />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>خيارات</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => handleUpdateStatus(order)}>
-                                  <Package className="ml-2" size={16} />
-                                  <span>تحديث الحالة</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem className="text-red-500 focus:text-red-500">
-                                  <Trash2 className="ml-2" size={16} />
-                                  <span>حذف الطلب</span>
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                <OrdersTable 
+                  orders={filteredOrders} 
+                  onViewDetails={handleOpenDetails} 
+                  onUpdateStatus={handleUpdateStatus} 
+                />
               </CardContent>
             </Card>
           </TabsContent>
@@ -302,71 +191,12 @@ const Orders = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>رقم الطلب</TableHead>
-                        <TableHead>العميل</TableHead>
-                        <TableHead>تاريخ الطلب</TableHead>
-                        <TableHead>المجموع</TableHead>
-                        <TableHead>الحالة</TableHead>
-                        <TableHead className="text-left">إجراءات</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredOrders
-                        .filter(order => order.status === status)
-                        .map((order) => (
-                          <TableRow key={order.id}>
-                            <TableCell className="font-medium">{order.id}</TableCell>
-                            <TableCell>{order.shipping.name}</TableCell>
-                            <TableCell>
-                              {new Date(order.createdAt).toLocaleDateString('ar-KW', {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric',
-                              })}
-                            </TableCell>
-                            <TableCell>{order.total.toFixed(3)} KWD</TableCell>
-                            <TableCell>
-                              <Badge className={`bg-${statusMap[order.status].color}-500 hover:bg-${statusMap[order.status].color}-600`}>
-                                {React.createElement(statusMap[order.status].icon, { 
-                                  className: "ml-2 h-4 w-4" 
-                                })}
-                                {statusMap[order.status].label}
-                              </Badge>
-                            </TableCell>
-                            <TableCell>
-                              <div className="flex justify-end gap-2">
-                                <Button variant="ghost" size="icon" onClick={() => handleOpenDetails(order)}>
-                                  <Eye size={16} />
-                                </Button>
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon">
-                                      <MoreHorizontal size={16} />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end">
-                                    <DropdownMenuLabel>خيارات</DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => handleUpdateStatus(order)}>
-                                      <Package className="ml-2" size={16} />
-                                      <span>تحديث الحالة</span>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuItem className="text-red-500 focus:text-red-500">
-                                      <Trash2 className="ml-2" size={16} />
-                                      <span>حذف الطلب</span>
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                    </TableBody>
-                  </Table>
+                  <OrdersTable 
+                    orders={filteredOrders} 
+                    onViewDetails={handleOpenDetails} 
+                    onUpdateStatus={handleUpdateStatus} 
+                    filterStatus={status} 
+                  />
                 </CardContent>
               </Card>
             </TabsContent>
@@ -420,54 +250,7 @@ const Orders = () => {
         </DialogContent>
       </Dialog>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-        <Card>
-          <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-sm font-medium">إجمالي الإيرادات</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {orders.reduce((total, order) => total + order.total, 0).toFixed(3)} KWD
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              منذ البداية
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-sm font-medium">الطلبات قيد الانتظار</CardTitle>
-            <Clock className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {orders.filter(order => order.status === 'pending').length}
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              طلبات جديدة تنتظر المعالجة
-            </p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
-            <CardTitle className="text-sm font-medium">متوسط قيمة الطلب</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
-              {orders.length > 0
-                ? (orders.reduce((total, order) => total + order.total, 0) / orders.length).toFixed(3)
-                : "0.000"} KWD
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              متوسط قيمة كل طلب
-            </p>
-          </CardContent>
-        </Card>
-      </div>
+      <OrdersStats orders={orders} />
     </div>
   );
 };
