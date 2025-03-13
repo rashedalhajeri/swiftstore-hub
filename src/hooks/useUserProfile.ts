@@ -12,15 +12,16 @@ export const useUserProfile = (): UseUserProfileResult => {
 
   const fetchUserProfile = async (userId: string) => {
     try {
-      const { data: userData } = await supabase.auth.getUser(userId);
+      const { data: userData } = await supabase.auth.getUser();
       
+      // First check if profile exists
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .select('is_admin, first_name, last_name')
         .eq('id', userId)
         .maybeSingle();
       
-      if (profileError) {
+      if (profileError && profileError.code !== 'PGRST116') {
         console.error('Error fetching profile:', profileError);
         setIsAdmin(false);
         return false;
@@ -33,15 +34,15 @@ export const useUserProfile = (): UseUserProfileResult => {
       
       // If no profile exists, create one using user metadata if available
       const userMetadata = userData?.user?.user_metadata;
-      const { error: insertError } = await supabase
-        .from('profiles')
-        .insert({
-          id: userId,
-          is_admin: false,
-          first_name: userMetadata?.first_name || null,
-          last_name: userMetadata?.last_name || null,
-          email: userData?.user?.email || null
-        });
+      
+      // Use RLS bypass for this operation 
+      const { error: insertError } = await supabase.rpc('create_user_profile', {
+        user_id: userId,
+        is_admin_val: false,
+        first_name_val: userMetadata?.first_name || null,
+        last_name_val: userMetadata?.last_name || null,
+        email_val: userData?.user?.email || null
+      });
       
       if (insertError) {
         console.error('Error creating profile:', insertError);

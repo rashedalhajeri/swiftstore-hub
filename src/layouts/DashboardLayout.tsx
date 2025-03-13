@@ -123,38 +123,32 @@ const DashboardLayout = () => {
           const {
             data,
             error
-          } = await supabase.from('profiles').select('first_name, last_name, email').eq('id', user.id).single();
-          if (error) {
-            console.error('Error fetching user profile:', error);
-            return;
-          }
-          if (data) {
+          } = await supabase.from('profiles').select('first_name, last_name, email').eq('id', user.id).maybeSingle();
+          
+          if (data && (data.first_name || data.last_name)) {
             const firstName = data.first_name || '';
             const lastName = data.last_name || '';
-            if (firstName || lastName) {
-              setUserFullName(`${firstName} ${lastName}`.trim());
-            } else {
-              if (user.user_metadata && (user.user_metadata.first_name || user.user_metadata.last_name)) {
-                const metaFirstName = user.user_metadata.first_name || '';
-                const metaLastName = user.user_metadata.last_name || '';
-                setUserFullName(`${metaFirstName} ${metaLastName}`.trim());
-              } else {
-                setUserFullName('مستخدم متجر.أنا');
-              }
-            }
+            setUserFullName(`${firstName} ${lastName}`.trim());
             setUserEmail(data.email || user.email || '');
+          } else if (user.user_metadata && (user.user_metadata.first_name || user.user_metadata.last_name)) {
+            const metaFirstName = user.user_metadata.first_name || '';
+            const metaLastName = user.user_metadata.last_name || '';
+            setUserFullName(`${metaFirstName} ${metaLastName}`.trim());
+            setUserEmail(user.email || '');
           } else {
-            if (user.user_metadata && (user.user_metadata.first_name || user.user_metadata.last_name)) {
-              const metaFirstName = user.user_metadata.first_name || '';
-              const metaLastName = user.user_metadata.last_name || '';
-              setUserFullName(`${metaFirstName} ${metaLastName}`.trim());
-            } else {
-              setUserFullName('مستخدم متجر.أنا');
-            }
+            setUserFullName('مستخدم متجر.أنا');
             setUserEmail(user.email || '');
           }
         } catch (error) {
           console.error('Unexpected error fetching profile:', error);
+          if (user.user_metadata && (user.user_metadata.first_name || user.user_metadata.last_name)) {
+            const metaFirstName = user.user_metadata.first_name || '';
+            const metaLastName = user.user_metadata.last_name || '';
+            setUserFullName(`${metaFirstName} ${metaLastName}`.trim());
+          } else {
+            setUserFullName('مستخدم متجر.أنا');
+          }
+          setUserEmail(user.email || '');
         }
       }
     };
@@ -174,9 +168,10 @@ const DashboardLayout = () => {
             .from('stores')
             .select('logo, slug')
             .eq('user_id', user.id)
+            .limit(1)
             .maybeSingle();
             
-          if (error) {
+          if (error && error.code !== 'PGRST116') {
             console.error('Error fetching store info:', error);
             return;
           }
@@ -192,10 +187,8 @@ const DashboardLayout = () => {
             }
           } else {
             const storedSlug = localStorage.getItem('storeSlug');
-            const randomSlug = storedSlug || `store-${Math.random().toString(36).substring(2, 8)}`;
-            
             let storeName = 'متجر.أنا';
-            let storeUrl = randomSlug;
+            let storeUrl = storedSlug || `store-${Math.random().toString(36).substring(2, 8)}`;
             
             if (user.user_metadata) {
               if (user.user_metadata.store_name) {
@@ -206,28 +199,24 @@ const DashboardLayout = () => {
               }
             }
             
-            const { error: insertError, data: newStore } = await supabase
-              .from('stores')
-              .insert({
-                user_id: user.id,
-                name: storeName,
-                logo: null,
-                description: 'متجر للملابس والإكسسوارات',
-                slug: storeUrl
-              })
-              .select()
-              .single();
-              
-            if (insertError) {
-              console.error('Error creating default store:', insertError);
-            } else {
-              if (newStore && newStore.slug) {
-                setStoreSlug(newStore.slug);
-                localStorage.setItem('storeSlug', newStore.slug);
+            try {
+              const { error: insertError, data: newStore } = await supabase.rpc('create_store', {
+                user_id_val: user.id,
+                name_val: storeName,
+                slug_val: storeUrl,
+                description_val: 'متجر للملابس والإكسسوارات'
+              });
+                
+              if (insertError) {
+                console.error('Error creating default store:', insertError);
               } else {
                 setStoreSlug(storeUrl);
                 localStorage.setItem('storeSlug', storeUrl);
               }
+            } catch (error) {
+              console.error('Error in store creation:', error);
+              setStoreSlug(storeUrl);
+              localStorage.setItem('storeSlug', storeUrl);
             }
           }
         } catch (error) {
@@ -292,17 +281,17 @@ const DashboardLayout = () => {
                 ) : (
                   <AvatarImage src="/placeholder.svg" alt="صورة افتراضية" />
                 )}
-                <AvatarFallback className="bg-sidebar-accent text-sidebar-foreground sidebar-text">
+                <AvatarFallback className="bg-sidebar-accent text-white">
                   {userFullName ? userFullName.charAt(0).toUpperCase() : 'م'}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate sidebar-text">{userFullName}</p>
+                <p className="text-sm font-medium text-white">{userFullName}</p>
                 {storeSlug && (
-                  <div className="flex items-center text-xs text-sidebar-foreground/70 truncate sidebar-text gap-1">
+                  <div className="flex items-center text-xs text-gray-300 truncate gap-1">
                     <span className="rtl:ml-0.5">linok.me/</span>
                     <span className="font-medium">{storeSlug}</span>
-                    <ExternalLink size={12} className="ms-1 sidebar-icon" />
+                    <ExternalLink size={12} className="ms-1 text-gray-300" />
                   </div>
                 )}
               </div>
@@ -312,16 +301,16 @@ const DashboardLayout = () => {
             </div>
             
             <div className="grid grid-cols-2 gap-2 mt-1">
-              <Button variant="outline" size="sm" className="bg-sidebar-accent/50 border-sidebar-border text-sidebar-foreground w-full sidebar-text" asChild>
+              <Button variant="outline" size="sm" className="bg-sidebar-accent/50 border-sidebar-border text-white w-full" asChild>
                 <Link to="/store" className="flex items-center justify-center gap-1">
-                  <Store size={14} className="sidebar-icon" />
-                  <span className="text-xs sidebar-text">عرض المتجر</span>
+                  <Store size={14} className="text-white" />
+                  <span className="text-xs text-white">عرض المتجر</span>
                 </Link>
               </Button>
-              <Button variant="outline" size="sm" className="bg-sidebar-accent/50 border-sidebar-border text-sidebar-foreground w-full sidebar-text" asChild>
+              <Button variant="outline" size="sm" className="bg-sidebar-accent/50 border-sidebar-border text-white w-full" asChild>
                 <Link to="/dashboard/settings/store" className="flex items-center justify-center gap-1">
-                  <Edit size={14} className="sidebar-icon" />
-                  <span className="text-xs sidebar-text">تحرير المتجر</span>
+                  <Edit size={14} className="text-white" />
+                  <span className="text-xs text-white">تحرير المتجر</span>
                 </Link>
               </Button>
             </div>
