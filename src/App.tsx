@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -146,7 +145,17 @@ const App = () => (
                     <UpdatePassword />
                   </PublicOnlyRoute>
                 } />
+
+                {/* Store Routes - Updated for direct slugs */}
                 <Route path="/store" element={<StoreFront />} />
+                {/* New direct store URL route */}
+                <Route path="/:storeSlug" element={<StoreFront />} />
+                <Route path="/:storeSlug/product/:id" element={<ProductDetails />} />
+                <Route path="/:storeSlug/cart" element={<Cart />} />
+                <Route path="/:storeSlug/checkout" element={<Checkout />} />
+                <Route path="/:storeSlug/order-confirmation" element={<OrderConfirmation />} />
+                
+                {/* Keep legacy store routes for backward compatibility */}
                 <Route path="/store/product/:id" element={<ProductDetails />} />
                 <Route path="/store/cart" element={<Cart />} />
                 <Route path="/store/checkout" element={<Checkout />} />

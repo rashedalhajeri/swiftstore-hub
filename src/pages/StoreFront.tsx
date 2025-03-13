@@ -1,6 +1,5 @@
-
 import React, { useEffect, useState } from 'react';
-import { useSearchParams, Navigate } from 'react-router-dom';
+import { useSearchParams, Navigate, useParams } from 'react-router-dom';
 import { Product } from '@/types/store';
 import { useStore } from '@/contexts/StoreContext';
 import { storeService } from '@/services/storeService';
@@ -19,7 +18,8 @@ const StoreFront = () => {
   const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>('all');
   
-  const storeSlug = searchParams.get('store');
+  const params = useParams();
+  const storeSlug = params.storeSlug || searchParams.get('store');
   const categoryFilter = searchParams.get('category');
   
   useEffect(() => {
@@ -84,10 +84,19 @@ const StoreFront = () => {
   const handleCategoryFilter = (category: string) => {
     setActiveCategory(category);
     
+    // Use the current route structure (either direct slug or query parameter)
     if (category === 'all') {
-      const newParams = new URLSearchParams(searchParams);
-      newParams.delete('category');
-      setSearchParams(newParams);
+      if (params.storeSlug) {
+        // Direct path route
+        const newParams = new URLSearchParams(searchParams);
+        newParams.delete('category');
+        setSearchParams(newParams);
+      } else {
+        // Legacy query param route
+        const newParams = new URLSearchParams(searchParams);
+        newParams.delete('category');
+        setSearchParams(newParams);
+      }
     } else {
       const newParams = new URLSearchParams(searchParams);
       newParams.set('category', category);

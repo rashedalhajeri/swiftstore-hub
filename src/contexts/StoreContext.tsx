@@ -3,6 +3,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { Store } from '@/types/store';
 import { storeService } from '@/services/storeService';
 import { useAuthSession } from '@/hooks/useAuthSession';
+import { useLocation, useParams } from 'react-router-dom';
 
 interface StoreContextType {
   store: Store | null;
@@ -25,14 +26,22 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { session } = useAuthSession();
+  const location = useLocation();
+  const params = useParams();
   
-  // Get store slug from URL if available
+  // Get store slug from URL path or query parameter
   const getStoreSlug = () => {
-    // Check if window is available (for SSR)
+    // First check for direct path parameter (/:storeSlug)
+    if (params.storeSlug) {
+      return params.storeSlug;
+    }
+    
+    // Next check for query parameter (legacy support)
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get('store');
     }
+    
     return null;
   };
   
@@ -72,7 +81,7 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
   // Fetch store when component mounts or when store slug or user session changes
   useEffect(() => {
     fetchStore();
-  }, [storeSlug, session?.user?.id]);
+  }, [storeSlug, session?.user?.id, location.pathname]);
 
   return (
     <StoreContext.Provider value={{ store, isLoading, error, refetch: fetchStore }}>

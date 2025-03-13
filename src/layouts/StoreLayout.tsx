@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import { Link, useLocation, useSearchParams, useParams } from 'react-router-dom';
 import { 
   ShoppingCart, 
   Search, 
@@ -36,7 +35,9 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
   const { totalItems } = useCart();
   const { store } = useStore();
   const [searchParams] = useSearchParams();
+  const params = useParams();
   const storeParam = searchParams.get('store');
+  const storeSlug = params.storeSlug || storeParam;
   
   const storeInfo = {
     name: store?.name || 'متجر.أنا',
@@ -46,8 +47,19 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
     currency: 'KWD'
   };
 
-  // بناء الروابط مع الحفاظ على معلمة المتجر
+  // بناء الروابط مع الحفاظ على الشكل المناسب للرابط
   const buildStoreLink = (path: string) => {
+    // If we're using the direct slug approach
+    if (params.storeSlug) {
+      // For the home page (remove the trailing slash if any)
+      if (path === '/store') {
+        return `/${params.storeSlug}`;
+      }
+      // For other paths, replace /store/ with /{storeSlug}/
+      return path.replace('/store', `/${params.storeSlug}`);
+    }
+    
+    // Legacy approach with query parameter
     return storeParam ? `${path}?store=${storeParam}` : path;
   };
 
