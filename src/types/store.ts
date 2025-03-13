@@ -1,4 +1,3 @@
-
 export interface Product {
   id: string;
   name: string;
@@ -17,6 +16,7 @@ export interface Product {
   category_id?: string;
   created_at?: string;
   updated_at?: string;
+  store_id?: string; // Add store_id to the Product interface
 }
 
 export interface Review {

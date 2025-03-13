@@ -121,22 +121,52 @@ export const storeService = {
       
       if (!data) return [];
 
-      // Transform the data to match the Product type
-      return data.map(item => ({
-        id: item.id || '',
-        name: item.name || '',
-        price: Number(item.price) || 0,
-        image: item.image || '',
-        featured: Boolean(item.featured) || false,
-        category: typeof item.category === 'object' && item.category ? item.category.name : (item.category_id || ''),
-        description: item.description || '',
-        sku: item.sku || '',
-        stock: item.stock !== undefined ? Number(item.stock) : undefined,
-        rating: item.rating !== undefined ? Number(item.rating) : undefined,
-        images: Array.isArray(item.images) ? item.images : [],
-        attributes: item.attributes && typeof item.attributes === 'object' ? item.attributes : {},
-        store_id: item.store_id || ''
-      }));
+      // Transform the data to match the Product type with careful type checking
+      return data.map(item => {
+        // Type-safe handling of category
+        let categoryName = '';
+        if (item.category && typeof item.category === 'object' && 'name' in item.category) {
+          categoryName = item.category.name as string;
+        } else {
+          categoryName = item.category_id || '';
+        }
+
+        // Ensure images are properly typed as string[]
+        let processedImages: string[] = [];
+        if (item.images) {
+          if (Array.isArray(item.images)) {
+            processedImages = item.images.filter(img => typeof img === 'string') as string[];
+          }
+        }
+
+        // Safely process attributes
+        let processedAttributes: Record<string, string> = {};
+        if (item.attributes && typeof item.attributes === 'object' && !Array.isArray(item.attributes)) {
+          Object.entries(item.attributes).forEach(([key, value]) => {
+            if (typeof value === 'string') {
+              processedAttributes[key] = value;
+            } else if (value !== null && value !== undefined) {
+              processedAttributes[key] = String(value);
+            }
+          });
+        }
+
+        return {
+          id: item.id || '',
+          name: item.name || '',
+          price: Number(item.price) || 0,
+          image: item.image || '',
+          featured: Boolean(item.featured) || false,
+          category: categoryName,
+          description: item.description || '',
+          sku: item.sku || '',
+          stock: item.stock !== undefined ? Number(item.stock) : undefined,
+          rating: item.rating !== undefined ? Number(item.rating) : undefined,
+          images: processedImages,
+          attributes: processedAttributes,
+          store_id: storeId // Use the storeId parameter directly instead of trying to access it from item
+        };
+      });
     } catch (error) {
       console.error('Error in getStoreProducts:', error);
       return [];
