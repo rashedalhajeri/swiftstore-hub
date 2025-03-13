@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import Logo from './Logo';
-import { Menu, X, Bell, User, Settings, LogOut, LayoutDashboard } from 'lucide-react';
+import { Menu, X, Bell, User, Settings, LogOut, LayoutDashboard, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   DropdownMenu,
@@ -17,7 +17,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Loader2 } from '@/components/ui/loader';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
