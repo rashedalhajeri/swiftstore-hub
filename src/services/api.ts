@@ -7,8 +7,11 @@ import { Json } from '@/integrations/supabase/types';
 export const productService = {
   // الحصول على جميع المنتجات
   async getAllProducts() {
-    // No caching - always get fresh data
+    // استخدام خيار abortSignal لإلغاء الطلبات غير الضرورية
+    const abortController = new AbortController();
+    
     try {
+      // Removed the abortSignal parameter since it's not supported in Supabase
       const { data, error } = await supabase
         .from('products')
         .select('*, category:categories(name)');
@@ -20,28 +23,14 @@ export const productService = {
       
       return data;
     } catch (error) {
-      console.error('Error fetching products:', error);
-      throw error;
-    }
-  },
-
-  // الحصول على منتجات متجر محدد
-  async getProductsByStoreId(storeId: string) {
-    try {
-      const { data, error } = await supabase
-        .from('products')
-        .select('*, category:categories(name)')
-        .eq('store_id', storeId);
-      
-      if (error) {
-        console.error(`Error fetching products for store ${storeId}:`, error);
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.log('Request aborted');
+      } else {
+        console.error('Error fetching products:', error);
         throw error;
       }
-      
-      return data;
-    } catch (error) {
-      console.error('Error fetching store products:', error);
-      throw error;
+    } finally {
+      abortController.abort();
     }
   },
 
@@ -102,8 +91,7 @@ export const productService = {
         sku: product.sku,
         stock: product.stock,
         attributes: product.attributes as unknown as Json,
-        rating: product.rating,
-        store_id: product.store_id, // Make sure store_id is included
+        rating: product.rating
       })
       .select()
       .single();
@@ -132,7 +120,6 @@ export const productService = {
     if (product.stock !== undefined) updateData.stock = product.stock;
     if (product.attributes) updateData.attributes = product.attributes as unknown as Json;
     if (product.rating !== undefined) updateData.rating = product.rating;
-    if (product.store_id) updateData.store_id = product.store_id;
     
     const { data, error } = await supabase
       .from('products')

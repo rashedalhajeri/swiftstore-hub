@@ -281,13 +281,6 @@ const DashboardLayout = () => {
   const isSettingsPage = location.pathname.includes('/dashboard/settings');
   const currentSettingsPage = isSettingsPage ? location.pathname.split('/dashboard/settings/')[1] || 'account' : '';
 
-  const getStoreUrl = () => {
-    if (storeSlug) {
-      return `/store?store=${encodeURIComponent(storeSlug)}`;
-    }
-    return '/dashboard/settings/store';
-  };
-
   return <div className="flex h-screen bg-secondary/20 overflow-hidden" dir="rtl">
       {isMobile && sidebarOpen && <div className="fixed inset-0 bg-black/50 z-20" onClick={() => setSidebarOpen(false)} />}
 
@@ -361,7 +354,7 @@ const DashboardLayout = () => {
             
             <div className="grid grid-cols-2 gap-2 mt-1">
               <Button variant="outline" size="sm" className="bg-sidebar-accent/50 border-sidebar-border text-white w-full" asChild>
-                <Link to={getStoreUrl()} className="flex items-center justify-center gap-1" target="_blank">
+                <Link to={`/store?store=${storeSlug}`} className="flex items-center justify-center gap-1">
                   <Store size={14} className="text-white" />
                   <span className="text-xs text-white">عرض المتجر</span>
                 </Link>
