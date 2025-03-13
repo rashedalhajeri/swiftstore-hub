@@ -354,7 +354,7 @@ const DashboardLayout = () => {
             
             <div className="grid grid-cols-2 gap-2 mt-1">
               <Button variant="outline" size="sm" className="bg-sidebar-accent/50 border-sidebar-border text-white w-full" asChild>
-                <Link to="/store" className="flex items-center justify-center gap-1">
+                <Link to={`/store?store=${storeSlug}`} className="flex items-center justify-center gap-1">
                   <Store size={14} className="text-white" />
                   <span className="text-xs text-white">عرض المتجر</span>
                 </Link>

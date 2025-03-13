@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { 
   ShoppingCart, 
   Search, 
@@ -22,6 +22,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Logo from '@/components/Logo';
 import { Badge } from '@/components/ui/badge';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 // Sample product data for the store
 const sampleProducts = [
@@ -101,16 +103,67 @@ const categories = [
 ];
 
 const StoreFront = () => {
+  const [searchParams] = useSearchParams();
+  const storeSlug = searchParams.get('store') || localStorage.getItem('storeSlug') || 'store';
+  
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('الكل');
   const [cart, setCart] = useState<number[]>([]);
   const [storeInfo, setStoreInfo] = useState({
     name: 'متجر.أنا',
-    url: localStorage.getItem('storeUrl') || 'store',
+    slug: storeSlug,
     logo: '',
-    currency: 'KWD'
+    description: '',
+    currency: 'KWD',
+    primaryColor: '#8B5CF6'
   });
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch store information
+  useEffect(() => {
+    const fetchStoreInfo = async () => {
+      try {
+        setIsLoading(true);
+        
+        const { data: storeData, error } = await supabase
+          .from('stores')
+          .select('*')
+          .eq('slug', storeSlug)
+          .maybeSingle();
+          
+        if (error) {
+          console.error('Error fetching store:', error);
+          toast.error('حدث خطأ أثناء تحميل بيانات المتجر');
+          return;
+        }
+        
+        if (storeData) {
+          setStoreInfo({
+            name: storeData.name || 'متجر.أنا',
+            slug: storeData.slug || storeSlug,
+            logo: storeData.logo || '',
+            description: storeData.description || '',
+            currency: 'KWD',
+            primaryColor: storeData.primary_color || '#8B5CF6'
+          });
+          
+          // Apply store's primary color if available
+          if (storeData.primary_color) {
+            document.documentElement.style.setProperty('--primary', storeData.primary_color);
+          }
+        } else {
+          console.warn('No store found with slug:', storeSlug);
+        }
+      } catch (err) {
+        console.error('Error in fetchStoreInfo:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchStoreInfo();
+  }, [storeSlug]);
 
   // Filter products based on search and category
   const filteredProducts = sampleProducts.filter(product => {
@@ -275,7 +328,7 @@ const StoreFront = () => {
             <div className="max-w-3xl mx-auto text-center">
               <h1 className="text-4xl font-bold mb-4">مرحبًا بك في {storeInfo.name}</h1>
               <p className="text-lg text-muted-foreground mb-8">
-                متجرك المفضل للمنتجات الأصلية عالية الجودة بأسعار تنافسية
+                {storeInfo.description || "متجرك المفضل للمنتجات الأصلية عالية الجودة بأسعار تنافسية"}
               </p>
               <div className="flex flex-wrap gap-4 justify-center">
                 <Button asChild size="lg" className="button-hover-effect">
@@ -409,7 +462,7 @@ const StoreFront = () => {
             <div>
               <h3 className="font-bold text-lg mb-4">عن المتجر</h3>
               <p className="text-muted-foreground">
-                نقدم لكم أفضل المنتجات بأفضل الأسعار مع خدمة عملاء متميزة
+                {storeInfo.description || "نقدم لكم أفضل المنتجات بأفضل الأسعار مع خدمة عملاء متميزة"}
               </p>
             </div>
             <div>
@@ -455,7 +508,7 @@ const StoreFront = () => {
             <div>
               <h3 className="font-bold text-lg mb-4">تواصل معنا</h3>
               <ul className="space-y-2 text-muted-foreground">
-                <li>البريد الإلكتروني: info@{storeInfo.url}</li>
+                <li>البريد الإلكتروني: info@{storeInfo.slug}</li>
                 <li>الهاتف: +965 1234 5678</li>
                 <li>العنوان: الكويت</li>
               </ul>
