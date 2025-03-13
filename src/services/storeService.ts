@@ -131,6 +131,17 @@ export const storeService = {
           }
         }
 
+        // Handle attributes - ensure it's always a Record<string, string>
+        let processedAttributes: Record<string, string> = {};
+        if (item.attributes) {
+          if (typeof item.attributes === 'object' && !Array.isArray(item.attributes)) {
+            // Extract keys and values, ensuring all values are strings
+            Object.entries(item.attributes).forEach(([key, value]) => {
+              processedAttributes[key] = String(value);
+            });
+          }
+        }
+
         return {
           id: item.id,
           name: item.name,
@@ -142,7 +153,7 @@ export const storeService = {
           images: processedImages,
           sku: item.sku || '',
           stock: item.stock || 0,
-          attributes: item.attributes || {},
+          attributes: processedAttributes,
           rating: item.rating || 0,
           category_id: item.category_id || '',
           created_at: item.created_at || '',
