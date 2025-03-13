@@ -18,8 +18,9 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
   const [searchParams] = useSearchParams();
   const { totalItems } = useCart();
   
-  // Get store slug from URL or localStorage
-  const storeSlug = searchParams.get('store') || localStorage.getItem('storeSlug') || '';
+  // Get store slug from URL first, then localStorage as fallback
+  const storeParam = searchParams.get('store');
+  const storeSlug = storeParam || localStorage.getItem('storeSlug') || '';
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('الكل');
@@ -43,13 +44,15 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
         if (!storeSlug) {
           setStoreLoading(false);
           toast.error('لم يتم تحديد متجر');
+          navigate('/');
           return;
         }
         
+        console.log('Fetching store with slug:', storeSlug);
         const storeData = await storeService.getStoreBySlug(storeSlug);
         
         if (storeData) {
-          console.log('Store data fetched:', storeData);
+          console.log('Store data fetched successfully:', storeData);
           setStoreInfo({
             id: storeData.id,
             name: storeData.name,
@@ -74,6 +77,8 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
           // Navigate to dashboard if in dashboard
           if (location.pathname.includes('/dashboard')) {
             navigate('/dashboard/settings/store');
+          } else {
+            navigate('/');
           }
         }
       } catch (err) {

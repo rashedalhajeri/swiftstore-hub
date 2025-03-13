@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/types/store';
 import { toast } from 'sonner';
@@ -17,26 +16,6 @@ interface StoreInfo {
   is_published: boolean;
   user_id: string;
 }
-
-// Separate interface for product response to avoid deep type inference
-type ProductResponse = {
-  id: string;
-  name: string;
-  price: number;
-  image: string;
-  category: { name: string } | null;
-  featured: boolean | null;
-  description: string | null;
-  images: any[] | null;
-  sku: string | null;
-  stock: number | null;
-  attributes: Record<string, any> | null;
-  rating: number | null;
-  category_id: string | null;
-  store_id: string;
-  created_at: string | null;
-  updated_at: string | null;
-};
 
 export const storeService = {
   /**
@@ -79,8 +58,8 @@ export const storeService = {
         return [];
       }
       
-      // Use type assertion with a simpler approach to avoid deep type inference
-      const products = data as unknown as ProductResponse[];
+      // Simplified approach to avoid deep type inference issues
+      const products = data as any[];
       
       // Map the data to our Product type
       return (products || []).map(item => ({
