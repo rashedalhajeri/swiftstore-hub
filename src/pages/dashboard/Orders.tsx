@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { 
   Package, 
@@ -615,34 +616,36 @@ const Orders = () => {
         </Drawer>
       ) : (
         <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-            <DialogHeader className="sticky top-0 z-10 bg-background">
+          <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col rounded-lg shadow-lg border-0">
+            <DialogHeader className="sticky top-0 z-10 bg-background px-6 py-4 border-b">
               <DialogTitle>
                 {isInvoiceView ? (
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-5 w-5" />
+                  <div className="flex items-center gap-2 text-xl">
+                    <FileText className="h-5 w-5 text-primary" />
                     فاتورة الطلب #{selectedOrder?.id}
                   </div>
                 ) : (
-                  <div className="flex items-center gap-2">
-                    <Package className="h-5 w-5" />
+                  <div className="flex items-center gap-2 text-xl">
+                    <Package className="h-5 w-5 text-primary" />
                     تفاصيل الطلب #{selectedOrder?.id}
                   </div>
                 )}
               </DialogTitle>
-              <DialogDescription>
+              <DialogDescription className="mt-1 text-muted-foreground">
                 {isInvoiceView ? 'عرض فاتورة الطلب وطباعتها' : 'عرض معلومات الطلب والمنتجات والشحن والدفع'}
               </DialogDescription>
             </DialogHeader>
-            <div className="overflow-y-auto flex-1 px-1 py-2">
+            <div className="overflow-y-auto flex-1 px-6 py-4">
               {selectedOrder && <OrderDetails order={selectedOrder} isInvoice={isInvoiceView} />}
             </div>
-            <DialogFooter className="sticky bottom-0 pt-2 bg-background border-t mt-auto">
-              <Button variant="outline" onClick={() => setIsDetailsOpen(false)}>
+            <DialogFooter className="sticky bottom-0 pt-2 bg-background border-t mt-auto p-4">
+              <Button variant="outline" onClick={() => setIsDetailsOpen(false)} className="gap-2">
+                <XCircle className="h-4 w-4" />
                 إغلاق
               </Button>
               {isInvoiceView && (
                 <Button 
+                  className="gap-2 bg-primary hover:bg-primary/90"
                   onClick={() => {
                     toast({
                       title: "جاري الطباعة",
