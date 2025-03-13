@@ -83,6 +83,7 @@ export const storeService = {
         throw error;
       }
       
+      toast.success('تم تحديث المتجر بنجاح');
       return data;
     } catch (error) {
       console.error('Error in updateStore:', error);
@@ -110,6 +111,7 @@ export const storeService = {
       const { data, error } = await supabase
         .from('products')
         .select('*, category:categories(name)')
+        .eq('store_id', storeId)  // Filter products by store_id
         .order('created_at', { ascending: false });
       
       if (error) {
@@ -144,17 +146,17 @@ export const storeService = {
 
         return {
           id: item.id,
-          name: item.name,
-          price: item.price,
-          image: item.image,
+          name: item.name || '',
+          price: Number(item.price) || 0,
+          image: item.image || '',
           category: item.category || { name: '' },
-          featured: item.featured || false,
+          featured: Boolean(item.featured) || false,
           description: item.description || '',
           images: processedImages,
           sku: item.sku || '',
-          stock: item.stock || 0,
+          stock: Number(item.stock) || 0,
           attributes: processedAttributes,
-          rating: item.rating || 0,
+          rating: Number(item.rating) || 0,
           category_id: item.category_id || '',
           created_at: item.created_at || '',
           updated_at: item.updated_at || ''

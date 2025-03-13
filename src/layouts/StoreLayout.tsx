@@ -12,13 +12,17 @@ import {
   ShoppingBag, 
   Phone, 
   Mail, 
-  MapPin 
+  MapPin,
+  Instagram,
+  Facebook,
+  Twitter
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import Logo from '@/components/Logo';
 import { useCart } from '@/contexts/CartContext';
 import { categories } from '@/data/products';
+import { useStore } from '@/contexts/StoreContext';
 
 interface StoreLayoutProps {
   children: React.ReactNode;
@@ -27,52 +31,83 @@ interface StoreLayoutProps {
 const StoreLayout = ({ children }: StoreLayoutProps) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isScrolled, setIsScrolled] = useState(false);
   const location = useLocation();
   const { totalItems } = useCart();
-  const [storeInfo, setStoreInfo] = useState({
-    name: 'متجر.أنا',
-    url: localStorage.getItem('storeUrl') || 'store',
-    logo: '',
+  const { store } = useStore();
+  
+  const storeInfo = {
+    name: store?.name || 'متجر.أنا',
+    url: store?.slug || localStorage.getItem('storeUrl') || 'store',
+    logo: store?.logo || '',
+    primary_color: store?.primary_color || '#8B5CF6',
     currency: 'KWD'
-  });
+  };
 
   // إغلاق القائمة عند تغيير المسار
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [location.pathname]);
 
+  // التحقق من تمرير الصفحة لإضافة تأثير على الهيدر
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 10) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // تطبيق اللون الأساسي من المتجر
+  useEffect(() => {
+    if (storeInfo.primary_color) {
+      document.documentElement.style.setProperty('--primary', storeInfo.primary_color);
+    }
+  }, [storeInfo.primary_color]);
+
   return (
     <div className="min-h-screen bg-background flex flex-col" style={{ direction: 'rtl' }}>
       {/* الـ Header */}
-      <header className="sticky top-0 bg-background/95 backdrop-blur-md border-b z-50">
+      <header 
+        className={`sticky top-0 z-50 transition-all duration-300 ${
+          isScrolled 
+            ? 'bg-background/95 backdrop-blur-md shadow-sm' 
+            : 'bg-background'
+        }`}
+      >
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <button 
-                className="md:hidden"
+                className="md:hidden focus:outline-none"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
                 {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
               <Link to="/store" className="flex items-center">
                 {storeInfo.logo ? (
-                  <img src={storeInfo.logo} alt={storeInfo.name} className="h-8" />
+                  <img src={storeInfo.logo} alt={storeInfo.name} className="h-10 object-contain" />
                 ) : (
-                  <div className="font-bold text-xl">{storeInfo.name}</div>
+                  <div className="font-bold text-xl transition-all hover:text-primary">{storeInfo.name}</div>
                 )}
               </Link>
             </div>
             
             <div className="hidden md:flex items-center gap-6">
-              <Link to="/store" className="font-medium hover:text-primary transition-colors">
+              <Link to="/store" className="font-medium hover:text-primary transition-colors py-2 border-b-2 border-transparent hover:border-primary">
                 الرئيسية
               </Link>
               <div className="relative group">
-                <button className="flex items-center gap-1 font-medium hover:text-primary transition-colors">
+                <button className="flex items-center gap-1 font-medium hover:text-primary transition-colors py-2 border-b-2 border-transparent group-hover:border-primary">
                   <span>التصنيفات</span>
                   <ChevronDown size={16} />
                 </button>
-                <div className="absolute top-full right-0 mt-2 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 min-w-48">
+                <div className="absolute top-full right-0 mt-2 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50 min-w-48 animate-fade-in">
                   <div className="py-2">
                     {categories.map(category => (
                       <Link 
@@ -86,13 +121,13 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
                   </div>
                 </div>
               </div>
-              <Link to="/store" className="font-medium hover:text-primary transition-colors">
+              <Link to="/store" className="font-medium hover:text-primary transition-colors py-2 border-b-2 border-transparent hover:border-primary">
                 المنتجات
               </Link>
-              <Link to="/store/about" className="font-medium hover:text-primary transition-colors">
+              <Link to="/store/about" className="font-medium hover:text-primary transition-colors py-2 border-b-2 border-transparent hover:border-primary">
                 من نحن
               </Link>
-              <Link to="/store/contact" className="font-medium hover:text-primary transition-colors">
+              <Link to="/store/contact" className="font-medium hover:text-primary transition-colors py-2 border-b-2 border-transparent hover:border-primary">
                 اتصل بنا
               </Link>
             </div>
@@ -106,7 +141,7 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
                   <Input
                     type="text"
                     placeholder="البحث..."
-                    className="w-32 md:w-auto pl-8"
+                    className="w-32 md:w-auto pl-8 focus:ring-primary transition-all rounded-full"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
@@ -115,22 +150,22 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
               </div>
               
               <Link to="/login" className="hidden md:block">
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 hover:text-primary transition-colors">
                   <User size={20} />
                 </Button>
               </Link>
               
               <Link to="/store/favorites" className="hidden md:block">
-                <Button variant="ghost" size="icon">
+                <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 hover:text-primary transition-colors">
                   <Heart size={20} />
                 </Button>
               </Link>
               
-              <Link to="/store/cart" className="relative">
-                <Button variant="ghost" size="icon">
+              <Link to="/store/cart" className="relative group">
+                <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 hover:text-primary transition-colors relative">
                   <ShoppingCart size={20} />
                   {totalItems > 0 && (
-                    <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                    <span className="absolute -top-1 -right-1 bg-primary text-primary-foreground text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center transition-all group-hover:scale-110">
                       {totalItems}
                     </span>
                   )}
@@ -141,14 +176,16 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
         </div>
         
         {/* القائمة في الجوال */}
-        {mobileMenuOpen && (
-          <div className="md:hidden py-4 px-4 border-t">
-            <nav className="flex flex-col gap-3">
-              <Link to="/store" className="font-medium py-2">
+        <div className={`md:hidden transition-all duration-300 overflow-hidden ${
+          mobileMenuOpen ? 'max-h-[500px] opacity-100 border-t' : 'max-h-0 opacity-0'
+        }`}>
+          <nav className="py-4 px-4">
+            <div className="flex flex-col gap-3">
+              <Link to="/store" className="font-medium py-2 hover:text-primary transition-colors">
                 الرئيسية
               </Link>
               <button 
-                className="flex items-center justify-between font-medium py-2 w-full"
+                className="flex items-center justify-between font-medium py-2 w-full hover:text-primary transition-colors"
                 onClick={() => {}}
               >
                 <span>التصنيفات</span>
@@ -159,31 +196,31 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
                   <Link 
                     key={category}
                     to={`/store?category=${category}`}
-                    className="block w-full text-right py-1 text-sm"
+                    className="block w-full text-right py-1 text-sm hover:text-primary transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     {category}
                   </Link>
                 ))}
               </div>
-              <Link to="/store" className="font-medium py-2">
+              <Link to="/store" className="font-medium py-2 hover:text-primary transition-colors">
                 المنتجات
               </Link>
-              <Link to="/store/about" className="font-medium py-2">
+              <Link to="/store/about" className="font-medium py-2 hover:text-primary transition-colors">
                 من نحن
               </Link>
-              <Link to="/store/contact" className="font-medium py-2">
+              <Link to="/store/contact" className="font-medium py-2 hover:text-primary transition-colors">
                 اتصل بنا
               </Link>
               <div className="flex items-center gap-3 py-2">
-                <Link to="/login" className="font-medium flex items-center gap-2">
+                <Link to="/login" className="font-medium flex items-center gap-2 hover:text-primary transition-colors">
                   <User size={16} />
                   <span>تسجيل الدخول</span>
                 </Link>
               </div>
-            </nav>
-          </div>
-        )}
+            </div>
+          </nav>
+        </div>
       </header>
 
       <main className="flex-1">
@@ -191,29 +228,35 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
       </main>
 
       {/* Footer */}
-      <footer className="bg-background border-t py-12">
-        <div className="container mx-auto px-4">
+      <footer className="bg-background border-t mt-12">
+        <div className="container mx-auto px-4 py-12">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="font-bold text-lg mb-4">عن المتجر</h3>
+              <h3 className="font-bold text-lg mb-4 text-primary">عن المتجر</h3>
               <p className="text-muted-foreground">
-                نقدم لكم أفضل المنتجات بأفضل الأسعار مع خدمة عملاء متميزة
+                {store?.description || 'نقدم لكم أفضل المنتجات بأفضل الأسعار مع خدمة عملاء متميزة'}
               </p>
-              <div className="flex items-center gap-4 mt-4">
-                <a href="#" className="text-foreground hover:text-primary">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-instagram"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
-                </a>
-                <a href="#" className="text-foreground hover:text-primary">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-twitter"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
-                </a>
-                <a href="#" className="text-foreground hover:text-primary">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-facebook"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-                </a>
+              <div className="flex items-center gap-4 mt-6">
+                {store?.instagram && (
+                  <a href={store.instagram} className="text-muted-foreground hover:text-primary transition-colors" target="_blank" rel="noopener noreferrer">
+                    <Instagram strokeWidth={1.5} size={22} />
+                  </a>
+                )}
+                {store?.facebook && (
+                  <a href={store.facebook} className="text-muted-foreground hover:text-primary transition-colors" target="_blank" rel="noopener noreferrer">
+                    <Facebook strokeWidth={1.5} size={22} />
+                  </a>
+                )}
+                {store?.twitter && (
+                  <a href={store.twitter} className="text-muted-foreground hover:text-primary transition-colors" target="_blank" rel="noopener noreferrer">
+                    <Twitter strokeWidth={1.5} size={22} />
+                  </a>
+                )}
               </div>
             </div>
             <div>
-              <h3 className="font-bold text-lg mb-4">روابط مهمة</h3>
-              <ul className="space-y-2">
+              <h3 className="font-bold text-lg mb-4 text-primary">روابط مهمة</h3>
+              <ul className="space-y-3">
                 <li>
                   <Link to="/store/about" className="text-muted-foreground hover:text-primary transition-colors">
                     من نحن
@@ -237,9 +280,9 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
               </ul>
             </div>
             <div>
-              <h3 className="font-bold text-lg mb-4">فئات المنتجات</h3>
-              <ul className="space-y-2">
-                {categories.map(category => (
+              <h3 className="font-bold text-lg mb-4 text-primary">فئات المنتجات</h3>
+              <ul className="space-y-3">
+                {categories.slice(0, 6).map(category => (
                   <li key={category}>
                     <Link
                       to={`/store?category=${category}`}
@@ -252,18 +295,18 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
               </ul>
             </div>
             <div>
-              <h3 className="font-bold text-lg mb-4">تواصل معنا</h3>
-              <ul className="space-y-2 text-muted-foreground">
+              <h3 className="font-bold text-lg mb-4 text-primary">تواصل معنا</h3>
+              <ul className="space-y-3 text-muted-foreground">
                 <li className="flex items-center gap-2">
-                  <Phone size={16} />
+                  <Phone size={16} className="text-primary" />
                   <span>+965 1234 5678</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <Mail size={16} />
+                  <Mail size={16} className="text-primary" />
                   <span>info@{storeInfo.url}.linok.me</span>
                 </li>
                 <li className="flex items-center gap-2">
-                  <MapPin size={16} />
+                  <MapPin size={16} className="text-primary" />
                   <span>الكويت</span>
                 </li>
               </ul>
