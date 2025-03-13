@@ -49,7 +49,26 @@ export const storeService = {
    */
   async getStoreProducts(storeId: string): Promise<Product[]> {
     try {
-      // We'll type this explicitly to avoid deep type instantiation
+      // Define the type of the raw data from Supabase
+      interface RawProductData {
+        id: string;
+        name: string;
+        price: number;
+        image: string;
+        category: { name: string } | null;
+        featured: boolean | null;
+        description: string | null;
+        images: any[] | null;
+        sku: string | null;
+        stock: number | null;
+        attributes: Record<string, any> | null;
+        rating: number | null;
+        category_id: string | null;
+        store_id: string | null;
+        created_at: string | null;
+        updated_at: string | null;
+      }
+      
       const { data, error } = await supabase
         .from('products')
         .select('*, category:categories(name)')
@@ -61,7 +80,7 @@ export const storeService = {
       }
       
       // Map the raw data to Product type explicitly, avoiding complex type inference 
-      return (data || []).map(item => {
+      return (data || []).map((item: RawProductData) => {
         // Start with a well-defined Product object with explicit types
         const product: Product = {
           id: item.id,
@@ -82,8 +101,8 @@ export const storeService = {
         };
         
         // Add store_id only if it exists in the source data
-        if ('store_id' in item) {
-          (product as any).store_id = item.store_id;
+        if (item.store_id) {
+          product.store_id = item.store_id;
         }
         
         return product;
