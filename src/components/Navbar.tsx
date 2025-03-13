@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import Logo from './Logo';
 import { Menu, X, Bell, User, Settings, LogOut, LayoutDashboard, Loader2 } from 'lucide-react';
@@ -23,7 +22,6 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
-  const navigate = useNavigate();
   const { user, signOut, isAdmin, loading } = useAuth();
 
   useEffect(() => {
@@ -46,7 +44,7 @@ const Navbar = () => {
     try {
       setIsMenuOpen(false);
       await signOut();
-      // Remove explicit navigation as we're now handling it in the AuthContext
+      // تم إزالة التنقل اليدوي لأننا نتعامل معه الآن في AuthContext
     } catch (error) {
       console.error('Error in handleSignOut:', error);
     }

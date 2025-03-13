@@ -30,7 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       loadingTimeout = window.setTimeout(() => {
         console.log("Auth loading timeout reached - forcing loading state to false");
         setLoading(false);
-      }, 5000);
+      }, 3000); // تقليل وقت المهلة من 5000 إلى 3000 مللي ثانية
     }
     
     return () => {
@@ -145,7 +145,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         setLoading(false);
       } else {
-        // Changed comparison to avoid TypeScript error and handle all non-sign-out events without sessions
+        // التعامل مع جميع الأحداث الأخرى التي بدون جلسة
         console.log('No session in auth change event');
         setSession(null);
         setUser(null);
@@ -248,13 +248,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(true);
       console.log('Attempting to sign out...');
       
-      // First clear the local state BEFORE calling sign out
+      // تعديل: حذف localStorage و sessionStorage للتأكد من إزالة أي بيانات تخزين محلية قد تتسبب في إعادة تسجيل الدخول
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // أولاً: مسح حالة الجلسة المحلية قبل استدعاء supabase.auth.signOut
       setSession(null);
       setUser(null);
       setIsAdmin(false);
       
-      // Then call supabase signOut
-      const { error } = await supabase.auth.signOut();
+      // ثانياً: استدعاء واجهة تسجيل الخروج من supabase
+      const { error } = await supabase.auth.signOut({
+        scope: 'global'  // تسجيل خروج من جميع الأجهزة - مهم جداً
+      });
       
       if (error) {
         console.error('Error during sign out:', error);
@@ -274,8 +280,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: "تم تسجيل خروجك بنجاح",
       });
       
-      // Force page reload to ensure clean state
-      window.location.href = '/';
+      // إجبار إعادة تحميل الصفحة وتوجيهها للصفحة الرئيسية لضمان حالة نظيفة
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 500);
     } catch (error) {
       console.error('Unexpected error during sign out:', error);
       toast({
