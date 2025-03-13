@@ -104,8 +104,8 @@ const StoreFront = () => {
         isLoading={storeLoading} 
       />
       
-      {/* Featured Categories */}
-      <div className="mb-12">
+      {/* Featured Categories - Added mt-20 for more spacing after header */}
+      <div className="mt-20 mb-12">
         <h2 className="text-xl font-bold mb-6 flex items-center">
           <Package className="ml-2" size={20} />
           تصفح حسب الفئة

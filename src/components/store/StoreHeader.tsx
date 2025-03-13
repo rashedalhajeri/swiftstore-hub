@@ -19,7 +19,7 @@ const StoreHeader = ({ store, error, isLoading }: StoreHeaderProps) => {
   if (isLoading) {
     return (
       <div className="w-full flex flex-col gap-4">
-        <div className="w-full h-48 md:h-64 bg-gray-100 animate-pulse rounded-md"></div>
+        <div className="w-full h-48 md:h-64 bg-gray-100 animate-pulse rounded-lg"></div>
         <div className="flex gap-4">
           <div className="w-16 h-16 rounded-full bg-gray-100 animate-pulse"></div>
           <div className="flex-1 space-y-2">
@@ -46,17 +46,17 @@ const StoreHeader = ({ store, error, isLoading }: StoreHeaderProps) => {
   }
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full mb-16">
       {/* البنر */}
       <div className="w-full h-56 md:h-40 sm:h-32 relative">
         {store.banner ? (
           <img 
             src={store.banner} 
             alt="Store Banner" 
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover rounded-lg"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-r from-green-700 to-green-500"></div>
+          <div className="w-full h-full bg-gradient-to-r from-green-700 to-green-500 rounded-lg"></div>
         )}
       </div>
 
@@ -67,16 +67,16 @@ const StoreHeader = ({ store, error, isLoading }: StoreHeaderProps) => {
           <img 
             src={store.logo} 
             alt={`${store.name} Logo`} 
-            className="w-24 h-24 sm:w-16 sm:h-16 rounded-full border-4 border-white shadow-lg"
+            className="w-24 h-24 sm:w-20 sm:h-20 rounded-full border-4 border-white shadow-lg"
           />
         ) : (
-          <div className="w-24 h-24 sm:w-16 sm:h-16 rounded-full border-4 border-white shadow-lg bg-gradient-to-r from-green-700 to-green-500"></div>
+          <div className="w-24 h-24 sm:w-20 sm:h-20 rounded-full border-4 border-white shadow-lg bg-gradient-to-r from-green-700 to-green-500"></div>
         )}
 
         {/* معلومات المتجر */}
         <div className="rtl:mr-4 ltr:ml-4">
-          <h1 className="text-3xl sm:text-xl font-bold">{store.name}</h1>
-          <p className="text-gray-600 text-sm sm:text-xs">{store.description || 'وصف المتجر'}</p>
+          <h1 className="text-3xl sm:text-2xl font-bold">{store.name}</h1>
+          <p className="text-gray-600 text-sm">{store.description || 'وصف المتجر'}</p>
         </div>
       </div>
 

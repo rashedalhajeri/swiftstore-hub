@@ -121,29 +121,31 @@ export const storeService = {
       
       if (!data) return [];
 
-      // Fixed processing with proper type handling
+      // Fixed processing with proper type handling - simplified to avoid deep type instantiation
       return data.map(item => {
-        let categoryData: string | { name: string } = { name: '' };
+        // Handle category safely
+        let categoryName = '';
         if (item.category && typeof item.category === 'object' && 'name' in item.category) {
-          categoryData = item.category;
+          categoryName = item.category.name || '';
         } else if (typeof item.category === 'string') {
-          categoryData = item.category;
+          categoryName = item.category;
         }
 
-        // Handle images properly
+        // Handle images safely
         let processedImages: string[] = [];
         if (Array.isArray(item.images)) {
-          processedImages = item.images.filter((img): img is string => typeof img === 'string');
+          processedImages = item.images.filter(img => typeof img === 'string');
         }
 
-        // Handle attributes properly
+        // Handle attributes safely
         let processedAttributes: Record<string, string> = {};
         if (item.attributes && typeof item.attributes === 'object' && !Array.isArray(item.attributes)) {
-          processedAttributes = Object.keys(item.attributes).reduce((acc, key) => {
-            const value = item.attributes[key];
-            acc[key] = typeof value === 'string' ? value : String(value);
-            return acc;
-          }, {} as Record<string, string>);
+          // Avoid recursive type issues by directly processing as Record
+          const attributes = item.attributes as Record<string, unknown>;
+          Object.keys(attributes).forEach(key => {
+            const value = attributes[key];
+            processedAttributes[key] = typeof value === 'string' ? value : String(value);
+          });
         }
 
         return {
@@ -151,7 +153,7 @@ export const storeService = {
           name: item.name || '',
           price: Number(item.price) || 0,
           image: item.image || '',
-          category: categoryData,
+          category: { name: categoryName },
           featured: Boolean(item.featured) || false,
           description: item.description || '',
           images: processedImages,
