@@ -23,7 +23,7 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, signOut, isAdmin } = useAuth();
+  const { user, signOut, isAdmin, loading } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -43,9 +43,9 @@ const Navbar = () => {
   const handleSignOut = async () => {
     console.log('Sign out button clicked');
     try {
-      await signOut();
-      console.log('Navigating to home after sign out');
+      setIsMenuOpen(false);
       navigate('/', { replace: true });
+      await signOut();
     } catch (error) {
       console.error('Error in handleSignOut:', error);
     }
@@ -60,7 +60,6 @@ const Navbar = () => {
       <div className="container mx-auto px-4 md:px-6 flex items-center justify-between">
         <Logo animated size="md" />
 
-        {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
           <Link 
             to="/" 
@@ -88,11 +87,9 @@ const Navbar = () => {
           </Link>
         </nav>
 
-        {/* Auth Buttons or User Menu */}
         <div className="hidden md:flex items-center space-x-4 rtl:space-x-reverse">
-          {user ? (
+          {!loading && user ? (
             <div className="flex items-center gap-4">
-              {/* Dashboard Button */}
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/dashboard" className="flex items-center gap-2">
                   <LayoutDashboard size={16} />
@@ -100,7 +97,6 @@ const Navbar = () => {
                 </Link>
               </Button>
 
-              {/* Notifications */}
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="ghost" size="icon" className="relative">
@@ -145,7 +141,6 @@ const Navbar = () => {
                 </PopoverContent>
               </Popover>
 
-              {/* User Menu */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="ghost" size="sm" className="flex items-center gap-2">
@@ -184,7 +179,7 @@ const Navbar = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-          ) : (
+          ) : !loading ? (
             <>
               <Button variant="ghost" asChild>
                 <Link to="/login">تسجيل الدخول</Link>
@@ -193,10 +188,13 @@ const Navbar = () => {
                 <Link to="/register">إنشاء حساب</Link>
               </Button>
             </>
+          ) : (
+            <Button variant="ghost" disabled>
+              <span className="animate-pulse">جاري التحميل...</span>
+            </Button>
           )}
         </div>
 
-        {/* Mobile Menu Button */}
         <button
           className="md:hidden"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -205,7 +203,6 @@ const Navbar = () => {
         </button>
       </div>
 
-      {/* Mobile Menu */}
       <div
         className={`md:hidden fixed inset-0 z-40 bg-background transition-transform duration-300 ease-in-out ${
           isMenuOpen ? 'translate-x-0' : 'translate-x-full'
@@ -228,7 +225,7 @@ const Navbar = () => {
             </Link>
           </nav>
           <div className="flex flex-col space-y-4">
-            {user ? (
+            {!loading && user ? (
               <>
                 <div className="flex items-center gap-2 mb-4">
                   <User size={20} />
@@ -251,7 +248,7 @@ const Navbar = () => {
                   تسجيل الخروج
                 </Button>
               </>
-            ) : (
+            ) : !loading ? (
               <>
                 <Button variant="outline" asChild className="w-full">
                   <Link to="/login">تسجيل الدخول</Link>
@@ -260,6 +257,10 @@ const Navbar = () => {
                   <Link to="/register">إنشاء حساب</Link>
                 </Button>
               </>
+            ) : (
+              <Button disabled className="w-full">
+                <span className="animate-pulse">جاري التحميل...</span>
+              </Button>
             )}
           </div>
         </div>

@@ -23,6 +23,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
+  // تحميل جلسة المستخدم والتحقق من حالة التسجيل عند بدء التطبيق
   useEffect(() => {
     const getSession = async () => {
       setLoading(true);
@@ -32,15 +33,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (error) {
           console.error('Error getting session:', error);
+          // في حالة وجود خطأ، نتأكد من تنظيف حالة المستخدم
+          setSession(null);
+          setUser(null);
+          setIsAdmin(false);
           setLoading(false);
           return;
         }
 
-        setSession(data.session);
-        setUser(data.session?.user || null);
+        if (!data.session) {
+          // إذا لم يكن هناك جلسة، نتأكد من تنظيف حالة المستخدم
+          console.log('No active session found');
+          setSession(null);
+          setUser(null);
+          setIsAdmin(false);
+          setLoading(false);
+          return;
+        }
 
-        if (data.session?.user) {
-          console.log('User found, checking admin status...');
+        console.log('Active session found:', data.session.user.id);
+        setSession(data.session);
+        setUser(data.session.user);
+
+        // التحقق من حالة المسؤول
+        try {
           const { data: profileData, error: profileError } = await supabase
             .from('profiles')
             .select('is_admin')
@@ -49,25 +65,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           
           if (profileError) {
             console.error('Error fetching profile:', profileError);
+            setIsAdmin(false);
           } else {
             console.log('Profile data:', profileData);
             setIsAdmin(!!profileData?.is_admin);
           }
+        } catch (profileErr) {
+          console.error('Unexpected error checking admin status:', profileErr);
+          setIsAdmin(false);
         }
       } catch (error) {
         console.error('Unexpected error during session fetch:', error);
+        // في حالة حدوث أي استثناء، نتأكد من تنظيف حالة المستخدم
+        setSession(null);
+        setUser(null);
+        setIsAdmin(false);
       } finally {
         console.log('Session loading complete');
         setLoading(false);
       }
     };
 
+    // تحميل الجلسة فورًا عند بدء التطبيق
     getSession();
 
+    // الاستماع لتغييرات حالة المصادقة
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, newSession) => {
-      console.log('Auth state changed:', event);
+      console.log('Auth state changed:', event, newSession ? 'with session' : 'no session');
       
-      // Immediately clear state on sign out
+      // التعامل مع تسجيل الخروج بشكل فوري
       if (event === 'SIGNED_OUT') {
         console.log('User signed out, clearing state');
         setSession(null);
@@ -77,23 +103,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
       
-      setSession(newSession);
-      setUser(newSession?.user || null);
-
-      if (newSession?.user) {
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('is_admin')
-          .eq('id', newSession.user.id)
-          .single();
+      // التعامل مع تحديث الجلسة أو تسجيل الدخول
+      if (newSession) {
+        console.log('Session updated:', newSession.user.id);
+        setSession(newSession);
+        setUser(newSession.user);
         
-        setIsAdmin(!!profileData?.is_admin);
-      } else {
+        try {
+          const { data: profileData, error: profileError } = await supabase
+            .from('profiles')
+            .select('is_admin')
+            .eq('id', newSession.user.id)
+            .single();
+          
+          if (profileError) {
+            console.error('Error fetching profile on auth change:', profileError);
+            setIsAdmin(false);
+          } else {
+            setIsAdmin(!!profileData?.is_admin);
+          }
+        } catch (err) {
+          console.error('Error checking admin status on auth change:', err);
+          setIsAdmin(false);
+        }
+      } else if (event !== 'SIGNED_OUT') {
+        // إذا لم يكن هناك جلسة ولم يكن الحدث تسجيل خروج، نتأكد من تنظيف الحالة
+        console.log('No session in auth change event');
+        setSession(null);
+        setUser(null);
         setIsAdmin(false);
       }
+      
+      setLoading(false);
     });
 
     return () => {
+      console.log('Cleaning up auth listener');
       authListener.subscription.unsubscribe();
     };
   }, []);
@@ -178,7 +223,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(true);
       console.log('Attempting to sign out...');
       
-      // Manually clear state BEFORE calling signOut to ensure immediate UI update
+      // تنظيف حالة المستخدم فورًا قبل استدعاء signOut للتأكد من تحديث الواجهة بشكل فوري
       setSession(null);
       setUser(null);
       setIsAdmin(false);

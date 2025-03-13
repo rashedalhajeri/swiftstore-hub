@@ -57,6 +57,26 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
+// غلاف للمسارات العامة التي لا يمكن الوصول إليها إذا كان المستخدم مسجل الدخول
+const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-secondary/20">
+        <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+        <p className="text-lg font-medium text-muted-foreground">جاري التحميل...</p>
+      </div>
+    );
+  }
+  
+  if (user) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -68,10 +88,26 @@ const App = () => (
             <Routes>
               {/* Public Routes */}
               <Route path="/" element={<Index />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/reset-password" element={<ResetPassword />} />
-              <Route path="/update-password" element={<UpdatePassword />} />
+              <Route path="/login" element={
+                <PublicOnlyRoute>
+                  <Login />
+                </PublicOnlyRoute>
+              } />
+              <Route path="/register" element={
+                <PublicOnlyRoute>
+                  <Register />
+                </PublicOnlyRoute>
+              } />
+              <Route path="/reset-password" element={
+                <PublicOnlyRoute>
+                  <ResetPassword />
+                </PublicOnlyRoute>
+              } />
+              <Route path="/update-password" element={
+                <PublicOnlyRoute>
+                  <UpdatePassword />
+                </PublicOnlyRoute>
+              } />
               <Route path="/store" element={<StoreFront />} />
               <Route path="/store/product/:id" element={<ProductDetails />} />
               <Route path="/store/cart" element={<Cart />} />
