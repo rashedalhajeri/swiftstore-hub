@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { 
   Package, 
@@ -48,7 +47,6 @@ import { OrderDetails } from "@/components/dashboard/OrderDetails";
 import { UpdateOrderStatus } from "@/components/dashboard/UpdateOrderStatus";
 import { Order } from "@/types/store";
 
-// نماذج بيانات طلبات مؤقتة (سيتم استبدالها بالبيانات من قاعدة البيانات)
 const mockOrders: Order[] = [
   {
     id: "ord-001",
@@ -245,7 +243,7 @@ const mockOrders: Order[] = [
   }
 ];
 
-const statusMap: { [key: string]: { label: string; color: string; icon: React.ComponentType } } = {
+const statusMap: { [key: string]: { label: string; color: string; icon: React.ComponentType<any> } } = {
   pending: { label: "قيد الانتظار", color: "yellow", icon: Clock },
   processing: { label: "جاري المعالجة", color: "blue", icon: Package2 },
   shipped: { label: "تم الشحن", color: "purple", icon: Truck },
@@ -294,7 +292,6 @@ const Orders = () => {
     }
   };
 
-  // Fix icon rendering in the return statement
   return (
     <div className="space-y-6" style={{ direction: "rtl" }}>
       <div className="flex flex-col md:flex-row justify-between items-start gap-4">
@@ -367,7 +364,9 @@ const Orders = () => {
                       <TableCell>{order.total.toFixed(3)} KWD</TableCell>
                       <TableCell>
                         <Badge className={`bg-${statusMap[order.status].color}-500 hover:bg-${statusMap[order.status].color}-600`}>
-                          {React.createElement(statusMap[order.status].icon, { size: 16, className: "ml-2 h-4 w-4" })}
+                          {React.createElement(statusMap[order.status].icon, { 
+                            className: "ml-2 h-4 w-4" 
+                          })}
                           {statusMap[order.status].label}
                         </Badge>
                       </TableCell>
@@ -406,7 +405,6 @@ const Orders = () => {
           </Card>
         </TabsContent>
 
-        {/* حالات الطلبات الأخرى */}
         {Object.keys(statusMap).map(status => (
           <TabsContent key={status} value={status}>
             <Card>
@@ -445,7 +443,9 @@ const Orders = () => {
                           <TableCell>{order.total.toFixed(3)} KWD</TableCell>
                           <TableCell>
                             <Badge className={`bg-${statusMap[order.status].color}-500 hover:bg-${statusMap[order.status].color}-600`}>
-                              {React.createElement(statusMap[order.status].icon, { size: 16, className: "ml-2 h-4 w-4" })}
+                              {React.createElement(statusMap[order.status].icon, { 
+                                className: "ml-2 h-4 w-4" 
+                              })}
                               {statusMap[order.status].label}
                             </Badge>
                           </TableCell>
