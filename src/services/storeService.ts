@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/types/store';
 import { toast } from 'sonner';
@@ -59,15 +58,13 @@ export const storeService = {
         return [];
       }
       
-      // Use any[] type to avoid complex type inference issues
-      const rawProducts = data as any[];
-      
-      if (!rawProducts || !Array.isArray(rawProducts)) {
+      // Fix for TS2589 error - avoid deep type instantiation
+      if (!data || !Array.isArray(data)) {
         return [];
       }
       
-      // Map the data to our Product type with explicit conversion
-      return rawProducts.map(item => ({
+      // Map the data to our Product type with explicit type casting
+      return data.map((item: any) => ({
         id: item.id || '',
         name: item.name || '',
         price: typeof item.price === 'number' ? item.price : 0,

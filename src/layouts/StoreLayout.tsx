@@ -42,6 +42,7 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
     const fetchStoreInfo = async () => {
       try {
         if (!storeSlug) {
+          console.error('No store slug provided');
           setStoreLoading(false);
           toast.error('لم يتم تحديد متجر');
           navigate('/');

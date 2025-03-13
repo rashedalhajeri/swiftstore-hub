@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Package, ShoppingCart, Users, Settings, Menu, X, LogOut, User, Store, CreditCard, Bell, Shield, Globe, HelpCircle, Edit, Tags, Percent, ListFilter, ExternalLink, Plus } from 'lucide-react';
@@ -284,7 +283,6 @@ const DashboardLayout = () => {
 
   const getStoreUrl = () => {
     if (storeSlug) {
-      // Use the full URL with query parameters to ensure we go to the store page
       return `/store?store=${encodeURIComponent(storeSlug)}`;
     }
     return '/dashboard/settings/store';
