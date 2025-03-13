@@ -3,7 +3,6 @@ import React from 'react';
 import { Store } from '@/types/store';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Link, useSearchParams, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -19,25 +18,32 @@ const StoreHeader = ({
   isLoading
 }: StoreHeaderProps) => {
   const isMobile = useIsMobile();
-  const [searchParams] = useSearchParams();
-  const params = useParams();
-  const storeParam = searchParams.get('store');
-  
-  // بناء الروابط مع الحفاظ على معلمة المتجر
-  const buildStoreLink = (path: string) => {
-    // If we're using the direct slug approach
-    if (params.storeSlug) {
-      // For the home page (remove the trailing slash if any)
-      if (path === '/store') {
-        return `/${params.storeSlug}`;
-      }
-      // For other paths, replace /store/ with /{storeSlug}/
-      return path.replace('/store', `/${params.storeSlug}`);
-    }
-    
-    // Legacy approach with query parameter
-    return storeParam ? `${path}?store=${storeParam}` : path;
-  };
+
+  // تحسين عرض الخطأ بطريقة أفضل للمستخدم
+  if (error) {
+    return (
+      <div className="w-full max-w-md mx-auto py-12 px-4">
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>خطأ</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+        <Button 
+          onClick={() => window.history.back()} 
+          className="w-full"
+        >
+          العودة
+        </Button>
+        <Button 
+          variant="outline" 
+          className="w-full mt-4"
+          onClick={() => window.location.href = '/'}
+        >
+          الذهاب إلى الصفحة الرئيسية
+        </Button>
+      </div>
+    );
+  }
 
   if (isLoading) {
     return <div className="w-full flex flex-col gap-4">
@@ -52,22 +58,14 @@ const StoreHeader = ({
       </div>;
   }
 
-  if (error) {
-    return <Alert variant="destructive" className="mb-6">
-        <AlertCircle className="h-4 w-4" />
-        <AlertTitle>خطأ</AlertTitle>
-        <AlertDescription>{error}</AlertDescription>
-      </Alert>;
-  }
-
   return (
     <div className="w-full bg-background">
       {/* Top promotional banner */}
       <div className="mx-4 mb-6">
         <div className="w-full rounded-xl overflow-hidden relative">
           <img 
-            src="/lovable-uploads/3e000195-9fd0-4623-9f95-8e97c92179fc.png" 
-            alt="Cyber Monday Super Sale" 
+            src={store?.banner || "/lovable-uploads/3e000195-9fd0-4623-9f95-8e97c92179fc.png"} 
+            alt={`${store?.name || 'Store'} Banner`}
             className="w-full h-auto object-cover"
           />
         </div>
@@ -94,7 +92,7 @@ const StoreHeader = ({
       {/* Popular Products Header */}
       <div className="flex justify-between items-center px-4 mb-3">
         <h2 className="text-base font-semibold">POPULAR PRODUCTS</h2>
-        <Link to={buildStoreLink('/store')} className="text-xs text-gray-500">View All</Link>
+        <a href="/" className="text-xs text-gray-500">View All</a>
       </div>
     </div>
   );

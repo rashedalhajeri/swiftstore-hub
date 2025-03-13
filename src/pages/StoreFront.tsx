@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, Navigate, useParams } from 'react-router-dom';
 import { Product } from '@/types/store';
@@ -12,7 +13,7 @@ import LoadingScreen from '@/components/LoadingScreen';
 
 const StoreFront = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { store, isLoading: storeLoading, error: storeError } = useStore();
+  const { store, isLoading: storeLoading, error: storeError, refetch } = useStore();
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,6 +22,19 @@ const StoreFront = () => {
   const params = useParams();
   const storeSlug = params.storeSlug || searchParams.get('store');
   const categoryFilter = searchParams.get('category');
+  
+  // Attempt to refetch store data if there's an error
+  useEffect(() => {
+    if (storeError && storeSlug) {
+      // We should wait a moment before retrying to avoid infinite retry loops
+      const retryTimer = setTimeout(() => {
+        console.log('Retrying store fetch...');
+        refetch();
+      }, 3000);
+      
+      return () => clearTimeout(retryTimer);
+    }
+  }, [storeError, storeSlug, refetch]);
   
   useEffect(() => {
     const loadProducts = async () => {
@@ -66,20 +80,6 @@ const StoreFront = () => {
     return <LoadingScreen />;
   }
   
-  // Show error if store couldn't be loaded
-  if (storeError) {
-    return (
-      <div className="container py-12">
-        <Alert variant="destructive" className="mb-6">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>خطأ</AlertTitle>
-          <AlertDescription>{storeError}</AlertDescription>
-        </Alert>
-        <Button onClick={() => window.history.back()}>العودة</Button>
-      </div>
-    );
-  }
-
   // Handle category filter
   const handleCategoryFilter = (category: string) => {
     setActiveCategory(category);
