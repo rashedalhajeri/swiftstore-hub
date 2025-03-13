@@ -1,9 +1,10 @@
+
 export interface Product {
   id: string;
   name: string;
   price: number;
   image: string;
-  category: string | { name: string };
+  category: string;
   featured: boolean;
   description?: string;
   images?: string[];
@@ -16,11 +17,11 @@ export interface Product {
   category_id?: string;
   created_at?: string;
   updated_at?: string;
-  store_id?: string; // Add store_id to the Product interface
+  store_id?: string;
 }
 
 export interface Review {
-  id: string; // Changed from number to string
+  id: string;
   userName: string;
   rating: number;
   comment: string;

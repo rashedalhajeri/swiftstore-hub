@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Product, Store } from '@/types/store';
 import { toast } from 'sonner';
@@ -119,48 +120,34 @@ export const storeService = {
       }
       
       if (!data || !Array.isArray(data)) return [];
-
-      // Create an empty array with explicit Product type to avoid deep type instantiation
-      const products: Product[] = [];
       
-      // Iterate through the data array and create properly typed Product objects
-      for (let i = 0; i < data.length; i++) {
-        const item = data[i];
-        if (!item) continue;
-        
-        // Handle category with type safety
+      // Convert the data to Product[] type with explicit casting to avoid deep type instantiation
+      return data.map(item => {
+        // Handle category with safe type assertion
         let categoryName = '';
         if (item.category && typeof item.category === 'object' && 'name' in item.category) {
           categoryName = String(item.category.name || '');
         } else if (typeof item.category === 'string') {
           categoryName = item.category;
         }
-
-        // Process images safely
-        const processedImages: string[] = [];
-        if (item.images && Array.isArray(item.images)) {
-          for (const img of item.images) {
-            if (img !== null && img !== undefined) {
-              processedImages.push(String(img));
-            }
-          }
-        }
-
-        // Process attributes safely
-        const processedAttributes: Record<string, string> = {};
+        
+        // Safe conversion for images
+        const images = Array.isArray(item.images) 
+          ? item.images.filter(Boolean).map(String) 
+          : [];
+          
+        // Safe conversion for attributes
+        const attributes: Record<string, string> = {};
         if (item.attributes && typeof item.attributes === 'object' && item.attributes !== null) {
-          for (const key in item.attributes) {
-            if (Object.prototype.hasOwnProperty.call(item.attributes, key)) {
-              const val = item.attributes[key];
-              if (val !== null && val !== undefined) {
-                processedAttributes[key] = String(val);
-              }
+          Object.entries(item.attributes).forEach(([key, value]) => {
+            if (value !== null && value !== undefined) {
+              attributes[key] = String(value);
             }
-          }
+          });
         }
-
-        // Create a new product object with proper type conversion
-        const product: Product = {
+        
+        // Create a new product with explicit type conversion
+        return {
           id: String(item.id || ''),
           name: String(item.name || ''),
           price: typeof item.price === 'number' ? item.price : Number(item.price) || 0,
@@ -171,16 +158,11 @@ export const storeService = {
           sku: item.sku ? String(item.sku) : '',
           stock: item.stock !== undefined ? Number(item.stock) : undefined,
           rating: item.rating !== undefined ? Number(item.rating) : undefined,
-          images: processedImages,
-          attributes: processedAttributes,
+          images,
+          attributes,
           store_id: String(storeId)
-        };
-        
-        // Add the product to our array
-        products.push(product);
-      }
-
-      return products;
+        } as Product; // Use type assertion to avoid deep type instantiation
+      });
     } catch (error) {
       console.error('Error in getStoreProducts:', error);
       return [];
