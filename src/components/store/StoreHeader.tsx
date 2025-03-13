@@ -8,11 +8,13 @@ import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useIsMobile } from '@/hooks/use-mobile';
+
 interface StoreHeaderProps {
   store: Store | null;
   error: string | null;
   isLoading: boolean;
 }
+
 const StoreHeader = ({
   store,
   error,
@@ -22,6 +24,7 @@ const StoreHeader = ({
     totalItems
   } = useCart();
   const isMobile = useIsMobile();
+
   if (isLoading) {
     return <div className="w-full flex flex-col gap-4">
         <div className="w-full h-48 md:h-64 bg-gray-100 animate-pulse rounded-lg"></div>
@@ -34,6 +37,7 @@ const StoreHeader = ({
         </div>
       </div>;
   }
+
   if (error) {
     return <Alert variant="destructive" className="mb-6">
         <AlertCircle className="h-4 w-4" />
@@ -41,6 +45,7 @@ const StoreHeader = ({
         <AlertDescription>{error}</AlertDescription>
       </Alert>;
   }
+
   return <div className="w-full bg-background">
       {/* Top header with profile and notification */}
       <div className="flex items-center justify-between py-3 px-4">
@@ -64,17 +69,12 @@ const StoreHeader = ({
       
       {/* Black promotional banner - Image-based design that maintains structure regardless of content */}
       <div className="mx-4 mb-6">
-        <div className="bg-black text-white rounded-xl overflow-hidden h-24 md:h-32 relative">
-          {/* Banner Image */}
-          <div className="absolute inset-0 right-0 w-1/2 h-full">
-            <img alt="Promotion" className="object-cover w-full h-full" src="/lovable-uploads/06677fd2-366f-413c-bb0e-72f22b566155.jpg" />
-          </div>
-          
-          {/* Optional Text Content Container - Will maintain layout even if empty */}
-          <div className="flex items-center h-full">
-            
-            <div className="w-1/2"> {/* Spacer div to maintain layout */}</div>
-          </div>
+        <div className="w-full rounded-xl overflow-hidden relative">
+          <img 
+            src="/lovable-uploads/3e000195-9fd0-4623-9f95-8e97c92179fc.png" 
+            alt="Cyber Monday Super Sale" 
+            className="w-full h-auto object-cover"
+          />
         </div>
       </div>
       
@@ -133,4 +133,5 @@ const StoreHeader = ({
       </div>
     </div>;
 };
+
 export default StoreHeader;
