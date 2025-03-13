@@ -23,6 +23,28 @@ export default defineConfig(({ mode }) => ({
     },
   },
   esbuild: {
-    jsxInject: `import React from 'react'`  // This will inject React import into every file
+    jsxInject: `import React from 'react'`,  // This will inject React import into every file
+    logOverride: { 'this-is-undefined-in-esm': 'silent' }
+  },
+  optimizeDeps: {
+    include: ['react', 'react-dom', 'react-router-dom', '@supabase/supabase-js'], // Pre-bundle common dependencies
+  },
+  build: {
+    sourcemap: mode !== 'production', // Only include sourcemaps in development
+    chunkSizeWarningLimit: 1000, // Increase the chunk size warning limit
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom', 'react-router-dom'],
+          ui: [
+            '@/components/ui/button',
+            '@/components/ui/input',
+            '@/components/ui/card',
+            '@/components/ui/dialog',
+            '@/components/ui/tabs',
+          ],
+        },
+      },
+    },
   }
 }));

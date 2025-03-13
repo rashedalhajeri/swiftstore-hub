@@ -10,7 +10,7 @@ const LoadingScreen = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // إضافة مؤقت للتعامل مع حالات التعليق
+  // تحسين المؤقت للتعامل مع حالات التعليق - تقليل المدة إلى 3 ثوانٍ
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       setLoadingTimeout(true);
@@ -18,7 +18,7 @@ const LoadingScreen = () => {
       if (user) {
         navigate('/dashboard', { replace: true });
       }
-    }, 5000);
+    }, 3000); // تقليل المدة من 5 ثوانٍ إلى 3 ثوانٍ
     
     return () => clearTimeout(timeoutId);
   }, [user, navigate]);

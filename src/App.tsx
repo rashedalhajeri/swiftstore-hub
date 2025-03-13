@@ -36,13 +36,22 @@ import SettingsDomains from "./pages/dashboard/settings/Domains";
 import SettingsSupport from "./pages/dashboard/settings/Support";
 import LoadingScreen from "./components/LoadingScreen";
 
-const queryClient = new QueryClient();
+// تكوين مخزن مؤقت أكثر فعالية
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false, // منع إعادة جلب البيانات عند تغيير التركيز على النافذة
+      retry: 1, // تقليل عدد محاولات إعادة المحاولة
+      staleTime: 1000 * 60 * 5, // 5 دقائق قبل اعتبار البيانات قديمة
+    },
+  },
+});
 
-// غلاف حماية للمسارات التي تتطلب تسجيل الدخول
+// غلاف حماية للمسارات التي تتطلب تسجيل الدخول - تم تحسينه
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
-  // تحديد مدة قصوى للتحميل للتخلص من مشكلة العالق
+  // تحديد مدة قصوى للتحميل - تم تقليلها إلى 3 ثوانٍ
   const [loadingTimeout, setLoadingTimeout] = useState(false);
   
   useEffect(() => {
@@ -51,7 +60,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     if (loading) {
       timeoutId = window.setTimeout(() => {
         setLoadingTimeout(true);
-      }, 5000);
+      }, 3000);
     }
     
     return () => {
@@ -59,6 +68,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     };
   }, [loading]);
   
+  // عرض شاشة التحميل لمدة أقصر
   if (loading && !loadingTimeout) {
     return <LoadingScreen />;
   }
@@ -70,11 +80,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return <>{children}</>;
 };
 
-// غلاف للمسارات العامة التي لا يمكن الوصول إليها إذا كان المستخدم مسجل الدخول
+// غلاف للمسارات العامة - تم تحسينه
 const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
-  // تحديد مدة قصوى للتحميل للتخلص من مشكلة العالق
+  // تحديد مدة قصوى للتحميل - تم تقليلها إلى 3 ثوانٍ
   const [loadingTimeout, setLoadingTimeout] = useState(false);
   
   useEffect(() => {
@@ -83,7 +93,7 @@ const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
     if (loading) {
       timeoutId = window.setTimeout(() => {
         setLoadingTimeout(true);
-      }, 5000);
+      }, 3000);
     }
     
     return () => {
@@ -91,6 +101,7 @@ const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
     };
   }, [loading]);
   
+  // عرض شاشة التحميل لمدة أقصر
   if (loading && !loadingTimeout) {
     return <LoadingScreen />;
   }

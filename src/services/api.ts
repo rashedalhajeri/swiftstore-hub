@@ -6,16 +6,31 @@ import { Json } from '@/integrations/supabase/types';
 export const productService = {
   // الحصول على جميع المنتجات
   async getAllProducts() {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*, category:categories(name)');
+    // استخدام خيار abortSignal لإلغاء الطلبات غير الضرورية
+    const abortController = new AbortController();
+    const { signal } = abortController;
     
-    if (error) {
-      console.error('Error fetching products:', error);
-      throw error;
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*, category:categories(name)', { abortSignal: signal });
+      
+      if (error) {
+        console.error('Error fetching products:', error);
+        throw error;
+      }
+      
+      return data;
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        console.log('Request aborted');
+      } else {
+        console.error('Error fetching products:', error);
+        throw error;
+      }
+    } finally {
+      abortController.abort();
     }
-    
-    return data;
   },
 
   // الحصول على المنتجات المميزة
@@ -255,7 +270,7 @@ export const orderService = {
         *,
         order_items:order_items(
           *,
-          product:products(*)
+          product:products(id, name, price, image)
         )
       `)
       .order('created_at', { ascending: false });
@@ -276,7 +291,7 @@ export const orderService = {
         *,
         order_items:order_items(
           *,
-          product:products(*)
+          product:products(id, name, price, image)
         )
       `)
       .eq('id', id)

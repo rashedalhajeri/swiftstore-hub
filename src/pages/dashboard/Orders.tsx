@@ -48,6 +48,7 @@ import { UpdateOrderStatus } from "@/components/dashboard/UpdateOrderStatus";
 import { Order } from "@/types/store";
 import { orderService } from "@/services/api";
 import { toast } from 'sonner';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 const statusMap: { [key: string]: { label: string; color: string; icon: React.ComponentType<any> } } = {
   pending: { label: "قيد الانتظار", color: "yellow", icon: Clock },
@@ -58,48 +59,56 @@ const statusMap: { [key: string]: { label: string; color: string; icon: React.Co
 };
 
 const Orders = () => {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isUpdateStatusOpen, setIsUpdateStatusOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        setLoading(true);
-        const data = await orderService.getUserOrders();
-        
-        const formattedOrders = data.map((dbOrder: any) => {
-          const items = dbOrder.order_items.map((item: any) => ({
-            product: item.product,
-            quantity: item.quantity
-          }));
+  const { 
+    data: orders = [], 
+    isLoading,
+    isError
+  } = useQuery({
+    queryKey: ['orders'],
+    queryFn: async () => {
+      const data = await orderService.getUserOrders();
+      
+      return data.map((dbOrder: any) => {
+        const items = dbOrder.order_items.map((item: any) => ({
+          product: item.product,
+          quantity: item.quantity
+        }));
 
-          return {
-            id: dbOrder.id,
-            items,
-            total: dbOrder.total,
-            status: dbOrder.status || 'pending',
-            shipping: dbOrder.shipping_info,
-            payment: dbOrder.payment_info || { method: 'cod' },
-            createdAt: dbOrder.created_at
-          };
-        });
-        
-        setOrders(formattedOrders);
-      } catch (error) {
-        console.error('Error fetching orders:', error);
-        toast.error('حدث خطأ أثناء تحميل الطلبات');
-      } finally {
-        setLoading(false);
-      }
-    };
+        return {
+          id: dbOrder.id,
+          items,
+          total: dbOrder.total,
+          status: dbOrder.status || 'pending',
+          shipping: dbOrder.shipping_info,
+          payment: dbOrder.payment_info || { method: 'cod' },
+          createdAt: dbOrder.created_at
+        };
+      });
+    },
+    staleTime: 1000 * 60 * 5, // 5 دقائق قبل إعادة جلب البيانات
+    cacheTime: 1000 * 60 * 30, // 30 دقيقة للاحتفاظ بالبيانات في الذاكرة
+  });
 
-    fetchOrders();
-  }, []);
+  const updateOrderMutation = useMutation({
+    mutationFn: async ({ orderId, status }: { orderId: string, status: string }) => {
+      return await orderService.updateOrderStatus(orderId, status);
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      setIsUpdateStatusOpen(false);
+      toast.success('تم تحديث حالة الطلب بنجاح');
+    },
+    onError: (error) => {
+      console.error('Error updating order status:', error);
+      toast.error('حدث خطأ أثناء تحديث حالة الطلب');
+    }
+  });
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
@@ -123,31 +132,36 @@ const Orders = () => {
 
   const handleStatusUpdate = async (newStatus: string) => {
     if (selectedOrder) {
-      setIsLoading(true);
-      try {
-        await orderService.updateOrderStatus(selectedOrder.id, newStatus);
-        
-        setOrders(orders.map(order =>
-          order.id === selectedOrder.id ? { ...order, status: newStatus as any } : order
-        ));
-        
-        setIsUpdateStatusOpen(false);
-        toast.success('تم تحديث حالة الطلب بنجاح');
-      } catch (error) {
-        console.error('Error updating order status:', error);
-        toast.error('حدث خطأ أثناء تحديث حالة الطلب');
-      } finally {
-        setIsLoading(false);
-      }
+      updateOrderMutation.mutate({ orderId: selectedOrder.id, status: newStatus });
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-96">
         <div className="flex flex-col items-center gap-2">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <p className="text-muted-foreground">جاري تحميل الطلبات...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex justify-center items-center h-96">
+        <div className="flex flex-col items-center gap-2 text-center">
+          <XCircle className="h-12 w-12 text-destructive" />
+          <h3 className="text-xl font-medium">فشل تحميل الطلبات</h3>
+          <p className="text-muted-foreground mt-1 max-w-md">
+            حدث خطأ أثناء تحميل الطلبات. يرجى تحديث الصفحة أو المحاولة مرة أخرى لاحقًا.
+          </p>
+          <Button 
+            onClick={() => queryClient.invalidateQueries({ queryKey: ['orders'] })}
+            className="mt-4"
+          >
+            إعادة المحاولة
+          </Button>
         </div>
       </div>
     );
@@ -394,7 +408,11 @@ const Orders = () => {
             />
           )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsUpdateStatusOpen(false)} disabled={isLoading}>
+            <Button 
+              variant="outline" 
+              onClick={() => setIsUpdateStatusOpen(false)} 
+              disabled={updateOrderMutation.isPending}
+            >
               إلغاء
             </Button>
           </DialogFooter>
