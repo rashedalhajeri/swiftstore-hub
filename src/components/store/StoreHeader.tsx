@@ -10,12 +10,14 @@ interface StoreHeaderProps {
   store: Store | null;
   error: string | null;
   isLoading: boolean;
+  onRetry?: () => void;
 }
 
 const StoreHeader = ({
   store,
   error,
-  isLoading
+  isLoading,
+  onRetry
 }: StoreHeaderProps) => {
   const isMobile = useIsMobile();
 
@@ -28,15 +30,23 @@ const StoreHeader = ({
           <AlertTitle>خطأ</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
+        {onRetry && (
+          <Button 
+            onClick={onRetry} 
+            className="w-full mb-4"
+          >
+            إعادة المحاولة
+          </Button>
+        )}
         <Button 
           onClick={() => window.history.back()} 
-          className="w-full"
+          className="w-full mb-4"
         >
           العودة
         </Button>
         <Button 
           variant="outline" 
-          className="w-full mt-4"
+          className="w-full"
           onClick={() => window.location.href = '/'}
         >
           الذهاب إلى الصفحة الرئيسية
@@ -67,6 +77,10 @@ const StoreHeader = ({
             src={store?.banner || "/lovable-uploads/3e000195-9fd0-4623-9f95-8e97c92179fc.png"} 
             alt={`${store?.name || 'Store'} Banner`}
             className="w-full h-auto object-cover"
+            onError={(e) => {
+              // Fallback image if the banner fails to load
+              e.currentTarget.src = "/lovable-uploads/3e000195-9fd0-4623-9f95-8e97c92179fc.png";
+            }}
           />
         </div>
       </div>
