@@ -117,23 +117,38 @@ export const storeService = {
         throw error;
       }
       
-      return data ? data.map(item => ({
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        image: item.image,
-        category: item.category || { name: '' },
-        featured: item.featured || false,
-        description: item.description || '',
-        images: item.images || [],
-        sku: item.sku || '',
-        stock: item.stock || 0,
-        attributes: item.attributes || {},
-        rating: item.rating || 0,
-        category_id: item.category_id || '',
-        created_at: item.created_at || '',
-        updated_at: item.updated_at || ''
-      })) : [];
+      if (!data) return [];
+
+      // Process each product to ensure proper type conversion
+      return data.map(item => {
+        // Handle images - ensure it's always an array of strings
+        let processedImages: string[] = [];
+        if (item.images) {
+          if (Array.isArray(item.images)) {
+            processedImages = item.images.filter(img => typeof img === 'string') as string[];
+          } else if (typeof item.images === 'string') {
+            processedImages = [item.images];
+          }
+        }
+
+        return {
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          image: item.image,
+          category: item.category || { name: '' },
+          featured: item.featured || false,
+          description: item.description || '',
+          images: processedImages,
+          sku: item.sku || '',
+          stock: item.stock || 0,
+          attributes: item.attributes || {},
+          rating: item.rating || 0,
+          category_id: item.category_id || '',
+          created_at: item.created_at || '',
+          updated_at: item.updated_at || ''
+        };
+      });
     } catch (error) {
       console.error('Error in getStoreProducts:', error);
       return [];
