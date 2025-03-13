@@ -1,32 +1,29 @@
-
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { 
   Package, 
-  Search,
-  Calendar,
-  CreditCard,
-  Truck,
-  XCircle,
-  CheckCircle2,
-  MoreHorizontal,
-  FileText,
-  AlertCircle,
-  User,
-  DollarSign,
-  Filter
+  Search, 
+  Filter, 
+  MoreHorizontal, 
+  Truck, 
+  CheckCircle, 
+  XCircle, 
+  Package2, 
+  Clock,
+  Loader2
 } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -35,36 +32,24 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger,
   DialogFooter
 } from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerClose
-} from "@/components/ui/drawer";
-import { OrderDetails } from "@/components/dashboard/OrderDetails";
-import { UpdateOrderStatus } from "@/components/dashboard/UpdateOrderStatus";
 import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/hooks/use-toast";
+import OrderDetails from "@/components/dashboard/OrderDetails";
+import UpdateOrderStatus from "@/components/dashboard/UpdateOrderStatus";
 import { Order } from "@/types/store";
-import { useIsMobile } from "@/hooks/use-mobile";
 
-const SAMPLE_ORDERS: Order[] = [
+// نماذج بيانات طلبات مؤقتة (سيتم استبدالها بالبيانات من قاعدة البيانات)
+const mockOrders: Order[] = [
   {
-    id: "ORD-001",
-    createdAt: "2023-06-15T14:30:00Z",
-    status: "processing",
-    total: 599.97,
+    id: "ord-001",
     items: [
       {
         product: {
@@ -73,7 +58,7 @@ const SAMPLE_ORDERS: Order[] = [
           price: 299.99,
           image: "https://via.placeholder.com/150",
           category: "إلكترونيات",
-          featured: true,
+          featured: true
         },
         quantity: 1
       },
@@ -84,34 +69,34 @@ const SAMPLE_ORDERS: Order[] = [
           price: 149.99,
           image: "https://via.placeholder.com/150",
           category: "إلكترونيات",
-          featured: false,
+          featured: false
         },
-        quantity: 2
+        quantity: 1
       }
     ],
+    total: 449.98,
+    status: "delivered",
     shipping: {
       name: "أحمد محمد",
-      address: "شارع 123، مبنى 45",
+      address: "شارع السالم، بلوك 3، منزل 21",
       city: "الكويت",
-      state: "العاصمة",
+      state: "حولي",
       zipCode: "12345",
       email: "ahmed@example.com",
-      phone: "+965 1234 5678"
+      phone: "123-456-7890"
     },
     payment: {
       method: "credit_card",
-      cardNumber: "**** **** **** 4242",
+      cardNumber: "xxxx-xxxx-xxxx-1234",
       cardHolder: "أحمد محمد",
-      expiryMonth: "06",
+      expiryMonth: "12",
       expiryYear: "2025",
-      transactionId: "txn_123456789"
-    }
+      transactionId: "trx-987654"
+    },
+    createdAt: "2023-10-15T12:30:45Z"
   },
   {
-    id: "ORD-002",
-    createdAt: "2023-06-14T10:15:00Z",
-    status: "shipped",
-    total: 349.99,
+    id: "ord-002",
     items: [
       {
         product: {
@@ -119,31 +104,35 @@ const SAMPLE_ORDERS: Order[] = [
           name: "مكنسة كهربائية Dyson V11",
           price: 349.99,
           image: "https://via.placeholder.com/150",
-          category: "أثاث منزلي",
-          featured: false,
+          category: "الأجهزة المنزلية",
+          featured: true
         },
         quantity: 1
       }
     ],
+    total: 349.99,
+    status: "processing",
     shipping: {
-      name: "سارة عبدالله",
-      address: "شارع الخليج، مبنى 12",
+      name: "فاطمة علي",
+      address: "شارع الفحيحيل، بلوك 7، شقة 3",
       city: "الكويت",
-      state: "حولي",
+      state: "الأحمدي",
       zipCode: "54321",
-      email: "sara@example.com",
-      phone: "+965 9876 5432"
+      email: "fatima@example.com",
+      phone: "098-765-4321"
     },
     payment: {
-      method: "paypal",
-      transactionId: "txn_987654321"
-    }
+      method: "debit_card",
+      cardNumber: "xxxx-xxxx-xxxx-5678",
+      cardHolder: "فاطمة علي",
+      expiryMonth: "09",
+      expiryYear: "2024",
+      transactionId: "trx-123456"
+    },
+    createdAt: "2023-10-17T15:45:12Z"
   },
   {
-    id: "ORD-003",
-    createdAt: "2023-06-13T16:45:00Z",
-    status: "delivered",
-    total: 89.99,
+    id: "ord-003",
     items: [
       {
         product: {
@@ -151,35 +140,31 @@ const SAMPLE_ORDERS: Order[] = [
           name: "مجموعة أواني طبخ",
           price: 89.99,
           image: "https://via.placeholder.com/150",
-          category: "مستلزمات ��لمطبخ",
-          featured: false,
+          category: "المطبخ",
+          featured: false
         },
         quantity: 1
       }
     ],
+    total: 89.99,
+    status: "shipped",
     shipping: {
-      name: "خالد عبدالرحمن",
-      address: "شارع التعاون، مبنى 33",
+      name: "محمد خالد",
+      address: "شارع مبارك الكبير، بلوك 12، منزل 5",
       city: "الكويت",
-      state: "السالمية",
+      state: "العاصمة",
       zipCode: "13579",
-      email: "khaled@example.com",
-      phone: "+965 5555 8888"
+      email: "mohamed@example.com",
+      phone: "555-123-4567"
     },
     payment: {
-      method: "credit_card",
-      cardNumber: "**** **** **** 5555",
-      cardHolder: "خالد عبدالرحمن",
-      expiryMonth: "08",
-      expiryYear: "2024",
-      transactionId: "txn_555555555"
-    }
+      method: "paypal",
+      transactionId: "pay-98765432"
+    },
+    createdAt: "2023-10-19T09:12:34Z"
   },
   {
-    id: "ORD-004",
-    createdAt: "2023-06-12T13:20:00Z",
-    status: "pending",
-    total: 209.97,
+    id: "ord-004",
     items: [
       {
         product: {
@@ -187,10 +172,10 @@ const SAMPLE_ORDERS: Order[] = [
           name: "قميص رجالي كلاسيكي",
           price: 39.99,
           image: "https://via.placeholder.com/150",
-          category: "ملابس",
-          featured: false,
+          category: "الملابس",
+          featured: false
         },
-        quantity: 3
+        quantity: 2
       },
       {
         product: {
@@ -198,30 +183,30 @@ const SAMPLE_ORDERS: Order[] = [
           name: "كتاب التفكير السريع والبطيء",
           price: 15.99,
           image: "https://via.placeholder.com/150",
-          category: "كتب",
-          featured: true,
+          category: "الكتب",
+          featured: false
         },
         quantity: 1
       }
     ],
+    total: 95.97,
+    status: "pending",
     shipping: {
-      name: "نورة أحمد",
-      address: "شارع فهد السالم، مبنى 9",
+      name: "نورة سعد",
+      address: "شارع عبد الله السالم، بلوك 9، شقة 32",
       city: "الكويت",
       state: "الفروانية",
       zipCode: "24680",
       email: "noura@example.com",
-      phone: "+965 1122 3344"
+      phone: "777-888-9999"
     },
     payment: {
       method: "cod"
-    }
+    },
+    createdAt: "2023-10-20T18:20:15Z"
   },
   {
-    id: "ORD-005",
-    createdAt: "2023-06-11T09:00:00Z",
-    status: "cancelled",
-    total: 799.99,
+    id: "ord-005",
     items: [
       {
         product: {
@@ -230,132 +215,81 @@ const SAMPLE_ORDERS: Order[] = [
           price: 799.99,
           image: "https://via.placeholder.com/150",
           category: "إلكترونيات",
-          featured: false,
+          featured: true
         },
         quantity: 1
       }
     ],
+    total: 799.99,
+    status: "cancelled",
     shipping: {
-      name: "محمد جاسم",
-      address: "شارع المباركية، مبنى 25",
+      name: "خالد يوسف",
+      address: "شارع سالم المبارك، بلوك 15، منزل 7",
       city: "الكويت",
-      state: "الجهراء",
-      zipCode: "97531",
-      email: "mohammad@example.com",
-      phone: "+965 6677 9900"
+      state: "حولي",
+      zipCode: "13579",
+      email: "khaled@example.com",
+      phone: "444-555-6666"
     },
     payment: {
-      method: "debit_card",
-      cardNumber: "**** **** **** 7777",
-      cardHolder: "محمد جاسم",
-      expiryMonth: "12",
-      expiryYear: "2023",
-      transactionId: "txn_777777777"
-    }
+      method: "credit_card",
+      cardNumber: "xxxx-xxxx-xxxx-9012",
+      cardHolder: "خالد يوسف",
+      expiryMonth: "05",
+      expiryYear: "2026",
+      transactionId: "trx-456789"
+    },
+    createdAt: "2023-10-21T10:05:30Z"
   }
 ];
 
+const statusMap: { [key: string]: { label: string; color: string; icon: React.ComponentType } } = {
+  pending: { label: "قيد الانتظار", color: "yellow", icon: Clock },
+  processing: { label: "جاري المعالجة", color: "blue", icon: Package2 },
+  shipped: { label: "تم الشحن", color: "purple", icon: Truck },
+  delivered: { label: "تم التسليم", color: "green", icon: CheckCircle },
+  cancelled: { label: "ملغى", color: "red", icon: XCircle },
+};
+
 const Orders = () => {
-  const [orders, setOrders] = useState<Order[]>(SAMPLE_ORDERS);
+  const [orders, setOrders] = useState<Order[]>(mockOrders);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterStatus, setFilterStatus] = useState<string>("all");
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [isStatusUpdateOpen, setIsStatusUpdateOpen] = useState(false);
-  const [isInvoiceView, setIsInvoiceView] = useState(false);
-  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
-  const { toast } = useToast();
-  const isMobile = useIsMobile();
+  const [isUpdateStatusOpen, setIsUpdateStatusOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const filteredOrders = orders.filter(order => {
-    const matchesSearch = 
-      order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.shipping.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.shipping.email.toLowerCase().includes(searchTerm.toLowerCase());
-      
-    const matchesStatus = filterStatus === "all" || order.status === filterStatus;
-    
-    return matchesSearch && matchesStatus;
-  });
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
 
-  const handleViewOrderDetails = (order: Order, invoiceView = false) => {
+  const filteredOrders = orders.filter(order =>
+    order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    order.shipping.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    order.shipping.email.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleOpenDetails = (order: Order) => {
     setSelectedOrder(order);
-    setIsInvoiceView(invoiceView);
     setIsDetailsOpen(true);
   };
 
-  const handleUpdateOrderStatus = (orderId: string, newStatus: Order['status']) => {
-    setOrders(orders.map(order => 
-      order.id === orderId 
-        ? { ...order, status: newStatus } 
-        : order
-    ));
-    
-    setIsStatusUpdateOpen(false);
-    
-    toast({
-      title: "تم تحديث حالة الطلب",
-      description: `تم تغيير حالة الطلب ${orderId} إلى ${getStatusText(newStatus)}`,
-    });
-  };
-
-  const handleDeleteOrder = (order: Order) => {
+  const handleUpdateStatus = (order: Order) => {
     setSelectedOrder(order);
-    setIsDeleteConfirmOpen(true);
+    setIsUpdateStatusOpen(true);
   };
 
-  const confirmDeleteOrder = () => {
+  const handleStatusUpdate = (newStatus: string) => {
     if (selectedOrder) {
-      setOrders(orders.filter(order => order.id !== selectedOrder.id));
-      setIsDeleteConfirmOpen(false);
-      
-      toast({
-        title: "تم حذف الطلب",
-        description: `تم حذف الطلب ${selectedOrder.id} بنجاح`,
-        variant: "destructive",
-      });
-      
-      setSelectedOrder(null);
+      setIsLoading(true);
+      setTimeout(() => {
+        setOrders(orders.map(order =>
+          order.id === selectedOrder.id ? { ...order, status: newStatus } : order
+        ));
+        setIsUpdateStatusOpen(false);
+        setIsLoading(false);
+      }, 500);
     }
-  };
-
-  const getStatusBadge = (status: Order['status']) => {
-    switch (status) {
-      case 'pending':
-        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200">قيد الانتظار</Badge>;
-      case 'processing':
-        return <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">قيد المعالجة</Badge>;
-      case 'shipped':
-        return <Badge className="bg-indigo-500 hover:bg-indigo-600">تم الشحن</Badge>;
-      case 'delivered':
-        return <Badge className="bg-green-500 hover:bg-green-600">تم التوصيل</Badge>;
-      case 'cancelled':
-        return <Badge variant="destructive">ملغي</Badge>;
-      default:
-        return null;
-    }
-  };
-
-  const getStatusText = (status: Order['status']) => {
-    switch (status) {
-      case 'pending': return 'قيد الانتظار';
-      case 'processing': return 'قيد المعالجة';
-      case 'shipped': return 'تم الشحن';
-      case 'delivered': return 'تم التوصيل';
-      case 'cancelled': return 'ملغي';
-      default: return '';
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Intl.DateTimeFormat('ar-KW', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date);
   };
 
   return (
@@ -364,350 +298,283 @@ const Orders = () => {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">الطلبات</h1>
           <p className="text-muted-foreground">
-            إدارة طلبات العملاء وتتبع حالتها ومعالجتها
+            إدارة وتتبع طلبات العملاء
           </p>
         </div>
-        <Button
-          variant="outline" 
-          className="w-full md:w-auto button-hover-effect"
-          onClick={() => {
-            toast({
-              title: "قريباً",
-              description: "سيتم إضافة ميزة تصدير الطلبات قريباً",
-            });
-          }}
-        >
-          <Package className="mr-2 h-4 w-4" />
-          تصدير الطلبات
+      </div>
+
+      <div className="flex flex-col md:flex-row items-center gap-4 mb-4">
+        <div className="relative w-full md:w-96">
+          <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
+          <Input
+            placeholder="بحث عن طلب..."
+            className="pr-10"
+            value={searchTerm}
+            onChange={handleSearch}
+          />
+        </div>
+        <Button variant="outline" className="flex gap-2">
+          <Filter size={16} />
+          <span>تصفية</span>
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
-        <div className="relative md:col-span-2">
-          <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
-          <Input 
-            placeholder="بحث عن طلب..." 
-            className="pr-10" 
-            value={searchTerm} 
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-        <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-full">
-            <div className="flex items-center">
-              <Filter className="h-4 w-4 ml-2" />
-              <SelectValue placeholder="تصفية حسب الحالة" />
-            </div>
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">جميع الحالات</SelectItem>
-            <SelectItem value="pending">قيد الانتظار</SelectItem>
-            <SelectItem value="processing">قيد المعالجة</SelectItem>
-            <SelectItem value="shipped">تم الشحن</SelectItem>
-            <SelectItem value="delivered">تم التوصيل</SelectItem>
-            <SelectItem value="cancelled">ملغي</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="mb-4 bg-gray-100/80 w-full overflow-auto flex-nowrap">
+        <TabsList className="mb-4">
           <TabsTrigger value="all">جميع الطلبات</TabsTrigger>
-          <TabsTrigger value="recent">الطلبات الحديثة</TabsTrigger>
-          <TabsTrigger value="processing">قيد المعالجة</TabsTrigger>
-          <TabsTrigger value="completed">مكتملة</TabsTrigger>
+          <TabsTrigger value="pending">قيد الانتظار</TabsTrigger>
+          <TabsTrigger value="processing">جاري المعالجة</TabsTrigger>
+          <TabsTrigger value="shipped">تم الشحن</TabsTrigger>
+          <TabsTrigger value="delivered">تم التسليم</TabsTrigger>
+          <TabsTrigger value="cancelled">ملغى</TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="all" className="mt-0">
-          <Card className="border-0 shadow-sm overflow-hidden">
-            <CardHeader className="pb-2 bg-gray-50/70 border-b">
+
+        <TabsContent value="all">
+          <Card>
+            <CardHeader className="pb-2">
               <CardTitle>قائمة الطلبات</CardTitle>
               <CardDescription>
                 إجمالي {filteredOrders.length} طلب
               </CardDescription>
             </CardHeader>
-            <CardContent className="p-0 max-h-[calc(100vh-18rem)] overflow-y-auto">
-              {filteredOrders.length > 0 ? (
-                <div className="grid gap-0 divide-y">
+            <CardContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>رقم الطلب</TableHead>
+                    <TableHead>العميل</TableHead>
+                    <TableHead>تاريخ الطلب</TableHead>
+                    <TableHead>المجموع</TableHead>
+                    <TableHead>الحالة</TableHead>
+                    <TableHead className="text-left">إجراءات</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
                   {filteredOrders.map((order) => (
-                    <div 
-                      key={order.id} 
-                      className="p-4 transition-colors hover:bg-gray-50/50 cursor-pointer"
-                      onClick={() => handleViewOrderDetails(order)}
-                    >
-                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div className="flex items-start md:items-center gap-3">
-                          <span className="inline-flex items-center justify-center bg-primary/10 text-primary h-10 w-10 rounded-full flex-shrink-0">
-                            <Package className="h-5 w-5" />
-                          </span>
-                          <div>
-                            <h3 className="font-semibold text-lg">{order.id}</h3>
-                            <div className="flex items-center text-sm text-muted-foreground mt-1">
-                              <Calendar className="h-4 w-4 ml-1" />
-                              <span>{formatDate(order.createdAt)}</span>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-4 space-x-reverse">
-                          {getStatusBadge(order.status)}
-                          <span className="text-primary font-bold">{order.total.toFixed(2)} KWD</span>
-                        </div>
-                      </div>
-                      
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-4">
-                        <div className="flex gap-2 items-center">
-                          <User className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm truncate">{order.shipping.name}</span>
-                        </div>
-                        <div className="flex gap-2 items-center">
-                          <CreditCard className="h-4 w-4 text-muted-foreground" />
-                          <span className="text-sm truncate">
-                            {order.payment.method === 'credit_card' ? 'بطاقة ائتمان' : 
-                             order.payment.method === 'debit_card' ? 'بطاقة سحب' :
-                             order.payment.method === 'paypal' ? 'PayPal' : 'الدفع عند الاستلام'}
-                          </span>
-                        </div>
-                        <div className="flex gap-2 items-center justify-between w-full">
-                          <div className="flex items-center gap-2">
-                            <Package className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-sm">{order.items.length} منتج</span>
-                          </div>
+                    <TableRow key={order.id}>
+                      <TableCell className="font-medium">{order.id}</TableCell>
+                      <TableCell>{order.shipping.name}</TableCell>
+                      <TableCell>
+                        {new Date(order.createdAt).toLocaleDateString('ar-KW', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                        })}
+                      </TableCell>
+                      <TableCell>{order.total.toFixed(3)} KWD</TableCell>
+                      <TableCell>
+                        <Badge className={`bg-${statusMap[order.status].color}-500 hover:bg-${statusMap[order.status].color}-600`}>
+                          <statusMap[order.status].icon className="ml-2 h-4 w-4" />
+                          {statusMap[order.status].label}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex justify-end gap-2">
+                          <Button variant="ghost" size="icon" onClick={() => handleOpenDetails(order)}>
+                            <Eye size={16} />
+                          </Button>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
-                                <MoreHorizontal className="h-4 w-4" />
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal size={16} />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-56">
-                              <DropdownMenuLabel>إدارة الطلب</DropdownMenuLabel>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>خيارات</DropdownMenuLabel>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem onClick={(e) => {
-                                e.stopPropagation();
-                                handleViewOrderDetails(order);
-                              }}>
-                                <Package className="ml-2 h-4 w-4" />
-                                عرض التفاصيل
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={(e) => {
-                                e.stopPropagation();
-                                handleViewOrderDetails(order, true);
-                              }}>
-                                <FileText className="ml-2 h-4 w-4" />
-                                عرض كفاتورة
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={(e) => {
-                                e.stopPropagation();
-                                setSelectedOrder(order);
-                                setIsStatusUpdateOpen(true);
-                              }}>
-                                <Truck className="ml-2 h-4 w-4" />
-                                تحديث الحالة
+                              <DropdownMenuItem onClick={() => handleUpdateStatus(order)}>
+                                <Package className="ml-2" size={16} />
+                                <span>تحديث الحالة</span>
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
-                              <DropdownMenuItem 
-                                className="text-red-500 focus:text-red-500"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDeleteOrder(order);
-                                }}
-                              >
-                                <XCircle className="ml-2 h-4 w-4" />
-                                حذف الطلب
+                              <DropdownMenuItem className="text-red-500 focus:text-red-500">
+                                <Trash2 className="ml-2" size={16} />
+                                <span>حذف الطلب</span>
                               </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </div>
-                      </div>
-                    </div>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </div>
-              ) : (
-                <div className="text-center py-10">
-                  <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="font-medium text-lg">لا توجد طلبات</h3>
-                  <p className="text-muted-foreground mt-1">
-                    لم يتم العثور على طلبات تطابق معايير البحث الخاصة بك
-                  </p>
-                </div>
-              )}
+                </TableBody>
+              </Table>
             </CardContent>
           </Card>
         </TabsContent>
-        
-        <TabsContent value="recent">
-          <Card className="border shadow-sm">
-            <CardHeader>
-              <CardTitle>الطلبات الحديثة</CardTitle>
-              <CardDescription>
-                الطلبات التي تم استلامها خلال آخر 24 ساعة
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-10">
-                <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="font-medium text-lg">قريباً</h3>
-                <p className="text-muted-foreground mt-1">
-                  سيتم تفعيل هذه الميزة قريباً
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="processing">
-          <Card className="border shadow-sm">
-            <CardHeader>
-              <CardTitle>الطلبات قيد المعالجة</CardTitle>
-              <CardDescription>
-                الطلبات التي تحتاج إلى معالجة وشحن
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-10">
-                <Truck className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="font-medium text-lg">قريباً</h3>
-                <p className="text-muted-foreground mt-1">
-                  سيتم تفعيل هذه الميزة قريباً
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="completed">
-          <Card className="border shadow-sm">
-            <CardHeader>
-              <CardTitle>الطلبات المكتملة</CardTitle>
-              <CardDescription>
-                الطلبات التي تم تسليمها بنجاح
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center py-10">
-                <CheckCircle2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                <h3 className="font-medium text-lg">قريباً</h3>
-                <p className="text-muted-foreground mt-1">
-                  سيتم تفعيل هذه الميزة قريباً
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+
+        {/* حالات الطلبات الأخرى */}
+        {Object.keys(statusMap).map(status => (
+          <TabsContent key={status} value={status}>
+            <Card>
+              <CardHeader>
+                <CardTitle>طلبات {statusMap[status].label}</CardTitle>
+                <CardDescription>
+                  قائمة الطلبات التي حالتها {statusMap[status].label}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>رقم الطلب</TableHead>
+                      <TableHead>العميل</TableHead>
+                      <TableHead>تاريخ الطلب</TableHead>
+                      <TableHead>المجموع</TableHead>
+                      <TableHead>الحالة</TableHead>
+                      <TableHead className="text-left">إجراءات</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredOrders
+                      .filter(order => order.status === status)
+                      .map((order) => (
+                        <TableRow key={order.id}>
+                          <TableCell className="font-medium">{order.id}</TableCell>
+                          <TableCell>{order.shipping.name}</TableCell>
+                          <TableCell>
+                            {new Date(order.createdAt).toLocaleDateString('ar-KW', {
+                              year: 'numeric',
+                              month: 'long',
+                              day: 'numeric',
+                            })}
+                          </TableCell>
+                          <TableCell>{order.total.toFixed(3)} KWD</TableCell>
+                          <TableCell>
+                            <Badge className={`bg-${statusMap[order.status].color}-500 hover:bg-${statusMap[order.status].color}-600`}>
+                              <statusMap[order.status].icon className="ml-2 h-4 w-4" />
+                              {statusMap[order.status].label}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex justify-end gap-2">
+                              <Button variant="ghost" size="icon" onClick={() => handleOpenDetails(order)}>
+                                <Eye size={16} />
+                              </Button>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon">
+                                    <MoreHorizontal size={16} />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuLabel>خيارات</DropdownMenuLabel>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem onClick={() => handleUpdateStatus(order)}>
+                                    <Package className="ml-2" size={16} />
+                                    <span>تحديث الحالة</span>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem className="text-red-500 focus:text-red-500">
+                                    <Trash2 className="ml-2" size={16} />
+                                    <span>حذف الطلب</span>
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        ))}
       </Tabs>
 
-      {isMobile ? (
-        <Drawer open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-          <DrawerContent className="max-h-[90vh] overflow-y-auto">
-            <DrawerHeader className="sticky top-0 z-10 bg-background">
-              <DrawerTitle>تفاصيل الطلب #{selectedOrder?.id}</DrawerTitle>
-              <DrawerDescription>
-                عرض معلومات الطلب والمنتجات والشحن والدفع
-              </DrawerDescription>
-            </DrawerHeader>
-            <div className="px-4 py-2 overflow-y-auto">
-              {selectedOrder && <OrderDetails order={selectedOrder} isInvoice={isInvoiceView} />}
-            </div>
-            <DrawerFooter className="sticky bottom-0 z-10 bg-background">
-              <Button variant="outline" onClick={() => setIsDetailsOpen(false)}>
-                إغلاق
-              </Button>
-            </DrawerFooter>
-          </DrawerContent>
-        </Drawer>
-      ) : (
-        <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-          <DialogContent className="max-w-5xl max-h-[90vh] overflow-hidden flex flex-col rounded-lg shadow-lg border-0">
-            <DialogHeader className="sticky top-0 z-10 bg-background px-6 py-4 border-b">
-              <DialogTitle>
-                {isInvoiceView ? (
-                  <div className="flex items-center gap-2 text-xl">
-                    <FileText className="h-5 w-5 text-primary" />
-                    فاتورة الطلب #{selectedOrder?.id}
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 text-xl">
-                    <Package className="h-5 w-5 text-primary" />
-                    تفاصيل الطلب #{selectedOrder?.id}
-                  </div>
-                )}
-              </DialogTitle>
-              <DialogDescription className="mt-1 text-muted-foreground">
-                {isInvoiceView ? 'عرض فاتورة الطلب وطباعتها' : 'عرض معلومات الطلب والمنتجات والشحن والدفع'}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="overflow-y-auto flex-1 px-6 py-4">
-              {selectedOrder && <OrderDetails order={selectedOrder} isInvoice={isInvoiceView} />}
-            </div>
-            <DialogFooter className="sticky bottom-0 pt-2 bg-background border-t mt-auto p-4">
-              <Button variant="outline" onClick={() => setIsDetailsOpen(false)} className="gap-2">
-                <XCircle className="h-4 w-4" />
-                إغلاق
-              </Button>
-              {isInvoiceView && (
-                <Button 
-                  className="gap-2 bg-primary hover:bg-primary/90"
-                  onClick={() => {
-                    toast({
-                      title: "جاري الطباعة",
-                      description: "تم إرسال الفاتورة للطباعة",
-                    });
-                    window.print();
-                  }}
-                >
-                  <FileText className="ml-2 h-4 w-4" />
-                  طباعة الفاتورة
-                </Button>
-              )}
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
-
-      <Dialog open={isStatusUpdateOpen} onOpenChange={setIsStatusUpdateOpen}>
+      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>تحديث حالة الطلب</DialogTitle>
+            <DialogTitle>تفاصيل الطلب</DialogTitle>
             <DialogDescription>
-              تغيير حالة الطلب #{selectedOrder?.id}
+              معلومات تفصيلية حول الطلب المحدد
             </DialogDescription>
           </DialogHeader>
-          {selectedOrder && (
-            <UpdateOrderStatus 
-              order={selectedOrder} 
-              onStatusUpdate={(status) => handleUpdateOrderStatus(selectedOrder.id, status)} 
-              onCancel={() => setIsStatusUpdateOpen(false)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <div className="flex items-center gap-2 text-destructive">
-              <AlertCircle className="h-5 w-5" />
-              <DialogTitle>تأكيد حذف الطلب</DialogTitle>
-            </div>
-            <DialogDescription className="pt-2">
-              هل أنت متأكد من رغبتك في حذف الطلب #{selectedOrder?.id}؟
-              <div className="mt-2 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
-                <p className="font-medium text-destructive mb-1">تحذير:</p>
-                <p className="text-sm">هذا الإجراء لا يمكن التراجع عنه، وسيتم حذف الطلب نهائيًا من قاعدة البيانات.</p>
-              </div>
-            </DialogDescription>
-          </DialogHeader>
+          <Separator className="my-4" />
+          {selectedOrder && <OrderDetails order={selectedOrder} />}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDeleteConfirmOpen(false)}>
-              إلغاء
-            </Button>
-            <Button variant="destructive" onClick={confirmDeleteOrder}>
-              حذف الطلب
+            <Button variant="outline" onClick={() => setIsDetailsOpen(false)}>
+              إغلاق
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={isUpdateStatusOpen} onOpenChange={setIsUpdateStatusOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>تحديث حالة الطلب</DialogTitle>
+            <DialogDescription>
+              تغيير حالة الطلب الحالي
+            </DialogDescription>
+          </DialogHeader>
+          <Separator className="my-4" />
+          {selectedOrder && (
+            <UpdateOrderStatus
+              order={selectedOrder}
+              onStatusUpdate={handleStatusUpdate}
+              isLoading={isLoading}
+            />
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsUpdateStatusOpen(false)} disabled={isLoading}>
+              إلغاء
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+        <Card>
+          <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
+            <CardTitle className="text-sm font-medium">إجمالي الإيرادات</CardTitle>
+            <Package className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {orders.reduce((total, order) => total + order.total, 0).toFixed(3)} KWD
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              منذ البداية
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
+            <CardTitle className="text-sm font-medium">الطلبات قيد الانتظار</CardTitle>
+            <Clock className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {orders.filter(order => order.status === 'pending').length}
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              طلبات جديدة تنتظر المعالجة
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
+            <CardTitle className="text-sm font-medium">متوسط قيمة الطلب</CardTitle>
+            <Package className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {(orders.reduce((total, order) => total + order.total, 0) / orders.length).toFixed(3)} KWD
+            </div>
+            <p className="text-xs text-muted-foreground mt-1">
+              متوسط قيمة كل طلب
+            </p>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
 
 export default Orders;
+
+import { Eye, Trash2 } from 'lucide-react';
