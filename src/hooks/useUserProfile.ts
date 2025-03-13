@@ -37,24 +37,49 @@ export const useUserProfile = (): UseUserProfileResult => {
       // If no profile exists, create one using user metadata if available
       const userMetadata = userData?.user?.user_metadata;
       
-      // Call the RPC function with the correct parameter names
-      const { error: insertError } = await supabase.rpc('create_user_profile', {
-        user_id_val: userId,
-        is_admin_val: false,
-        first_name_val: userMetadata?.first_name || null,
-        last_name_val: userMetadata?.last_name || null,
-        email_val: userData?.user?.email || null
-      });
-      
-      if (insertError) {
-        console.error('Error creating profile:', insertError);
+      try {
+        // Call the RPC function with the correct parameter names
+        const { error: insertError } = await supabase.rpc('create_user_profile', {
+          user_id_val: userId,
+          is_admin_val: false,
+          first_name_val: userMetadata?.first_name || null,
+          last_name_val: userMetadata?.last_name || null,
+          email_val: userData?.user?.email || null
+        });
+        
+        if (insertError) {
+          console.error('Error creating profile (RPC):', insertError);
+          
+          // Fallback: Try direct insert if RPC fails
+          const { error: directInsertError } = await supabase
+            .from('profiles')
+            .insert({
+              id: userId,
+              is_admin: false,
+              first_name: userMetadata?.first_name || null,
+              last_name: userMetadata?.last_name || null,
+              email: userData?.user?.email || null
+            })
+            .single();
+            
+          if (directInsertError) {
+            console.error('Error creating profile (direct insert):', directInsertError);
+            toast.error('حدث خطأ أثناء إنشاء الملف الشخصي');
+            return false;
+          }
+          
+          console.log('Profile created successfully via direct insert');
+        } else {
+          console.log('Profile created successfully via RPC');
+        }
+        
+        setIsAdmin(false);
+        return true;
+      } catch (createError) {
+        console.error('Error in profile creation process:', createError);
         toast.error('حدث خطأ أثناء إنشاء الملف الشخصي');
-      } else {
-        console.log('Profile created successfully with metadata');
+        return false;
       }
-      
-      setIsAdmin(false);
-      return false;
     } catch (err) {
       console.error('Error checking admin status:', err);
       setIsAdmin(false);
