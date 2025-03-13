@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Store } from '@/types/store';
 import { Bell, Heart, Home, Search, ShoppingCart, User } from 'lucide-react';
@@ -9,21 +8,20 @@ import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useIsMobile } from '@/hooks/use-mobile';
-
 interface StoreHeaderProps {
   store: Store | null;
   error: string | null;
   isLoading: boolean;
 }
-
 const StoreHeader = ({
   store,
   error,
   isLoading
 }: StoreHeaderProps) => {
-  const { totalItems } = useCart();
+  const {
+    totalItems
+  } = useCart();
   const isMobile = useIsMobile();
-
   if (isLoading) {
     return <div className="w-full flex flex-col gap-4">
         <div className="w-full h-48 md:h-64 bg-gray-100 animate-pulse rounded-lg"></div>
@@ -36,7 +34,6 @@ const StoreHeader = ({
         </div>
       </div>;
   }
-
   if (error) {
     return <Alert variant="destructive" className="mb-6">
         <AlertCircle className="h-4 w-4" />
@@ -44,24 +41,15 @@ const StoreHeader = ({
         <AlertDescription>{error}</AlertDescription>
       </Alert>;
   }
-
   return <div className="w-full bg-background">
       {/* Top header with profile and notification */}
       <div className="flex items-center justify-between py-3 px-4">
         <div className="flex items-center gap-2">
           {/* Show store logo if available, otherwise fallback to Avatar */}
-          {store?.logo ? (
-            <img 
-              src={store.logo} 
-              alt={store.name || 'Store Logo'} 
-              className="w-8 h-8 rounded-full object-cover border"
-            />
-          ) : (
-            <Avatar className="w-8 h-8 border">
+          {store?.logo ? <img src={store.logo} alt={store.name || 'Store Logo'} className="w-8 h-8 rounded-full object-cover border" /> : <Avatar className="w-8 h-8 border">
               <AvatarImage src="https://github.com/shadcn.png" alt="User" />
               <AvatarFallback>CN</AvatarFallback>
-            </Avatar>
-          )}
+            </Avatar>}
           
           {/* Display store name if available */}
           <span className="font-semibold text-sm">
@@ -79,23 +67,12 @@ const StoreHeader = ({
         <div className="bg-black text-white rounded-xl overflow-hidden h-24 md:h-32 relative">
           {/* Banner Image */}
           <div className="absolute inset-0 right-0 w-1/2 h-full">
-            <img 
-              src="/lovable-uploads/a8406f59-b32a-4672-af43-f1de97a76465.png" 
-              alt="Promotion" 
-              className="object-cover w-full h-full"
-            />
+            <img alt="Promotion" className="object-cover w-full h-full" src="/lovable-uploads/06677fd2-366f-413c-bb0e-72f22b566155.jpg" />
           </div>
           
           {/* Optional Text Content Container - Will maintain layout even if empty */}
           <div className="flex items-center h-full">
-            <div className="flex-1 mr-2 p-4 z-10">
-              {/* Promotional content can be added here if needed */}
-              <p className="text-xs uppercase mb-1">GET YOUR SPECIAL SALE</p>
-              <h3 className="font-bold text-2xl mb-2">UP TO <span className="text-yellow-400">30%</span></h3>
-              <Button variant="outline" size="sm" className="bg-white text-black rounded-full text-xs px-4 py-0 h-8 hover:bg-gray-100">
-                SHOP NOW
-              </Button>
-            </div>
+            
             <div className="w-1/2"> {/* Spacer div to maintain layout */}</div>
           </div>
         </div>
@@ -156,5 +133,4 @@ const StoreHeader = ({
       </div>
     </div>;
 };
-
 export default StoreHeader;
