@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
@@ -66,11 +67,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, newSession) => {
       console.log('Auth state changed:', event);
       
+      // Immediately clear state on sign out
       if (event === 'SIGNED_OUT') {
         console.log('User signed out, clearing state');
         setSession(null);
         setUser(null);
         setIsAdmin(false);
+        setLoading(false);
         return;
       }
       
@@ -174,6 +177,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       setLoading(true);
       console.log('Attempting to sign out...');
+      
+      // Manually clear state BEFORE calling signOut to ensure immediate UI update
+      setSession(null);
+      setUser(null);
+      setIsAdmin(false);
+      
       const { error } = await supabase.auth.signOut();
       
       if (error) {
@@ -187,9 +196,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
       
       console.log('Sign out successful');
-      setSession(null);
-      setUser(null);
-      setIsAdmin(false);
       
       toast({
         title: "تم تسجيل الخروج",

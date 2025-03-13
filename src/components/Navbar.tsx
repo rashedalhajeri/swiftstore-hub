@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -46,7 +45,7 @@ const Navbar = () => {
     try {
       await signOut();
       console.log('Navigating to home after sign out');
-      navigate('/');
+      navigate('/', { replace: true });
     } catch (error) {
       console.error('Error in handleSignOut:', error);
     }
