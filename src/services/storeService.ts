@@ -135,13 +135,12 @@ export const storeService = {
 
         // Handle attributes - ensure it's always a Record<string, string>
         let processedAttributes: Record<string, string> = {};
-        if (item.attributes) {
-          if (typeof item.attributes === 'object' && !Array.isArray(item.attributes)) {
-            // Extract keys and values, ensuring all values are strings
-            Object.entries(item.attributes).forEach(([key, value]) => {
-              processedAttributes[key] = String(value);
-            });
-          }
+        if (item.attributes && typeof item.attributes === 'object' && !Array.isArray(item.attributes)) {
+          // Using a type assertion to avoid deep recursion in type checking
+          const attrs = item.attributes as Record<string, unknown>;
+          Object.entries(attrs).forEach(([key, value]) => {
+            processedAttributes[key] = String(value);
+          });
         }
 
         return {
