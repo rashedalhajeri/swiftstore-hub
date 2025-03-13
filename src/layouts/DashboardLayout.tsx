@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Package, ShoppingCart, Users, Settings, Menu, X, LogOut, User, Store, CreditCard, Bell, Shield, Globe, HelpCircle, Edit, Tags, Percent, ListFilter, ExternalLink } from 'lucide-react';
@@ -171,6 +172,8 @@ const DashboardLayout = () => {
               setStoreSlug(data.slug);
             }
           } else {
+            // إنشاء متجر افتراضي إذا لم يكن هناك متجر
+            const randomSlug = `store-${Math.random().toString(36).substring(2, 8)}`;
             const { error: insertError } = await supabase
               .from('stores')
               .insert({
@@ -178,13 +181,15 @@ const DashboardLayout = () => {
                 name: 'متجر.أنا',
                 logo: null,
                 description: 'متجر للملابس والإكسسوارات',
-                slug: `store-${Math.random().toString(36).substring(2, 8)}`
+                slug: randomSlug
               })
               .select()
               .single();
               
             if (insertError) {
               console.error('Error creating default store:', insertError);
+            } else {
+              setStoreSlug(randomSlug);
             }
           }
         } catch (error) {
@@ -254,10 +259,11 @@ const DashboardLayout = () => {
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate sidebar-text">{userFullName}</p>
+                <p className="text-sm font-medium truncate sidebar-text">{userFullName || 'مستخدم متجر.أنا'}</p>
                 {storeSlug && (
-                  <div className="flex items-center text-xs text-sidebar-foreground/70 truncate sidebar-text">
-                    <span>{storeSlug}</span>
+                  <div className="flex items-center text-xs text-sidebar-foreground/70 truncate sidebar-text gap-1">
+                    <span className="rtl:ml-0.5">linok.me/</span>
+                    <span className="font-medium">{storeSlug}</span>
                     <ExternalLink size={12} className="ms-1 sidebar-icon" />
                   </div>
                 )}
