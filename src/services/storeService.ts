@@ -121,9 +121,12 @@ export const storeService = {
       
       if (!data) return [];
 
-      // Transform the data to match the Product type
-      const products: Product[] = data.map(item => {
-        // Handle category
+      // Transform the data to match the Product type with explicit type annotation
+      const products: Product[] = [];
+      
+      // Process each product item with careful type handling
+      for (const item of data) {
+        // Handle category with explicit type checks
         let categoryName = '';
         if (item.category && typeof item.category === 'object' && 'name' in item.category) {
           categoryName = String(item.category.name || '');
@@ -133,7 +136,7 @@ export const storeService = {
           categoryName = String(item.category_id || '');
         }
 
-        // Handle images - explicitly process as string array
+        // Handle images with explicit string array conversion
         let processedImages: string[] = [];
         if (item.images) {
           if (Array.isArray(item.images)) {
@@ -143,10 +146,9 @@ export const storeService = {
           }
         }
 
-        // Handle attributes - safely convert to Record<string, string>
+        // Handle attributes with safe type conversion
         let processedAttributes: Record<string, string> = {};
         if (item.attributes && typeof item.attributes === 'object' && !Array.isArray(item.attributes)) {
-          // Loop through the keys in a type-safe way
           for (const key in item.attributes) {
             if (Object.prototype.hasOwnProperty.call(item.attributes, key)) {
               const val = item.attributes[key];
@@ -157,8 +159,8 @@ export const storeService = {
           }
         }
 
-        // Return the product with proper type conversions
-        return {
+        // Create product with explicit type conversion for each field
+        const product: Product = {
           id: String(item.id || ''),
           name: String(item.name || ''),
           price: Number(item.price) || 0,
@@ -173,7 +175,9 @@ export const storeService = {
           attributes: processedAttributes,
           store_id: storeId
         };
-      });
+        
+        products.push(product);
+      }
 
       return products;
     } catch (error) {
