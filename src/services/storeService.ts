@@ -29,7 +29,6 @@ export const storeService = {
         .from('stores')
         .select('*')
         .eq('slug', slug)
-        .eq('is_published', true)
         .maybeSingle();
         
       if (error) {
@@ -49,7 +48,7 @@ export const storeService = {
    */
   async getStoreProducts(storeId: string): Promise<Product[]> {
     try {
-      // Define the type of the raw data from Supabase
+      // Define a simple interface for the raw product data
       interface RawProductData {
         id: string;
         name: string;
@@ -64,7 +63,7 @@ export const storeService = {
         attributes: Record<string, any> | null;
         rating: number | null;
         category_id: string | null;
-        store_id: string | null;
+        store_id: string;
         created_at: string | null;
         updated_at: string | null;
       }
@@ -79,34 +78,25 @@ export const storeService = {
         return [];
       }
       
-      // Map the raw data to Product type explicitly, avoiding complex type inference 
-      return (data || []).map((item: RawProductData) => {
-        // Start with a well-defined Product object with explicit types
-        const product: Product = {
-          id: item.id,
-          name: item.name,
-          price: item.price,
-          image: item.image,
-          category: typeof item.category === 'object' ? item.category?.name || '' : '',
-          featured: Boolean(item.featured),
-          description: item.description || '',
-          images: Array.isArray(item.images) ? item.images : [],
-          sku: item.sku || '',
-          stock: typeof item.stock === 'number' ? item.stock : 0,
-          attributes: item.attributes ? item.attributes : {},
-          rating: typeof item.rating === 'number' ? item.rating : 0,
-          category_id: item.category_id || '',
-          created_at: item.created_at || '',
-          updated_at: item.updated_at || ''
-        };
-        
-        // Add store_id only if it exists in the source data
-        if (item.store_id) {
-          product.store_id = item.store_id;
-        }
-        
-        return product;
-      });
+      // Explicitly map the data to our Product type to avoid deep type inference issues
+      return (data || []).map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        image: item.image,
+        category: item.category?.name || '',
+        featured: Boolean(item.featured),
+        description: item.description || '',
+        images: Array.isArray(item.images) ? item.images : [],
+        sku: item.sku || '',
+        stock: typeof item.stock === 'number' ? item.stock : 0,
+        attributes: item.attributes || {},
+        rating: typeof item.rating === 'number' ? item.rating : 0,
+        category_id: item.category_id || '',
+        store_id: item.store_id,
+        created_at: item.created_at || '',
+        updated_at: item.updated_at || ''
+      }));
     } catch (err) {
       console.error('Unexpected error fetching store products:', err);
       return [];
