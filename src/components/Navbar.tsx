@@ -42,8 +42,14 @@ const Navbar = () => {
   }, [location]);
 
   const handleSignOut = async () => {
-    await signOut();
-    navigate('/');
+    console.log('Sign out button clicked');
+    try {
+      await signOut();
+      console.log('Navigating to home after sign out');
+      navigate('/');
+    } catch (error) {
+      console.error('Error in handleSignOut:', error);
+    }
   };
 
   return (
@@ -169,7 +175,10 @@ const Navbar = () => {
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={handleSignOut} className="cursor-pointer flex items-center gap-2 text-destructive focus:text-destructive">
+                  <DropdownMenuItem 
+                    onClick={handleSignOut} 
+                    className="cursor-pointer flex items-center gap-2 text-destructive focus:text-destructive"
+                  >
                     <LogOut size={16} />
                     <span>تسجيل الخروج</span>
                   </DropdownMenuItem>
@@ -235,7 +244,11 @@ const Navbar = () => {
                 <Button variant="outline" asChild className="w-full">
                   <Link to="/dashboard/settings/account">الإعدادات</Link>
                 </Button>
-                <Button variant="destructive" className="w-full" onClick={handleSignOut}>
+                <Button 
+                  variant="destructive" 
+                  className="w-full" 
+                  onClick={handleSignOut}
+                >
                   تسجيل الخروج
                 </Button>
               </>

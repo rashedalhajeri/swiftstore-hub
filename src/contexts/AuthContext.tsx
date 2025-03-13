@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User } from '@supabase/supabase-js';
@@ -24,7 +23,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { toast } = useToast();
 
   useEffect(() => {
-    // تحميل الجلسة الحالية عند تحميل التطبيق
     const getSession = async () => {
       setLoading(true);
       try {
@@ -40,7 +38,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(data.session);
         setUser(data.session?.user || null);
 
-        // التحقق مما إذا كان المستخدم مسؤولاً
         if (data.session?.user) {
           console.log('User found, checking admin status...');
           const { data: profileData, error: profileError } = await supabase
@@ -66,13 +63,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     getSession();
 
-    // الاستماع لتغييرات حالة المصادقة
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, newSession) => {
       console.log('Auth state changed:', event);
+      
+      if (event === 'SIGNED_OUT') {
+        console.log('User signed out, clearing state');
+        setSession(null);
+        setUser(null);
+        setIsAdmin(false);
+        return;
+      }
+      
       setSession(newSession);
       setUser(newSession?.user || null);
 
-      // تحديث حالة المسؤول عند تغيير المستخدم
       if (newSession?.user) {
         const { data: profileData } = await supabase
           .from('profiles')
@@ -169,13 +173,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     try {
       setLoading(true);
-      await supabase.auth.signOut();
+      console.log('Attempting to sign out...');
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Error during sign out:', error);
+        toast({
+          title: "حدث خطأ أثناء تسجيل الخروج",
+          description: error.message,
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      console.log('Sign out successful');
+      setSession(null);
+      setUser(null);
+      setIsAdmin(false);
+      
       toast({
         title: "تم تسجيل الخروج",
         description: "تم تسجيل خروجك بنجاح",
       });
     } catch (error) {
-      console.error('Error during sign out:', error);
+      console.error('Unexpected error during sign out:', error);
       toast({
         title: "حدث خطأ أثناء تسجيل الخروج",
         description: "يرجى المحاولة مرة أخرى",
