@@ -121,39 +121,45 @@ export const storeService = {
       
       if (!data || !Array.isArray(data)) return [];
       
-      // Convert the data to Product[] type with explicit casting to avoid deep type instantiation
-      return data.map(item => {
-        // Handle category with safe type assertion
-        let categoryName = '';
+      // Create a properly typed array to avoid excessive type instantiation
+      const products: Product[] = [];
+      
+      // Process each item manually to avoid deep type instantiation issues
+      for (const item of data) {
+        // Process category safely
+        let category: string | { name: string } = '';
         if (item.category && typeof item.category === 'object' && 'name' in item.category) {
-          categoryName = String(item.category.name || '');
+          category = { name: String(item.category.name || '') };
         } else if (typeof item.category === 'string') {
-          categoryName = item.category;
+          category = item.category;
         }
         
-        // Safe conversion for images
-        const images = Array.isArray(item.images) 
-          ? item.images.filter(Boolean).map(String) 
-          : [];
-          
-        // Safe conversion for attributes
+        // Process images safely
+        const images: string[] = [];
+        if (Array.isArray(item.images)) {
+          for (const img of item.images) {
+            if (img) images.push(String(img));
+          }
+        }
+        
+        // Process attributes safely
         const attributes: Record<string, string> = {};
-        if (item.attributes && typeof item.attributes === 'object' && item.attributes !== null) {
-          Object.entries(item.attributes).forEach(([key, value]) => {
+        if (item.attributes && typeof item.attributes === 'object') {
+          for (const [key, value] of Object.entries(item.attributes)) {
             if (value !== null && value !== undefined) {
               attributes[key] = String(value);
             }
-          });
+          }
         }
         
-        // Create a new product with explicit type conversion
-        return {
+        // Create the product object with manual type conversion
+        const product: Product = {
           id: String(item.id || ''),
           name: String(item.name || ''),
           price: typeof item.price === 'number' ? item.price : Number(item.price) || 0,
           image: String(item.image || ''),
           featured: Boolean(item.featured || false),
-          category: categoryName,
+          category,
           description: item.description ? String(item.description) : '',
           sku: item.sku ? String(item.sku) : '',
           stock: item.stock !== undefined ? Number(item.stock) : undefined,
@@ -161,8 +167,12 @@ export const storeService = {
           images,
           attributes,
           store_id: String(storeId)
-        } as Product; // Use type assertion to avoid deep type instantiation
-      });
+        };
+        
+        products.push(product);
+      }
+      
+      return products;
     } catch (error) {
       console.error('Error in getStoreProducts:', error);
       return [];
