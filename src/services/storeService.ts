@@ -59,27 +59,34 @@ export const storeService = {
         return [];
       }
       
-      // Map the data to the Product type explicitly
-      // This avoids deep type instantiation issues
-      return (data || []).map(item => ({
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        image: item.image,
-        category: typeof item.category === 'object' ? item.category?.name || '' : item.category,
-        featured: !!item.featured,
-        description: item.description,
-        images: Array.isArray(item.images) ? item.images : [],
-        sku: item.sku,
-        stock: item.stock,
-        attributes: item.attributes || {},
-        rating: item.rating,
-        category_id: item.category_id,
-        // Only conditionally add store_id if it exists in the data
-        ...(item.store_id !== undefined ? { store_id: item.store_id } : {}),
-        created_at: item.created_at,
-        updated_at: item.updated_at
-      }));
+      // Map the response data to Product type explicitly 
+      // without relying on type inference which causes the deep instantiation error
+      return (data || []).map(item => {
+        const product: Product = {
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          image: item.image,
+          category: typeof item.category === 'object' ? item.category?.name || '' : '',
+          featured: Boolean(item.featured),
+          description: item.description || '',
+          images: Array.isArray(item.images) ? item.images : [],
+          sku: item.sku || '',
+          stock: typeof item.stock === 'number' ? item.stock : 0,
+          attributes: item.attributes ? item.attributes : {},
+          rating: typeof item.rating === 'number' ? item.rating : 0,
+          category_id: item.category_id || '',
+          created_at: item.created_at || '',
+          updated_at: item.updated_at || ''
+        };
+        
+        // Add store_id only if it exists in the source data
+        if ('store_id' in item) {
+          (product as any).store_id = item.store_id;
+        }
+        
+        return product;
+      });
     } catch (err) {
       console.error('Unexpected error fetching store products:', err);
       return [];
