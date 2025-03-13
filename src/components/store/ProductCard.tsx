@@ -1,13 +1,12 @@
 
 import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Heart, Star } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { Product } from '@/types/store';
 import { useCart } from '@/contexts/CartContext';
-import RatingStars from './RatingStars';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 
 interface ProductCardProps {
   product: Product;
@@ -16,6 +15,9 @@ interface ProductCardProps {
 const ProductCard = ({ product }: ProductCardProps) => {
   const { addToCart } = useCart();
   const [isFavorite, setIsFavorite] = useState(false);
+  
+  // Format price with 2 decimal places
+  const formattedPrice = product.price.toFixed(2);
   
   // Extract category name
   const categoryName = typeof product.category === 'string' 
@@ -31,8 +33,8 @@ const ProductCard = ({ product }: ProductCardProps) => {
 
   return (
     <Link to={`/store/product/${product.id}`}>
-      <Card className="overflow-hidden border-none shadow-sm hover:shadow-md transition-all duration-200">
-        <div className="aspect-square relative overflow-hidden rounded-lg">
+      <Card className="overflow-hidden border-none shadow-sm hover:shadow-md transition-all duration-200 relative">
+        <div className="aspect-square relative overflow-hidden rounded-xl">
           <img 
             src={product.image} 
             alt={product.name}
@@ -41,7 +43,7 @@ const ProductCard = ({ product }: ProductCardProps) => {
           <Button
             variant="ghost"
             size="icon"
-            className={`absolute top-2 right-2 bg-white/80 backdrop-blur-sm rounded-full hover:bg-white ${
+            className={`absolute top-2 right-2 bg-white rounded-full hover:bg-white ${
               isFavorite ? 'text-red-500' : 'text-gray-500'
             }`}
             onClick={handleToggleFavorite}
@@ -51,17 +53,16 @@ const ProductCard = ({ product }: ProductCardProps) => {
         </div>
         
         <CardContent className="p-3">
-          <div className="text-sm font-medium mb-1 line-clamp-1">
+          <div className="text-xs uppercase text-gray-500">
+            {categoryName || "KIDS STYLISH CLOTHES"}
+          </div>
+          
+          <div className="text-sm font-medium line-clamp-1 mb-1">
             {product.name}
           </div>
           
-          <div className="flex items-center space-x-1 rtl:space-x-reverse mb-1">
-            <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-            <span className="text-xs font-medium">{product.rating?.toFixed(1) || "4.5"}</span>
-          </div>
-          
           <div className="font-bold">
-            {product.price.toFixed(3)} KWD
+            ${formattedPrice}
           </div>
         </CardContent>
       </Card>

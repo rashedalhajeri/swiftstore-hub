@@ -1,13 +1,13 @@
 
 import React from 'react';
 import { Store } from '@/types/store';
-import { Heart, ShoppingCart, User, Search } from 'lucide-react';
+import { Bell, Heart, Home, Search, ShoppingCart, User } from 'lucide-react';
 import { AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Link } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface StoreHeaderProps {
   store: Store | null;
@@ -43,76 +43,97 @@ const StoreHeader = ({ store, error, isLoading }: StoreHeaderProps) => {
     );
   }
 
-  // Mobile header inspired by the image
   return (
-    <div className="w-full mb-8">
-      <div className="container mx-auto px-4">
-        {/* Top navigation bar */}
-        <div className="flex items-center justify-between py-4">
-          <div className="flex items-center">
-            <h1 className="text-lg font-bold md:text-xl">Explore</h1>
-          </div>
-          
-          <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" className="rounded-full">
-              <Search className="h-5 w-5" />
-            </Button>
-          </div>
+    <div className="w-full bg-background">
+      {/* Top header with profile and notification */}
+      <div className="flex items-center justify-between py-3 px-4">
+        <div className="flex items-center gap-2">
+          <Avatar className="w-8 h-8 border">
+            <AvatarImage src="https://github.com/shadcn.png" alt="User" />
+            <AvatarFallback>CN</AvatarFallback>
+          </Avatar>
+          <span className="font-semibold text-sm">TARIQUL ISLAM</span>
         </div>
         
-        {/* Banner with promotion */}
-        <div className="w-full bg-gray-900 text-white rounded-2xl overflow-hidden mb-8">
-          <div className="flex items-center p-4 md:p-6">
-            <div className="flex-1">
-              <h3 className="font-bold text-lg md:text-xl">خصم 50% على طلبك الأول</h3>
-              <p className="text-sm text-gray-300 mb-3">استمتع بأفضل المنتجات بأفضل الأسعار</p>
-              <Button size="sm" className="bg-primary hover:bg-primary/90 rounded-full text-white">تسوق الآن</Button>
+        <Button variant="ghost" size="icon" className="rounded-full">
+          <Bell className="h-5 w-5" />
+        </Button>
+      </div>
+      
+      {/* Black promotional banner */}
+      <div className="mx-4 mb-6">
+        <div className="bg-black text-white rounded-xl overflow-hidden">
+          <div className="flex items-center p-4">
+            <div className="flex-1 mr-2">
+              <p className="text-xs uppercase mb-1">GET YOUR SPECIAL SALE</p>
+              <h3 className="font-bold text-2xl mb-2">UP TO <span className="text-yellow-400">30%</span></h3>
+              <Button variant="outline" size="sm" className="bg-white text-black rounded-full text-xs px-4 py-0 h-8 hover:bg-gray-100">
+                SHOP NOW
+              </Button>
             </div>
-            <div className="hidden md:block w-1/3">
+            <div className="w-1/2">
               <img 
-                src="/lovable-uploads/e3416c54-8cd7-4e20-9137-8996253aaf72.png" 
+                src="/lovable-uploads/a8406f59-b32a-4672-af43-f1de97a76465.png" 
                 alt="Promotion" 
-                className="w-40 h-40 object-contain" 
+                className="object-cover w-full h-auto"
               />
             </div>
           </div>
         </div>
       </div>
       
-      {/* Bottom navigation - Fixed at bottom on mobile */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t py-2 px-4 md:hidden z-50">
+      {/* Category filter buttons */}
+      <div className="px-4 mb-6">
+        <div className="flex overflow-x-auto space-x-2 rtl:space-x-reverse no-scrollbar">
+          <Button variant="outline" className="whitespace-nowrap rounded-full bg-black text-white border-none">
+            ALL
+          </Button>
+          <Button variant="outline" className="whitespace-nowrap rounded-full text-black">
+            NEW IN
+          </Button>
+          <Button variant="outline" className="whitespace-nowrap rounded-full text-black">
+            PARTYCHIC
+          </Button>
+          <Button variant="outline" className="whitespace-nowrap rounded-full text-black">
+            CASUAL
+          </Button>
+        </div>
+      </div>
+      
+      {/* Popular Products Header */}
+      <div className="flex justify-between items-center px-4 mb-3">
+        <h2 className="text-base font-semibold">POPULAR PRODUCTS</h2>
+        <Link to="#" className="text-xs text-gray-500">View All</Link>
+      </div>
+      
+      {/* Bottom navigation - Fixed at bottom */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t py-3 md:hidden z-50">
         <div className="flex justify-around items-center">
-          <Link to="/store" className="flex flex-col items-center text-primary">
-            <div className="p-1 rounded-full">
-              <Heart className="w-5 h-5" />
-            </div>
-            <span className="text-xs">الرئيسية</span>
+          <Link to="/store" className="flex flex-col items-center text-black">
+            <Home className="w-6 h-6" />
           </Link>
           
           <Link to="/store/favorites" className="flex flex-col items-center text-gray-500">
-            <div className="p-1 rounded-full">
-              <ShoppingCart className="w-5 h-5" />
-            </div>
-            <span className="text-xs">التسوق</span>
+            <Heart className="w-6 h-6" />
           </Link>
           
-          <Link to="/store/cart" className="flex flex-col items-center text-gray-500 relative">
-            <div className="p-1 rounded-full">
-              <ShoppingCart className="w-5 h-5" />
+          <Link to="/store/cart" className="flex flex-col items-center relative">
+            <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center -mt-5">
+              <ShoppingCart className="w-6 h-6" />
               {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 bg-primary text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center">
                   {totalItems}
                 </span>
               )}
             </div>
-            <span className="text-xs">السلة</span>
+          </Link>
+          
+          <Link to="/store/favorites" className="flex flex-col items-center text-gray-500">
+            <Search className="w-6 h-6" />
           </Link>
           
           <Link to="/login" className="flex flex-col items-center text-gray-500">
-            <div className="p-1 rounded-full">
-              <User className="w-5 h-5" />
-            </div>
-            <span className="text-xs">حسابي</span>
+            <User className="w-6 h-6" />
           </Link>
         </div>
       </div>

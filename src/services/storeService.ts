@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Product, Store } from '@/types/store';
 import { toast } from 'sonner';
@@ -120,30 +121,22 @@ export const storeService = {
       
       if (!data) return [];
 
-      // Simplified approach to avoid excessive type instantiation
+      // Fixed approach to avoid excessive type instantiation
       return data.map(item => {
-        // Basic product data
         const product: Product = {
           id: item.id || '',
           name: item.name || '',
           price: Number(item.price) || 0,
           image: item.image || '',
+          category: typeof item.category === 'object' && item.category && 'name' in item.category 
+            ? { name: item.category.name || '' } 
+            : item.category_id || '', // Set a default string value
           featured: Boolean(item.featured) || false,
           description: item.description || '',
           sku: item.sku || '',
           stock: Number(item.stock) || 0,
           rating: Number(item.rating) || 0,
-          category_id: item.category_id || '',
-          created_at: item.created_at || '',
-          updated_at: item.updated_at || ''
         };
-        
-        // Handle category
-        if (item.category && typeof item.category === 'object' && 'name' in item.category) {
-          product.category = { name: item.category.name || '' };
-        } else if (typeof item.category === 'string') {
-          product.category = item.category;
-        }
         
         // Handle images array
         if (Array.isArray(item.images)) {
@@ -151,13 +144,17 @@ export const storeService = {
         }
         
         // Handle attributes object
-        if (item.attributes && typeof item.attributes === 'object' && !Array.isArray(item.attributes)) {
+        if (item.attributes && typeof item.attributes === 'object') {
           product.attributes = {};
-          Object.entries(item.attributes as Record<string, unknown>).forEach(([key, value]) => {
-            if (product.attributes) {
-              product.attributes[key] = typeof value === 'string' ? value : String(value);
+          
+          // Only process if it's not an array
+          if (!Array.isArray(item.attributes)) {
+            for (const [key, value] of Object.entries(item.attributes)) {
+              if (product.attributes) {
+                product.attributes[key] = String(value);
+              }
             }
-          });
+          }
         }
         
         return product;
