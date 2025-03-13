@@ -68,22 +68,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch (profileErr) {
           console.error('Unexpected error checking admin status:', profileErr);
           setIsAdmin(false);
+        } finally {
+          setLoading(false);
         }
       } catch (error) {
         console.error('Unexpected error during session fetch:', error);
         setSession(null);
         setUser(null);
         setIsAdmin(false);
-      } finally {
-        console.log('Session loading complete');
         setLoading(false);
-      }
+      } 
     };
 
     getSession();
 
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, newSession) => {
       console.log('Auth state changed:', event, newSession ? 'with session' : 'no session');
+      
+      setLoading(true); // Ensure loading is set to true when auth state changes
       
       if (event === 'SIGNED_OUT' as AuthChangeEvent) {
         console.log('User signed out, clearing state');
@@ -115,15 +117,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } catch (err) {
           console.error('Error checking admin status on auth change:', err);
           setIsAdmin(false);
+        } finally {
+          setLoading(false); // Ensure loading is set to false after fetching profile
         }
       } else if (event !== 'SIGNED_OUT' as AuthChangeEvent) {
         console.log('No session in auth change event');
         setSession(null);
         setUser(null);
         setIsAdmin(false);
+        setLoading(false);
       }
-      
-      setLoading(false);
     });
 
     return () => {
@@ -146,13 +149,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           description: error.message,
           variant: "destructive",
         });
+        setLoading(false); // Ensure loading is set to false on error
         return { error };
       }
 
+      // Success is handled by the auth listener, but we'll still show a toast
       toast({
         title: "تم تسجيل الدخول بنجاح",
         description: "مرحباً بك مرة أخرى!",
       });
+      
+      // Don't set loading to false here as onAuthStateChange will handle that
+      // after fetching the user profile
 
       return undefined;
     } catch (error) {
@@ -162,9 +170,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: "يرجى المحاولة مرة أخرى لاحقاً",
         variant: "destructive",
       });
-      return { error };
-    } finally {
       setLoading(false);
+      return { error };
     }
   };
 

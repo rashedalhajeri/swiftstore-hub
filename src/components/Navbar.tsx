@@ -17,6 +17,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { Loader2 } from '@/components/ui/loader';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -88,7 +89,14 @@ const Navbar = () => {
         </nav>
 
         <div className="hidden md:flex items-center space-x-4 rtl:space-x-reverse">
-          {!loading && user ? (
+          {loading ? (
+            <Button variant="ghost" size="sm" disabled>
+              <span className="flex items-center">
+                <Loader2 className="w-4 h-4 ml-2 animate-spin" />
+                <span>جاري التحميل</span>
+              </span>
+            </Button>
+          ) : user ? (
             <div className="flex items-center gap-4">
               <Button variant="ghost" size="sm" asChild>
                 <Link to="/dashboard" className="flex items-center gap-2">
@@ -179,7 +187,7 @@ const Navbar = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-          ) : !loading ? (
+          ) : (
             <>
               <Button variant="ghost" asChild>
                 <Link to="/login">تسجيل الدخول</Link>
@@ -188,10 +196,6 @@ const Navbar = () => {
                 <Link to="/register">إنشاء حساب</Link>
               </Button>
             </>
-          ) : (
-            <Button variant="ghost" disabled>
-              <span className="animate-pulse">جاري التحميل...</span>
-            </Button>
           )}
         </div>
 

@@ -10,22 +10,30 @@ import { Loader2 } from 'lucide-react';
 import Logo from '@/components/Logo';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import LoadingScreen from '@/components/LoadingScreen';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { signIn, user } = useAuth();
+  const { signIn, user, loading } = useAuth();
 
   // التحقق إذا كان المستخدم مسجل دخوله بالفعل، وتوجيهه إلى لوحة التحكم
   useEffect(() => {
     if (user) {
+      console.log("User is authenticated, redirecting to dashboard");
       navigate('/dashboard');
     }
   }, [user, navigate]);
+
+  // إذا كان هناك عملية تحميل طويلة، نظهر شاشة التحميل
+  if (loading && !isSubmitting) {
+    console.log("Global auth loading state is active");
+    return <LoadingScreen />;
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,22 +47,21 @@ const Login = () => {
       return;
     }
     
-    setIsLoading(true);
+    setIsSubmitting(true);
     
     try {
+      console.log("Attempting to sign in");
       const result = await signIn(email, password);
       
       if (!result) {
-        // تم تسجيل الدخول بنجاح، سيتم التوجيه تلقائيًا
-        setTimeout(() => {
-          navigate('/dashboard');
-        }, 1000);
+        console.log("Sign in successful, user will be redirected by useEffect when user state updates");
       } else {
-        // تم التعامل مع الخطأ في وظيفة signIn
-        setIsLoading(false);
+        console.log("Sign in failed", result.error);
+        setIsSubmitting(false);
       }
     } catch (error) {
-      setIsLoading(false);
+      console.error("Login error:", error);
+      setIsSubmitting(false);
       toast({
         title: "حدث خطأ",
         description: "حدث خطأ أثناء محاولة تسجيل الدخول",
@@ -125,9 +132,9 @@ const Login = () => {
             <Button 
               type="submit" 
               className="w-full button-hover-effect"
-              disabled={isLoading}
+              disabled={isSubmitting}
             >
-              {isLoading ? (
+              {isSubmitting ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
                 'تسجيل الدخول'
