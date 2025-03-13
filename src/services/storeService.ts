@@ -49,6 +49,7 @@ export const storeService = {
    */
   async getStoreProducts(storeId: string): Promise<Product[]> {
     try {
+      // We'll type this explicitly to avoid deep type instantiation
       const { data, error } = await supabase
         .from('products')
         .select('*, category:categories(name)')
@@ -59,9 +60,9 @@ export const storeService = {
         return [];
       }
       
-      // Map the response data to Product type explicitly 
-      // without relying on type inference which causes the deep instantiation error
+      // Map the raw data to Product type explicitly, avoiding complex type inference 
       return (data || []).map(item => {
+        // Start with a well-defined Product object with explicit types
         const product: Product = {
           id: item.id,
           name: item.name,
