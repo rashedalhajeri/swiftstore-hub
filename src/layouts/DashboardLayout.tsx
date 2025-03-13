@@ -128,7 +128,7 @@ const DashboardLayout = () => {
         />
       )}
 
-      {/* Sidebar - Fixed position */}
+      {/* Sidebar - Fixed */}
       <aside 
         className={cn(
           "bg-sidebar text-sidebar-foreground fixed inset-y-0 right-0 z-30 w-64 flex flex-col h-screen",
@@ -136,7 +136,7 @@ const DashboardLayout = () => {
           "transition-all duration-300 ease-in-out md:translate-x-0"
         )}
       >
-        {/* Sidebar Header - Fixed */}
+        {/* Sidebar Header */}
         <div className="p-4 flex items-center justify-between border-b border-sidebar-border shrink-0">
           <Logo variant="light" size="md" />
           {isMobile && (
@@ -147,8 +147,8 @@ const DashboardLayout = () => {
         </div>
 
         {/* Sidebar Content - Scrollable */}
-        <div className="flex-1 overflow-y-auto">
-          <nav className="px-3 py-4 space-y-2">
+        <div className="flex-1 overflow-y-auto py-2">
+          <nav className="px-3 space-y-1">
             {sidebarItems.map((item) => {
               const isActive = item.href === location.pathname ||
                               (item.href !== '/dashboard' && location.pathname.startsWith(item.href));
@@ -171,7 +171,7 @@ const DashboardLayout = () => {
                   </Link>
                   
                   {hasSubmenu && isSettingsItem && isSettingsPage && (
-                    <div className="mr-6 mt-2 border-r pr-2 border-sidebar-border space-y-1">
+                    <div className="mr-6 mt-1 border-r pr-2 border-sidebar-border space-y-1">
                       {item.submenu.map((subItem) => {
                         const isSubActive = location.pathname === subItem.href;
                         
@@ -199,7 +199,7 @@ const DashboardLayout = () => {
           </nav>
         </div>
 
-        {/* Sidebar Footer - Fixed */}
+        {/* Sidebar Footer */}
         <div className="p-4 border-t border-sidebar-border shrink-0">
           <div className="flex items-center gap-3">
             <Avatar className="h-9 w-9 border border-sidebar-accent">
@@ -217,12 +217,12 @@ const DashboardLayout = () => {
         </div>
       </aside>
 
-      {/* Main Content - Adjusted for sidebar width */}
+      {/* Main Content */}
       <div className={cn(
         "flex-1 flex flex-col h-screen w-full",
-        sidebarOpen ? "md:ml-64" : ""
+        sidebarOpen ? "md:mr-64" : ""
       )}>
-        {/* Header - Fixed at top */}
+        {/* Header */}
         <header className="bg-background/95 backdrop-blur-md border-b h-16 flex items-center px-4 sticky top-0 z-10">
           <div className="flex w-full items-center justify-between">
             <div className="flex items-center gap-3">
@@ -233,7 +233,7 @@ const DashboardLayout = () => {
                 <Menu size={20} />
               </button>
               
-              {/* Settings Breadcrumb Navigation */}
+              {/* Settings Breadcrumb */}
               {isSettingsPage && (
                 <div className="flex items-center">
                   <Link to="/dashboard/settings" className="text-sm font-medium">
@@ -308,7 +308,7 @@ const DashboardLayout = () => {
           </div>
         )}
 
-        {/* Page Content - Scrollable with fixed header */}
+        {/* Page Content - Scrollable */}
         <main className="flex-1 overflow-y-auto">
           <div className="container py-6 px-4 md:px-6">
             <Outlet />
