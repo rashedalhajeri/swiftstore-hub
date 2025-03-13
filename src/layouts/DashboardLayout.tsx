@@ -92,6 +92,7 @@ const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [userFullName, setUserFullName] = useState('');
   const [userEmail, setUserEmail] = useState('');
+  const [storeLogo, setStoreLogo] = useState<string | null>(null);
   const location = useLocation();
   const isMobile = useIsMobile();
   const {
@@ -140,6 +141,34 @@ const DashboardLayout = () => {
     fetchUserProfile();
   }, [user]);
 
+  useEffect(() => {
+    const storedLogo = localStorage.getItem('storeLogo');
+    if (storedLogo) {
+      setStoreLogo(storedLogo);
+    }
+    
+    const fetchStoreLogo = async () => {
+      if (user) {
+        try {
+          const { data, error } = await supabase
+            .from('stores')
+            .select('logo')
+            .eq('user_id', user.id)
+            .single();
+            
+          if (data && data.logo) {
+            setStoreLogo(data.logo);
+            localStorage.setItem('storeLogo', data.logo);
+          }
+        } catch (error) {
+          console.error('Error fetching store logo:', error);
+        }
+      }
+    };
+    
+    fetchStoreLogo();
+  }, [user]);
+
   const handleSignOut = async () => {
     await signOut();
   };
@@ -154,7 +183,7 @@ const DashboardLayout = () => {
         <div className="p-4 flex items-center justify-between border-b border-sidebar-border shrink-0">
           <Logo variant="light" size="md" />
           {isMobile && <button onClick={() => setSidebarOpen(false)}>
-              <X size={20} className="text-sidebar-foreground" />
+              <X size={20} className="text-sidebar-foreground sidebar-icon" />
             </button>}
         </div>
 
@@ -165,17 +194,17 @@ const DashboardLayout = () => {
             const hasSubmenu = item.submenu && item.submenu.length > 0;
             const isSettingsItem = item.href === '/dashboard/settings';
             return <div key={item.label} className="space-y-1">
-                  <Link to={item.href} className={cn("flex items-center gap-3 p-2.5 rounded-md transition-colors", isActive ? "bg-sidebar-accent text-sidebar-accent-foreground" : "hover:bg-sidebar-accent/50")}>
-                    <item.icon size={20} />
-                    <span>{item.label}</span>
+                  <Link to={item.href} className={cn("flex items-center gap-3 p-2.5 rounded-md transition-colors sidebar-text", isActive ? "bg-sidebar-accent text-sidebar-accent-foreground" : "hover:bg-sidebar-accent/50")}>
+                    <item.icon size={20} className="sidebar-icon" />
+                    <span className="sidebar-text">{item.label}</span>
                   </Link>
                   
                   {hasSubmenu && isSettingsItem && isSettingsPage && <div className="mr-6 mt-1 border-r pr-2 border-sidebar-border space-y-1">
                       {item.submenu.map(subItem => {
                   const isSubActive = location.pathname === subItem.href;
-                  return <Link key={subItem.href} to={subItem.href} className={cn("flex items-center gap-3 p-2 rounded-md text-sm transition-colors", isSubActive ? "bg-sidebar-accent text-sidebar-accent-foreground" : "hover:bg-sidebar-accent/50")}>
-                            <subItem.icon size={18} />
-                            <span>{subItem.label}</span>
+                  return <Link key={subItem.href} to={subItem.href} className={cn("flex items-center gap-3 p-2 rounded-md text-sm transition-colors sidebar-text", isSubActive ? "bg-sidebar-accent text-sidebar-accent-foreground" : "hover:bg-sidebar-accent/50")}>
+                            <subItem.icon size={18} className="sidebar-icon" />
+                            <span className="sidebar-text">{subItem.label}</span>
                           </Link>;
                 })}
                     </div>}
@@ -188,31 +217,35 @@ const DashboardLayout = () => {
           <div className="flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <Avatar className="h-9 w-9 border border-sidebar-accent">
-                <AvatarImage src="https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=100&h=100&auto=format&fit=crop" alt="User Avatar" />
-                <AvatarFallback>
-                  {userFullName ? userFullName.charAt(0).toUpperCase() : 'U'}
+                {storeLogo ? (
+                  <AvatarImage src={storeLogo} alt="شعار المتجر" />
+                ) : (
+                  <AvatarImage src="/placeholder.svg" alt="صورة افتراضية" />
+                )}
+                <AvatarFallback className="bg-sidebar-accent text-sidebar-foreground sidebar-text">
+                  {userFullName ? userFullName.charAt(0).toUpperCase() : 'م'}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{userFullName}</p>
-                <p className="text-xs text-sidebar-foreground/70 truncate">{userEmail}</p>
+                <p className="text-sm font-medium truncate sidebar-text">{userFullName}</p>
+                <p className="text-xs text-sidebar-foreground/70 truncate sidebar-text">{userEmail}</p>
               </div>
               <Button variant="ghost" size="icon" className="text-sidebar-foreground" onClick={handleSignOut}>
-                <LogOut size={18} />
+                <LogOut size={18} className="sidebar-logout-icon" />
               </Button>
             </div>
             
             <div className="grid grid-cols-2 gap-2 mt-1">
-              <Button variant="outline" size="sm" className="bg-sidebar-accent/50 border-sidebar-border text-sidebar-foreground w-full" asChild>
+              <Button variant="outline" size="sm" className="bg-sidebar-accent/50 border-sidebar-border text-sidebar-foreground w-full sidebar-text" asChild>
                 <Link to="/store" className="flex items-center justify-center gap-1">
-                  <Store size={14} />
-                  <span className="text-xs">عرض المتجر</span>
+                  <Store size={14} className="sidebar-icon" />
+                  <span className="text-xs sidebar-text">عرض المتجر</span>
                 </Link>
               </Button>
-              <Button variant="outline" size="sm" className="bg-sidebar-accent/50 border-sidebar-border text-sidebar-foreground w-full" asChild>
+              <Button variant="outline" size="sm" className="bg-sidebar-accent/50 border-sidebar-border text-sidebar-foreground w-full sidebar-text" asChild>
                 <Link to="/dashboard/settings/store" className="flex items-center justify-center gap-1">
-                  <Edit size={14} />
-                  <span className="text-xs">تحرير المتجر</span>
+                  <Edit size={14} className="sidebar-icon" />
+                  <span className="text-xs sidebar-text">تحرير المتجر</span>
                 </Link>
               </Button>
             </div>
@@ -223,7 +256,6 @@ const DashboardLayout = () => {
       <div className={cn("flex-1 flex flex-col h-screen w-full", sidebarOpen ? "md:mr-64" : "")}>
         {/* Header */}
         
-
         {isSettingsPage && !isMobile && <div className="bg-background border-b p-0 w-full sticky top-16 z-10">
             <div className="container flex-shrink-0 h-14 flex items-center overflow-x-auto">
               <nav className="flex items-center space-x-4 rtl:space-x-reverse">
