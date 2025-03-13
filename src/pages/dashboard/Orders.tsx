@@ -68,7 +68,7 @@ const SAMPLE_ORDERS: Order[] = [
     items: [
       {
         product: {
-          id: 1,
+          id: "1",
           name: "هاتف ذكي Samsung Galaxy S22",
           price: 299.99,
           image: "https://via.placeholder.com/150",
@@ -79,7 +79,7 @@ const SAMPLE_ORDERS: Order[] = [
       },
       {
         product: {
-          id: 2,
+          id: "2",
           name: "سماعات لاسلكية Sony WH-1000XM4",
           price: 149.99,
           image: "https://via.placeholder.com/150",
@@ -115,7 +115,7 @@ const SAMPLE_ORDERS: Order[] = [
     items: [
       {
         product: {
-          id: 7,
+          id: "7",
           name: "مكنسة كهربائية Dyson V11",
           price: 349.99,
           image: "https://via.placeholder.com/150",
@@ -147,7 +147,7 @@ const SAMPLE_ORDERS: Order[] = [
     items: [
       {
         product: {
-          id: 8,
+          id: "8",
           name: "مجموعة أواني طبخ",
           price: 89.99,
           image: "https://via.placeholder.com/150",
@@ -183,7 +183,7 @@ const SAMPLE_ORDERS: Order[] = [
     items: [
       {
         product: {
-          id: 5,
+          id: "5",
           name: "قميص رجالي كلاسيكي",
           price: 39.99,
           image: "https://via.placeholder.com/150",
@@ -194,7 +194,7 @@ const SAMPLE_ORDERS: Order[] = [
       },
       {
         product: {
-          id: 6,
+          id: "6",
           name: "كتاب التفكير السريع والبطيء",
           price: 15.99,
           image: "https://via.placeholder.com/150",
@@ -225,7 +225,7 @@ const SAMPLE_ORDERS: Order[] = [
     items: [
       {
         product: {
-          id: 10,
+          id: "10",
           name: "كاميرا Canon EOS 90D",
           price: 799.99,
           image: "https://via.placeholder.com/150",

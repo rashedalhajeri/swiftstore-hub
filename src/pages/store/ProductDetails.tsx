@@ -30,12 +30,12 @@ const ProductDetails = () => {
   const { addToCart } = useCart();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState('');
-  const [product, setProduct] = useState(id ? getProductById(Number(id)) : undefined);
+  const [product, setProduct] = useState(id ? getProductById(id) : undefined);
   const [relatedProducts, setRelatedProducts] = useState(product ? getRelatedProducts(product.category, product.id) : []);
 
   useEffect(() => {
     if (id) {
-      const foundProduct = getProductById(Number(id));
+      const foundProduct = getProductById(id);
       if (foundProduct) {
         setProduct(foundProduct);
         setSelectedImage(foundProduct.image);

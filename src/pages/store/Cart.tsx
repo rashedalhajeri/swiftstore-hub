@@ -29,11 +29,11 @@ const Cart = () => {
     .sort(() => 0.5 - Math.random())
     .slice(0, 4);
 
-  const handleQuantityChange = (productId: number, newQuantity: number) => {
+  const handleQuantityChange = (productId: string, newQuantity: number) => {
     updateQuantity(productId, newQuantity);
   };
 
-  const handleRemoveItem = (productId: number) => {
+  const handleRemoveItem = (productId: string) => {
     removeFromCart(productId);
   };
 
