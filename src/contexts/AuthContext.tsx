@@ -28,10 +28,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const getSession = async () => {
       setLoading(true);
       try {
+        console.log('Fetching session...');
         const { data, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error('Error getting session:', error);
+          setLoading(false);
           return;
         }
 
@@ -40,17 +42,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         // التحقق مما إذا كان المستخدم مسؤولاً
         if (data.session?.user) {
-          const { data: profileData } = await supabase
+          console.log('User found, checking admin status...');
+          const { data: profileData, error: profileError } = await supabase
             .from('profiles')
             .select('is_admin')
             .eq('id', data.session.user.id)
             .single();
           
-          setIsAdmin(!!profileData?.is_admin);
+          if (profileError) {
+            console.error('Error fetching profile:', profileError);
+          } else {
+            console.log('Profile data:', profileData);
+            setIsAdmin(!!profileData?.is_admin);
+          }
         }
       } catch (error) {
         console.error('Unexpected error during session fetch:', error);
       } finally {
+        console.log('Session loading complete');
         setLoading(false);
       }
     };
@@ -84,6 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signIn = async (email: string, password: string) => {
     try {
+      setLoading(true);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -112,11 +122,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         variant: "destructive",
       });
       return { error };
+    } finally {
+      setLoading(false);
     }
   };
 
   const signUp = async (email: string, password: string, metadata?: any) => {
     try {
+      setLoading(true);
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -148,11 +161,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         variant: "destructive",
       });
       return { error };
+    } finally {
+      setLoading(false);
     }
   };
 
   const signOut = async () => {
     try {
+      setLoading(true);
       await supabase.auth.signOut();
       toast({
         title: "تم تسجيل الخروج",
@@ -165,6 +181,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: "يرجى المحاولة مرة أخرى",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 

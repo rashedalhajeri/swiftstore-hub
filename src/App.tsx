@@ -33,6 +33,7 @@ import SettingsNotifications from "./pages/dashboard/settings/Notifications";
 import SettingsSecurity from "./pages/dashboard/settings/Security";
 import SettingsDomains from "./pages/dashboard/settings/Domains";
 import SettingsSupport from "./pages/dashboard/settings/Support";
+import { Loader2 } from "lucide-react";
 
 const queryClient = new QueryClient();
 
@@ -41,7 +42,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center">جاري التحميل...</div>;
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-secondary/20">
+        <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
+        <p className="text-lg font-medium text-muted-foreground">جاري التحميل...</p>
+      </div>
+    );
   }
   
   if (!user) {
