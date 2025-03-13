@@ -1,7 +1,6 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Session, User } from '@supabase/supabase-js';
+import { Session, User, AuthChangeEvent } from '@supabase/supabase-js';
 import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
@@ -23,7 +22,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  // تحميل جلسة المستخدم والتحقق من حالة التسجيل عند بدء التطبيق
   useEffect(() => {
     const getSession = async () => {
       setLoading(true);
@@ -33,7 +31,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (error) {
           console.error('Error getting session:', error);
-          // في حالة وجود خطأ، نتأكد من تنظيف حالة المستخدم
           setSession(null);
           setUser(null);
           setIsAdmin(false);
@@ -42,7 +39,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
 
         if (!data.session) {
-          // إذا لم يكن هناك جلسة، نتأكد من تنظيف حالة المستخدم
           console.log('No active session found');
           setSession(null);
           setUser(null);
@@ -55,7 +51,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(data.session);
         setUser(data.session.user);
 
-        // التحقق من حالة المسؤول
         try {
           const { data: profileData, error: profileError } = await supabase
             .from('profiles')
@@ -76,7 +71,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } catch (error) {
         console.error('Unexpected error during session fetch:', error);
-        // في حالة حدوث أي استثناء، نتأكد من تنظيف حالة المستخدم
         setSession(null);
         setUser(null);
         setIsAdmin(false);
@@ -86,14 +80,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
-    // تحميل الجلسة فورًا عند بدء التطبيق
     getSession();
 
-    // الاستماع لتغييرات حالة المصادقة
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, newSession) => {
       console.log('Auth state changed:', event, newSession ? 'with session' : 'no session');
       
-      // التعامل مع تسجيل الخروج بشكل فوري
       if (event === 'SIGNED_OUT') {
         console.log('User signed out, clearing state');
         setSession(null);
@@ -103,7 +94,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
       
-      // التعامل مع تحديث الجلسة أو تسجيل الدخول
       if (newSession) {
         console.log('Session updated:', newSession.user.id);
         setSession(newSession);
@@ -127,7 +117,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setIsAdmin(false);
         }
       } else if (event !== 'SIGNED_OUT') {
-        // إذا لم يكن هناك جلسة ولم يكن الحدث تسجيل خروج، نتأكد من تنظيف الحالة
         console.log('No session in auth change event');
         setSession(null);
         setUser(null);
@@ -223,7 +212,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(true);
       console.log('Attempting to sign out...');
       
-      // تنظيف حالة المستخدم فورًا قبل استدعاء signOut للتأكد من تحديث الواجهة بشكل فوري
       setSession(null);
       setUser(null);
       setIsAdmin(false);
