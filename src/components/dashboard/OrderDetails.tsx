@@ -8,7 +8,12 @@ import {
   Mail, 
   Calendar,
   Tag,
-  DollarSign
+  DollarSign,
+  Package,
+  FileText,
+  Truck,
+  User,
+  Receipt
 } from 'lucide-react';
 import { 
   Table, 
@@ -20,13 +25,15 @@ import {
 } from "@/components/ui/table";
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 
 interface OrderDetailsProps {
   order: Order;
+  isInvoice?: boolean;
 }
 
-export const OrderDetails: React.FC<OrderDetailsProps> = ({ order }) => {
+export const OrderDetails: React.FC<OrderDetailsProps> = ({ order, isInvoice = false }) => {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return new Intl.DateTimeFormat('ar-KW', { 
@@ -65,127 +72,327 @@ export const OrderDetails: React.FC<OrderDetailsProps> = ({ order }) => {
     }
   };
 
+  const getSubtotal = () => {
+    return order.items.reduce((total, item) => total + (item.product.price * item.quantity), 0);
+  };
+
+  const getShippingCost = () => {
+    return 0; // يمكن تعديل هذا لاحقًا لحساب تكلفة الشحن الفعلية
+  };
+
+  const getTaxAmount = () => {
+    return 0; // يمكن تعديل هذا لاحقًا لحساب الضريبة الفعلية
+  };
+
+  // تنسيق المبلغ مع العملة
+  const formatCurrency = (amount: number) => {
+    return `${amount.toFixed(2)} KWD`;
+  };
+
+  // عرض الفاتورة
+  if (isInvoice) {
+    return (
+      <div className="bg-white p-6 rounded-lg shadow-md" style={{ direction: "rtl" }}>
+        <div className="flex flex-col md:flex-row justify-between items-start mb-8">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-800">فاتورة</h1>
+            <p className="text-gray-500 mt-1">#{order.id}</p>
+          </div>
+          <div className="mt-4 md:mt-0 text-left md:text-right">
+            <div className="flex items-center gap-2 justify-end">
+              <Calendar className="h-4 w-4 text-gray-500" />
+              <span className="text-gray-700">{formatDate(order.createdAt)}</span>
+            </div>
+            <div className="flex items-center gap-2 justify-end mt-2">
+              <Tag className="h-4 w-4 text-gray-500" />
+              <span>{getStatusBadge(order.status)}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          <div>
+            <h3 className="text-gray-800 font-semibold mb-3 flex items-center gap-2">
+              <User className="h-4 w-4" />
+              <span>بيانات العميل</span>
+            </h3>
+            <div className="bg-gray-50 p-4 rounded-md">
+              <p className="font-medium text-gray-700">{order.shipping.name}</p>
+              <p className="text-gray-600 mt-2">{order.shipping.email}</p>
+              <p className="text-gray-600">{order.shipping.phone}</p>
+            </div>
+          </div>
+          
+          <div>
+            <h3 className="text-gray-800 font-semibold mb-3 flex items-center gap-2">
+              <MapPin className="h-4 w-4" />
+              <span>عنوان الشحن</span>
+            </h3>
+            <div className="bg-gray-50 p-4 rounded-md">
+              <p className="text-gray-600">{order.shipping.address}</p>
+              <p className="text-gray-600">{order.shipping.city}، {order.shipping.state} {order.shipping.zipCode}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mb-8">
+          <h3 className="text-gray-800 font-semibold mb-3 flex items-center gap-2">
+            <Package className="h-4 w-4" />
+            <span>المنتجات</span>
+          </h3>
+          <div className="bg-gray-50 rounded-md overflow-hidden">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-gray-100">
+                  <TableHead className="font-semibold">المنتج</TableHead>
+                  <TableHead className="text-left font-semibold">السعر</TableHead>
+                  <TableHead className="text-left font-semibold">الكمية</TableHead>
+                  <TableHead className="text-left font-semibold">المجموع</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {order.items.map((item, index) => (
+                  <TableRow key={index} className="border-b border-gray-200">
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-3">
+                        <div className="h-12 w-12 rounded-md overflow-hidden border border-gray-200">
+                          <img 
+                            src={item.product.image} 
+                            alt={item.product.name} 
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                        <span>{item.product.name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>{formatCurrency(item.product.price)}</TableCell>
+                    <TableCell>{item.quantity}</TableCell>
+                    <TableCell>{formatCurrency(item.product.price * item.quantity)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          <div>
+            <h3 className="text-gray-800 font-semibold mb-3 flex items-center gap-2">
+              <CreditCard className="h-4 w-4" />
+              <span>معلومات الدفع</span>
+            </h3>
+            <div className="bg-gray-50 p-4 rounded-md">
+              <div className="mb-2">
+                <span className="text-gray-500">طريقة الدفع:</span>
+                <span className="text-gray-700 mr-2">{getPaymentMethodName(order.payment.method)}</span>
+              </div>
+              
+              {order.payment.method === 'credit_card' || order.payment.method === 'debit_card' ? (
+                <>
+                  <div className="mb-2">
+                    <span className="text-gray-500">رقم البطاقة:</span>
+                    <span className="text-gray-700 mr-2">{order.payment.cardNumber}</span>
+                  </div>
+                  {order.payment.cardHolder && (
+                    <div className="mb-2">
+                      <span className="text-gray-500">اسم حامل البطاقة:</span>
+                      <span className="text-gray-700 mr-2">{order.payment.cardHolder}</span>
+                    </div>
+                  )}
+                </>
+              ) : null}
+              
+              {order.payment.transactionId && (
+                <div>
+                  <span className="text-gray-500">رقم العملية:</span>
+                  <span className="text-gray-700 mr-2">{order.payment.transactionId}</span>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <div>
+            <h3 className="text-gray-800 font-semibold mb-3 flex items-center gap-2">
+              <Receipt className="h-4 w-4" />
+              <span>ملخص الطلب</span>
+            </h3>
+            <div className="bg-gray-50 p-4 rounded-md">
+              <div className="flex justify-between mb-2">
+                <span className="text-gray-600">المجموع الفرعي:</span>
+                <span className="text-gray-800 font-medium">{formatCurrency(getSubtotal())}</span>
+              </div>
+              <div className="flex justify-between mb-2">
+                <span className="text-gray-600">الشحن:</span>
+                <span className="text-gray-800 font-medium">{formatCurrency(getShippingCost())}</span>
+              </div>
+              <div className="flex justify-between mb-2">
+                <span className="text-gray-600">الضريبة:</span>
+                <span className="text-gray-800 font-medium">{formatCurrency(getTaxAmount())}</span>
+              </div>
+              <Separator className="my-2" />
+              <div className="flex justify-between mt-2">
+                <span className="text-gray-800 font-semibold">الإجمالي:</span>
+                <span className="text-primary font-bold">{formatCurrency(order.total)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="text-center border-t border-gray-200 pt-6">
+          <p className="text-gray-500 mb-4">شكرًا لتسوقك معنا!</p>
+          <Button className="bg-primary hover:bg-primary/90" onClick={() => window.print()}>
+            <FileText className="mr-2 h-4 w-4" />
+            طباعة الفاتورة
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // عرض تفاصيل الطلب الاعتيادي
   return (
     <div className="space-y-6" style={{ direction: "rtl" }}>
-      {/* Order Summary */}
+      {/* ملخص الطلب */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
+        <Card className="border-0 shadow-sm">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
+                <Calendar className="h-4 w-4 text-primary" />
                 <span className="text-sm font-medium">تاريخ الطلب</span>
               </div>
               <span className="text-sm">{formatDate(order.createdAt)}</span>
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-0 shadow-sm">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Tag className="h-4 w-4 text-muted-foreground" />
+                <Tag className="h-4 w-4 text-primary" />
                 <span className="text-sm font-medium">حالة الطلب</span>
               </div>
               {getStatusBadge(order.status)}
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="border-0 shadow-sm">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
+                <DollarSign className="h-4 w-4 text-primary" />
                 <span className="text-sm font-medium">إجمالي الطلب</span>
               </div>
-              <span className="text-sm font-bold">{order.total.toFixed(2)} KWD</span>
+              <span className="text-sm font-bold">{formatCurrency(order.total)}</span>
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Order Items */}
-      <div>
-        <h3 className="text-lg font-medium mb-3">المنتجات</h3>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>المنتج</TableHead>
-              <TableHead>السعر</TableHead>
-              <TableHead>الكمية</TableHead>
-              <TableHead>المجموع</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {order.items.map((item, index) => (
-              <TableRow key={index}>
-                <TableCell className="font-medium">
-                  <div className="flex items-center gap-2">
-                    <div className="h-10 w-10 rounded overflow-hidden">
-                      <img 
-                        src={item.product.image} 
-                        alt={item.product.name} 
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                    <span>{item.product.name}</span>
-                  </div>
-                </TableCell>
-                <TableCell>{item.product.price.toFixed(2)} KWD</TableCell>
-                <TableCell>{item.quantity}</TableCell>
-                <TableCell>{(item.product.price * item.quantity).toFixed(2)} KWD</TableCell>
+      {/* بطاقة المنتجات */}
+      <Card className="border-0 shadow-sm overflow-hidden">
+        <CardHeader className="bg-gray-50 border-b pb-4">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Package className="h-5 w-5 text-primary" />
+            المنتجات
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="p-0">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-gray-50/50">
+                <TableHead>المنتج</TableHead>
+                <TableHead className="text-left">السعر</TableHead>
+                <TableHead className="text-left">الكمية</TableHead>
+                <TableHead className="text-left">المجموع</TableHead>
               </TableRow>
-            ))}
-            <TableRow>
-              <TableCell colSpan={3} className="text-left font-bold">المجموع الفرعي</TableCell>
-              <TableCell className="font-bold">{order.total.toFixed(2)} KWD</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell colSpan={3} className="text-left font-bold">الشحن</TableCell>
-              <TableCell className="font-bold">0.00 KWD</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell colSpan={3} className="text-left font-bold">الضريبة</TableCell>
-              <TableCell className="font-bold">0.00 KWD</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell colSpan={3} className="text-left font-bold">الإجمالي</TableCell>
-              <TableCell className="font-bold">{order.total.toFixed(2)} KWD</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </div>
+            </TableHeader>
+            <TableBody>
+              {order.items.map((item, index) => (
+                <TableRow key={index} className="hover:bg-gray-50/50">
+                  <TableCell className="font-medium">
+                    <div className="flex items-center gap-3">
+                      <div className="h-12 w-12 rounded-md overflow-hidden border border-gray-100">
+                        <img 
+                          src={item.product.image} 
+                          alt={item.product.name} 
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                      <span>{item.product.name}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell>{formatCurrency(item.product.price)}</TableCell>
+                  <TableCell>{item.quantity}</TableCell>
+                  <TableCell>{formatCurrency(item.product.price * item.quantity)}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+        <CardFooter className="bg-gray-50/50 border-t flex flex-col space-y-2 items-end p-4">
+          <div className="w-full md:w-1/3 space-y-2">
+            <div className="flex justify-between">
+              <span className="text-gray-600">المجموع الفرعي:</span>
+              <span>{formatCurrency(getSubtotal())}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">الشحن:</span>
+              <span>{formatCurrency(getShippingCost())}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-600">الضريبة:</span>
+              <span>{formatCurrency(getTaxAmount())}</span>
+            </div>
+            <Separator />
+            <div className="flex justify-between font-bold">
+              <span>الإجمالي:</span>
+              <span className="text-primary">{formatCurrency(order.total)}</span>
+            </div>
+          </div>
+        </CardFooter>
+      </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Customer Information */}
-        <div>
-          <h3 className="text-lg font-medium mb-3">معلومات العميل</h3>
-          <div className="space-y-4">
-            <div className="flex items-start gap-2">
-              <MapPin className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+        {/* معلومات العميل */}
+        <Card className="border-0 shadow-sm">
+          <CardHeader className="bg-gray-50 border-b pb-4">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <User className="h-5 w-5 text-primary" />
+              معلومات العميل
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 space-y-4">
+            <div className="flex items-start gap-3">
+              <MapPin className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
               <div>
                 <p className="font-medium">{order.shipping.name}</p>
                 <p className="text-sm text-muted-foreground">{order.shipping.address}</p>
                 <p className="text-sm text-muted-foreground">{order.shipping.city}، {order.shipping.state} {order.shipping.zipCode}</p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Phone className="h-5 w-5 text-muted-foreground" />
+            <div className="flex items-center gap-3">
+              <Phone className="h-5 w-5 text-primary" />
               <p>{order.shipping.phone}</p>
             </div>
-            <div className="flex items-center gap-2">
-              <Mail className="h-5 w-5 text-muted-foreground" />
+            <div className="flex items-center gap-3">
+              <Mail className="h-5 w-5 text-primary" />
               <p>{order.shipping.email}</p>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
-        {/* Payment Information */}
-        <div>
-          <h3 className="text-lg font-medium mb-3">معلومات الدفع</h3>
-          <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              <CreditCard className="h-5 w-5 text-muted-foreground" />
+        {/* معلومات الدفع */}
+        <Card className="border-0 shadow-sm">
+          <CardHeader className="bg-gray-50 border-b pb-4">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <CreditCard className="h-5 w-5 text-primary" />
+              معلومات الدفع
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-4 space-y-4">
+            <div className="flex items-center gap-3">
+              <CreditCard className="h-5 w-5 text-primary" />
               <div>
                 <p className="font-medium">طريقة الدفع</p>
                 <p className="text-sm text-muted-foreground">{getPaymentMethodName(order.payment.method)}</p>
@@ -194,13 +401,13 @@ export const OrderDetails: React.FC<OrderDetailsProps> = ({ order }) => {
             
             {order.payment.method === 'credit_card' || order.payment.method === 'debit_card' ? (
               <>
-                <div className="text-sm">
-                  <p className="text-muted-foreground">رقم البطاقة</p>
+                <div className="pr-8 space-y-1">
+                  <p className="text-sm text-muted-foreground">رقم البطاقة</p>
                   <p>{order.payment.cardNumber}</p>
                 </div>
                 {order.payment.cardHolder && (
-                  <div className="text-sm">
-                    <p className="text-muted-foreground">اسم حامل البطاقة</p>
+                  <div className="pr-8 space-y-1">
+                    <p className="text-sm text-muted-foreground">اسم حامل البطاقة</p>
                     <p>{order.payment.cardHolder}</p>
                   </div>
                 )}
@@ -208,14 +415,26 @@ export const OrderDetails: React.FC<OrderDetailsProps> = ({ order }) => {
             ) : null}
             
             {order.payment.transactionId && (
-              <div className="text-sm">
-                <p className="text-muted-foreground">رقم العملية</p>
+              <div className="pr-8 space-y-1">
+                <p className="text-sm text-muted-foreground">رقم العملية</p>
                 <p>{order.payment.transactionId}</p>
               </div>
             )}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="flex justify-end mt-6">
+        <Button variant="outline" className="gap-2 mr-2" onClick={() => window.print()}>
+          <FileText className="h-4 w-4" />
+          طباعة
+        </Button>
+        <Button className="gap-2 bg-primary hover:bg-primary/90" onClick={() => { }}>
+          <Truck className="h-4 w-4" />
+          عرض كفاتورة
+        </Button>
       </div>
     </div>
   );
 };
+
