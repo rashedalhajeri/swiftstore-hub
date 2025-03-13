@@ -74,24 +74,29 @@ const StoreHeader = ({
         </Button>
       </div>
       
-      {/* Black promotional banner */}
+      {/* Black promotional banner - Image-based design that maintains structure regardless of content */}
       <div className="mx-4 mb-6">
-        <div className="bg-black text-white rounded-xl overflow-hidden">
-          <div className="flex items-center p-4">
-            <div className="flex-1 mr-2">
+        <div className="bg-black text-white rounded-xl overflow-hidden h-24 md:h-32 relative">
+          {/* Banner Image */}
+          <div className="absolute inset-0 right-0 w-1/2 h-full">
+            <img 
+              src="/lovable-uploads/a8406f59-b32a-4672-af43-f1de97a76465.png" 
+              alt="Promotion" 
+              className="object-cover w-full h-full"
+            />
+          </div>
+          
+          {/* Optional Text Content Container - Will maintain layout even if empty */}
+          <div className="flex items-center h-full">
+            <div className="flex-1 mr-2 p-4 z-10">
+              {/* Promotional content can be added here if needed */}
               <p className="text-xs uppercase mb-1">GET YOUR SPECIAL SALE</p>
               <h3 className="font-bold text-2xl mb-2">UP TO <span className="text-yellow-400">30%</span></h3>
               <Button variant="outline" size="sm" className="bg-white text-black rounded-full text-xs px-4 py-0 h-8 hover:bg-gray-100">
                 SHOP NOW
               </Button>
             </div>
-            <div className="w-1/2 h-full relative">
-              <img 
-                src="/lovable-uploads/a8406f59-b32a-4672-af43-f1de97a76465.png" 
-                alt="Promotion" 
-                className="object-cover w-full h-full max-h-24 absolute top-0 right-0"
-              />
-            </div>
+            <div className="w-1/2"> {/* Spacer div to maintain layout */}</div>
           </div>
         </div>
       </div>
