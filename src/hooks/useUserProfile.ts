@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 type UseUserProfileResult = {
   isAdmin: boolean;
@@ -47,6 +48,7 @@ export const useUserProfile = (): UseUserProfileResult => {
       
       if (insertError) {
         console.error('Error creating profile:', insertError);
+        toast.error('حدث خطأ أثناء إنشاء الملف الشخصي');
       } else {
         console.log('Profile created successfully with metadata');
       }
@@ -60,7 +62,7 @@ export const useUserProfile = (): UseUserProfileResult => {
     }
   };
 
-  // New function to check if a user has a store and get store information
+  // Function to check if a user has a store and get store information
   const getUserStore = async (userId: string) => {
     try {
       const { data: storeData, error: storeError } = await supabase

@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Package, ShoppingCart, Users, Settings, Menu, X, LogOut, User, Store, CreditCard, Bell, Shield, Globe, HelpCircle, Edit, Tags, Percent, ListFilter, ExternalLink, Plus } from 'lucide-react';
@@ -10,6 +9,8 @@ import { Separator } from '@/components/ui/separator';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { useUserProfile } from '@/hooks/useUserProfile';
+import { toast } from 'sonner';
 
 type SidebarItemType = {
   icon: React.ElementType;
@@ -108,11 +109,9 @@ const DashboardLayout = () => {
   const [isCreatingStore, setIsCreatingStore] = useState(false);
   const location = useLocation();
   const isMobile = useIsMobile();
-  const {
-    user,
-    signOut
-  } = useAuth();
+  const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { getUserStore } = useUserProfile();
 
   useEffect(() => {
     if (isMobile) {
@@ -173,102 +172,107 @@ const DashboardLayout = () => {
       setStoreLogo(storedLogo);
     }
     
+    const storedSlug = localStorage.getItem('storeSlug');
+    if (storedSlug) {
+      setStoreSlug(storedSlug);
+    }
+    
     const fetchStoreInfo = async () => {
-      if (user && !isCreatingStore) {
-        try {
-          // Check if the user already has a store
-          const { data, error } = await supabase
-            .from('stores')
-            .select('logo, slug')
-            .eq('user_id', user.id)
-            .limit(1)
-            .maybeSingle();
-            
-          if (error && error.code !== 'PGRST116') {
-            console.error('Error fetching store info:', error);
-            return;
+      if (!user || isCreatingStore) return;
+      
+      try {
+        setIsCreatingStore(true);
+        
+        const storeData = await getUserStore(user.id);
+        
+        if (storeData) {
+          if (storeData.logo) {
+            setStoreLogo(storeData.logo);
+            localStorage.setItem('storeLogo', storeData.logo);
           }
           
-          if (data) {
-            // Store found, update local state and localStorage
-            if (data.logo) {
-              setStoreLogo(data.logo);
-              localStorage.setItem('storeLogo', data.logo);
-            }
-            if (data.slug) {
-              setStoreSlug(data.slug);
-              localStorage.setItem('storeSlug', data.slug);
+          if (storeData.slug) {
+            setStoreSlug(storeData.slug);
+            localStorage.setItem('storeSlug', storeData.slug);
+          }
+          
+          setIsCreatingStore(false);
+          return;
+        }
+        
+        let storeName = 'متجر.أنا';
+        let storeSlugValue = storedSlug || `store-${Math.random().toString(36).substring(2, 8)}`;
+        
+        if (user.user_metadata) {
+          if (user.user_metadata.store_name) {
+            storeName = user.user_metadata.store_name;
+          }
+          if (user.user_metadata.store_url) {
+            storeSlugValue = user.user_metadata.store_url;
+          }
+        }
+        
+        const { data: existingStore } = await supabase
+          .from('stores')
+          .select('id, slug')
+          .eq('user_id', user.id)
+          .limit(1)
+          .maybeSingle();
+          
+        if (existingStore) {
+          setStoreSlug(existingStore.slug);
+          localStorage.setItem('storeSlug', existingStore.slug);
+          setIsCreatingStore(false);
+          return;
+        }
+        
+        const { error: insertError, data: newStore } = await supabase
+          .from('stores')
+          .insert({
+            user_id: user.id,
+            name: storeName,
+            slug: storeSlugValue,
+            description: 'متجر للملابس والإكسسوارات'
+          })
+          .select()
+          .single();
+          
+        if (insertError) {
+          if (insertError.code === '23505') {
+            const { data: conflictStore } = await supabase
+              .from('stores')
+              .select('slug')
+              .eq('user_id', user.id)
+              .maybeSingle();
+              
+            if (conflictStore) {
+              setStoreSlug(conflictStore.slug);
+              localStorage.setItem('storeSlug', conflictStore.slug);
+              toast.info('تم العثور على متجرك الحالي');
+            } else {
+              console.error('Could not find existing store after constraint error');
+              toast.error('حدث خطأ أثناء إنشاء المتجر');
             }
           } else {
-            // No store found, create one only if we're not already in the process
-            setIsCreatingStore(true);
-            
-            const storedSlug = localStorage.getItem('storeSlug');
-            let storeName = 'متجر.أنا';
-            let storeUrl = storedSlug || `store-${Math.random().toString(36).substring(2, 8)}`;
-            
-            if (user.user_metadata) {
-              if (user.user_metadata.store_name) {
-                storeName = user.user_metadata.store_name;
-              }
-              if (user.user_metadata.store_url) {
-                storeUrl = user.user_metadata.store_url;
-              }
-            }
-            
-            try {
-              // Check one more time to make sure no store was created in another request
-              const { data: existingStore } = await supabase
-                .from('stores')
-                .select('id, slug')
-                .eq('user_id', user.id)
-                .limit(1)
-                .maybeSingle();
-                
-              if (existingStore) {
-                // Store was found in the second check, use that
-                setStoreSlug(existingStore.slug);
-                localStorage.setItem('storeSlug', existingStore.slug);
-                setIsCreatingStore(false);
-                return;
-              }
-              
-              // Create a new store
-              const { error: insertError, data: newStore } = await supabase
-                .from('stores')
-                .insert({
-                  user_id: user.id,
-                  name: storeName,
-                  slug: storeUrl,
-                  description: 'متجر للملابس والإكسسوارات'
-                })
-                .select()
-                .single();
-                
-              if (insertError) {
-                console.error('Error creating default store:', insertError);
-              } else {
-                console.log('New store created successfully:', newStore);
-                setStoreSlug(storeUrl);
-                localStorage.setItem('storeSlug', storeUrl);
-              }
-            } catch (error) {
-              console.error('Error in store creation:', error);
-              setStoreSlug(storeUrl);
-              localStorage.setItem('storeSlug', storeUrl);
-            } finally {
-              setIsCreatingStore(false);
-            }
+            console.error('Error creating default store:', insertError);
+            toast.error('حدث خطأ أثناء إنشاء المتجر');
           }
-        } catch (error) {
-          console.error('Error in fetchStoreInfo:', error);
-          setIsCreatingStore(false);
+        } else {
+          console.log('New store created successfully:', newStore);
+          setStoreSlug(storeSlugValue);
+          localStorage.setItem('storeSlug', storeSlugValue);
+          toast.success('تم إنشاء متجر جديد بنجاح');
         }
+      } catch (error) {
+        console.error('Error in fetchStoreInfo:', error);
+        toast.error('حدث خطأ أثناء التحقق من معلومات المتجر');
+      } finally {
+        setIsCreatingStore(false);
       }
     };
     
     fetchStoreInfo();
-  }, [user, isCreatingStore]);
+  }, [user, getUserStore]);
 
   const handleSignOut = async () => {
     await signOut();
