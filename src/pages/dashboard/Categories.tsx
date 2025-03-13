@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { PlusCircle, Pencil, Trash2, Plus } from 'lucide-react';
+import { PlusCircle, Pencil, Trash2, Plus, AlertCircle } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
+import { useToast } from "@/hooks/use-toast";
 
 // نموذج الفئة
 interface Category {
@@ -39,7 +40,10 @@ const Categories = () => {
   ]);
   
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [currentCategory, setCurrentCategory] = useState<Category | null>(null);
+  const [categoryToDelete, setCategoryToDelete] = useState<Category | null>(null);
+  const { toast } = useToast();
   
   const form = useForm<z.infer<typeof categorySchema>>({
     resolver: zodResolver(categorySchema),
@@ -57,6 +61,10 @@ const Categories = () => {
           ? { ...cat, name: values.name, description: values.description || "" }
           : cat
       ));
+      toast({
+        title: "تم تحديث الفئة",
+        description: `تم تحديث فئة "${values.name}" بنجاح.`,
+      });
     } else {
       // إضافة فئة جديدة
       const newCategory: Category = {
@@ -66,6 +74,10 @@ const Categories = () => {
         products: 0,
       };
       setCategories([...categories, newCategory]);
+      toast({
+        title: "تمت إضافة الفئة",
+        description: `تم إضافة فئة "${values.name}" بنجاح.`,
+      });
     }
     
     // إغلاق النافذة المنبثقة وإعادة تعيين النموذج
@@ -81,8 +93,22 @@ const Categories = () => {
     setIsAddDialogOpen(true);
   };
 
-  const handleDelete = (id: string) => {
-    setCategories(categories.filter(category => category.id !== id));
+  const handleDeleteConfirm = (category: Category) => {
+    setCategoryToDelete(category);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (categoryToDelete) {
+      setCategories(categories.filter(category => category.id !== categoryToDelete.id));
+      setIsDeleteDialogOpen(false);
+      setCategoryToDelete(null);
+      toast({
+        title: "تم حذف الفئة",
+        description: `تم حذف فئة "${categoryToDelete.name}" بنجاح.`,
+        variant: "destructive",
+      });
+    }
   };
 
   const handleAddNew = () => {
@@ -146,7 +172,7 @@ const Categories = () => {
                       <Button variant="ghost" size="icon" onClick={() => handleEdit(category)}>
                         <Pencil size={16} />
                       </Button>
-                      <Button variant="ghost" size="icon" onClick={() => handleDelete(category.id)}>
+                      <Button variant="ghost" size="icon" onClick={() => handleDeleteConfirm(category)}>
                         <Trash2 size={16} />
                       </Button>
                     </div>
@@ -238,6 +264,34 @@ const Categories = () => {
               </DialogFooter>
             </form>
           </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* نافذة تأكيد الحذف */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-destructive" />
+              <DialogTitle>هل أنت متأكد من حذف {categoryToDelete?.name}؟</DialogTitle>
+            </div>
+            <DialogDescription>
+              هذا الإجراء لا يمكن التراجع عنه. سيتم حذف الفئة "{categoryToDelete?.name}" نهائيًا من قاعدة البيانات.
+              {categoryToDelete?.products && categoryToDelete.products > 0 ? (
+                <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded-md text-amber-800">
+                  <strong>تنبيه:</strong> هذه الفئة تحتوي على {categoryToDelete.products} منتج. حذف الفئة قد يؤثر على هذه المنتجات.
+                </div>
+              ) : null}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+              إلغاء
+            </Button>
+            <Button variant="destructive" onClick={confirmDelete}>
+              حذف
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
