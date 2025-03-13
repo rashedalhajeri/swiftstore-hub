@@ -29,9 +29,29 @@ const Login = () => {
     }
   }, [user, navigate]);
 
-  // إذا كان هناك عملية تحميل طويلة، نظهر شاشة التحميل
+  // إذا كان هناك عملية تحميل طويلة، نظهر شاشة التحميل لمدة لا تزيد عن 3 ثوانٍ
+  useEffect(() => {
+    let timeoutId: number | undefined;
+
+    if (loading && !isSubmitting) {
+      console.log("Global auth loading state is active, setting timeout");
+      timeoutId = window.setTimeout(() => {
+        console.log("LoadingScreen timeout reached, forcing navigation check");
+        if (user) {
+          navigate('/dashboard', { replace: true });
+        }
+      }, 3000); // إذا استمر التحميل أكثر من 3 ثوانٍ، نحاول التوجيه
+    }
+
+    return () => {
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, [loading, isSubmitting, user, navigate]);
+
   if (loading && !isSubmitting) {
-    console.log("Global auth loading state is active");
+    console.log("Rendering LoadingScreen");
     return <LoadingScreen />;
   }
 
@@ -54,11 +74,9 @@ const Login = () => {
       const result = await signIn(email, password);
       
       if (!result) {
-        console.log("Sign in successful, user will be redirected by useEffect when user state updates");
-        // هنا نضيف محاولة إضافية للتوجيه في حال لم يعمل useEffect
-        if (user) {
-          navigate('/dashboard', { replace: true });
-        }
+        console.log("Sign in successful, forcing navigation to dashboard");
+        // نقوم بالتوجيه إلى لوحة التحكم مباشرة بعد تسجيل الدخول حتى لو لم يتم تحديث حالة المستخدم
+        navigate('/dashboard', { replace: true });
       } else {
         console.log("Sign in failed", result.error);
         setIsSubmitting(false);

@@ -23,6 +23,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
+  // حل مشكلة حالة التحميل العالقة بعد فترة معينة
+  useEffect(() => {
+    let loadingTimeout: number;
+    
+    if (loading) {
+      loadingTimeout = window.setTimeout(() => {
+        console.log("Auth loading timeout reached - forcing loading state to false");
+        setLoading(false);
+      }, 8000); // إذا استمرت حالة التحميل أكثر من 8 ثوانٍ، نجبرها على الانتهاء
+    }
+    
+    return () => {
+      if (loadingTimeout) window.clearTimeout(loadingTimeout);
+    };
+  }, [loading]);
+
   useEffect(() => {
     const getSession = async () => {
       setLoading(true);
@@ -85,8 +101,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, newSession) => {
       console.log('Auth state changed:', event, newSession ? 'with session' : 'no session');
-      
-      setLoading(true); // Ensure loading is set to true when auth state changes
       
       if (event === 'SIGNED_OUT' as AuthChangeEvent) {
         console.log('User signed out, clearing state');

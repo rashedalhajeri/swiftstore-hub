@@ -40,7 +40,24 @@ const queryClient = new QueryClient();
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
-  if (loading) {
+  // تحديد مدة قصوى للتحميل للتخلص من مشكلة العالق
+  const [loadingTimeout, setLoadingTimeout] = React.useState(false);
+  
+  React.useEffect(() => {
+    let timeoutId: number;
+    
+    if (loading) {
+      timeoutId = window.setTimeout(() => {
+        setLoadingTimeout(true);
+      }, 5000);
+    }
+    
+    return () => {
+      if (timeoutId) window.clearTimeout(timeoutId);
+    };
+  }, [loading]);
+  
+  if (loading && !loadingTimeout) {
     return <LoadingScreen />;
   }
   
@@ -55,7 +72,24 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
-  if (loading) {
+  // تحديد مدة قصوى للتحميل للتخلص من مشكلة العالق
+  const [loadingTimeout, setLoadingTimeout] = React.useState(false);
+  
+  React.useEffect(() => {
+    let timeoutId: number;
+    
+    if (loading) {
+      timeoutId = window.setTimeout(() => {
+        setLoadingTimeout(true);
+      }, 5000);
+    }
+    
+    return () => {
+      if (timeoutId) window.clearTimeout(timeoutId);
+    };
+  }, [loading]);
+  
+  if (loading && !loadingTimeout) {
     return <LoadingScreen />;
   }
   
