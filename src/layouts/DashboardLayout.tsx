@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Package, ShoppingCart, Users, Settings, Menu, X, LogOut, User, Store, CreditCard, Bell, Shield, Globe, HelpCircle, Edit, Tags, Percent, ListFilter } from 'lucide-react';
@@ -150,18 +151,40 @@ const DashboardLayout = () => {
     const fetchStoreLogo = async () => {
       if (user) {
         try {
+          // Using the appropriate database table and column names
           const { data, error } = await supabase
             .from('stores')
             .select('logo')
             .eq('user_id', user.id)
-            .single();
+            .maybeSingle();
             
+          if (error) {
+            console.error('Error fetching store logo:', error);
+            return;
+          }
+          
           if (data && data.logo) {
             setStoreLogo(data.logo);
             localStorage.setItem('storeLogo', data.logo);
+          } else {
+            // Create a default store for the user if none exists
+            const { error: insertError } = await supabase
+              .from('stores')
+              .insert({
+                user_id: user.id,
+                name: 'متجر.أنا',
+                logo: null,
+                description: 'متجر للملابس والإكسسوارات'
+              })
+              .select()
+              .single();
+              
+            if (insertError) {
+              console.error('Error creating default store:', insertError);
+            }
           }
         } catch (error) {
-          console.error('Error fetching store logo:', error);
+          console.error('Error in fetchStoreLogo:', error);
         }
       }
     };

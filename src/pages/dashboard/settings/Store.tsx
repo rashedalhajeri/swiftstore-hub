@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -12,6 +12,9 @@ import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { StoreIcon, Globe, Upload, Facebook, Instagram, Twitter } from "lucide-react";
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from "sonner";
 
 const storeFormSchema = z.object({
   name: z.string().min(2, {
@@ -51,24 +54,94 @@ const defaultValues: Partial<StoreFormValues> = {
 
 const SettingsStore = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { user } = useAuth();
+  const [storeData, setStoreData] = useState<any>(null);
   
   const form = useForm<StoreFormValues>({
     resolver: zodResolver(storeFormSchema),
     defaultValues,
   });
 
-  function onSubmit(data: StoreFormValues) {
+  useEffect(() => {
+    const fetchStoreData = async () => {
+      if (!user) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('stores')
+          .select('*')
+          .eq('user_id', user.id)
+          .maybeSingle();
+          
+        if (error) {
+          console.error('Error fetching store data:', error);
+          return;
+        }
+        
+        if (data) {
+          setStoreData(data);
+          form.reset({
+            name: data.name || defaultValues.name,
+            description: data.description || defaultValues.description,
+            slug: data.slug || defaultValues.slug,
+            logo: data.logo || defaultValues.logo,
+            banner: data.banner || defaultValues.banner,
+            primaryColor: data.primary_color || defaultValues.primaryColor,
+            facebook: data.facebook || defaultValues.facebook,
+            instagram: data.instagram || defaultValues.instagram,
+            twitter: data.twitter || defaultValues.twitter,
+            isPublished: data.is_published ?? defaultValues.isPublished,
+          });
+        }
+      } catch (error) {
+        console.error('Error in fetchStoreData:', error);
+      }
+    };
+    
+    fetchStoreData();
+  }, [user, form]);
+
+  async function onSubmit(data: StoreFormValues) {
     setIsLoading(true);
     
-    // تحديث رابط المتجر في localStorage
-    localStorage.setItem('storeUrl', data.slug);
-    
-    // محاكاة الحفظ في قاعدة البيانات
-    setTimeout(() => {
+    try {
+      // Update store info in Supabase
+      const { error } = await supabase
+        .from('stores')
+        .upsert({
+          user_id: user?.id,
+          name: data.name,
+          description: data.description,
+          slug: data.slug,
+          logo: data.logo,
+          banner: data.banner,
+          primary_color: data.primaryColor,
+          facebook: data.facebook,
+          instagram: data.instagram,
+          twitter: data.twitter,
+          is_published: data.isPublished,
+        });
+        
+      if (error) {
+        console.error('Error updating store:', error);
+        toast.error('حدث خطأ أثناء تحديث المتجر');
+      } else {
+        // تحديث رابط المتجر في localStorage
+        localStorage.setItem('storeUrl', data.slug);
+        
+        // Update store logo in localStorage if available
+        if (data.logo) {
+          localStorage.setItem('storeLogo', data.logo);
+        }
+        
+        toast.success('تم تحديث معلومات المتجر بنجاح');
+      }
+    } catch (error) {
+      console.error('Error in onSubmit:', error);
+      toast.error('حدث خطأ أثناء تحديث المتجر');
+    } finally {
       setIsLoading(false);
-      console.log(data);
-      // يمكن إضافة إشعار هنا "تم تحديث معلومات المتجر بنجاح"
-    }, 1000);
+    }
   }
 
   return (
