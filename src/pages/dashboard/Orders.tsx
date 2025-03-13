@@ -2,25 +2,21 @@ import { useState } from 'react';
 import { 
   Package, 
   Search,
-  ChevronRight,
   Calendar,
-  Clock,
   CreditCard,
   Truck,
   XCircle,
-  Phone,
-  Mail,
-  MapPin,
   CheckCircle2,
   MoreHorizontal,
   FileText,
   AlertCircle,
   User,
-  DollarSign
+  DollarSign,
+  Filter
 } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -154,7 +150,7 @@ const SAMPLE_ORDERS: Order[] = [
           name: "مجموعة أواني طبخ",
           price: 89.99,
           image: "https://via.placeholder.com/150",
-          category: "مستلزمات المطبخ",
+          category: "مستلزمات ��لمطبخ",
           featured: false,
         },
         quantity: 1
@@ -372,7 +368,7 @@ const Orders = () => {
         </div>
         <Button
           variant="outline" 
-          className="button-hover-effect"
+          className="w-full md:w-auto button-hover-effect"
           onClick={() => {
             toast({
               title: "قريباً",
@@ -385,8 +381,8 @@ const Orders = () => {
         </Button>
       </div>
 
-      <div className="flex flex-col md:flex-row items-center gap-4 mb-4">
-        <div className="relative w-full md:w-96">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+        <div className="relative md:col-span-2">
           <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" size={18} />
           <Input 
             placeholder="بحث عن طلب..." 
@@ -396,8 +392,11 @@ const Orders = () => {
           />
         </div>
         <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger className="w-full md:w-[180px]">
-            <SelectValue placeholder="تصفية حسب الحالة" />
+          <SelectTrigger className="w-full">
+            <div className="flex items-center">
+              <Filter className="h-4 w-4 ml-2" />
+              <SelectValue placeholder="تصفية حسب الحالة" />
+            </div>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">جميع الحالات</SelectItem>
@@ -411,121 +410,114 @@ const Orders = () => {
       </div>
 
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="mb-4 bg-gray-100/80">
+        <TabsList className="mb-4 bg-gray-100/80 w-full overflow-auto flex-nowrap">
           <TabsTrigger value="all">جميع الطلبات</TabsTrigger>
           <TabsTrigger value="recent">الطلبات الحديثة</TabsTrigger>
           <TabsTrigger value="processing">قيد المعالجة</TabsTrigger>
           <TabsTrigger value="completed">مكتملة</TabsTrigger>
         </TabsList>
         
-        <TabsContent value="all">
-          <Card className="border-0 shadow-sm">
+        <TabsContent value="all" className="mt-0">
+          <Card className="border-0 shadow-sm overflow-hidden">
             <CardHeader className="pb-2 bg-gray-50/70 border-b">
               <CardTitle>قائمة الطلبات</CardTitle>
               <CardDescription>
                 إجمالي {filteredOrders.length} طلب
               </CardDescription>
             </CardHeader>
-            <CardContent className="p-4">
+            <CardContent className="p-0 max-h-[calc(100vh-18rem)] overflow-y-auto">
               {filteredOrders.length > 0 ? (
-                <div className="grid gap-4">
+                <div className="grid gap-0 divide-y">
                   {filteredOrders.map((order) => (
-                    <Card key={order.id} className="overflow-hidden border border-muted/50 shadow-sm hover:shadow transition-shadow duration-200">
-                      <CardContent className="p-0">
-                        <div className="flex flex-col md:flex-row">
-                          <div className="flex-grow p-4 space-y-4">
-                            <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-                              <div className="flex flex-col md:flex-row md:items-center gap-3">
-                                <span className="inline-flex items-center justify-center bg-primary/10 text-primary h-10 w-10 rounded-full">
-                                  <Package className="h-5 w-5" />
-                                </span>
-                                <div>
-                                  <h3 className="font-semibold text-lg">{order.id}</h3>
-                                  <div className="flex items-center text-sm text-muted-foreground mt-1">
-                                    <Calendar className="h-4 w-4 mr-1" />
-                                    <span>{formatDate(order.createdAt)}</span>
-                                  </div>
-                                </div>
-                              </div>
-                              <div>
-                                {getStatusBadge(order.status)}
-                              </div>
+                    <div 
+                      key={order.id} 
+                      className="p-4 transition-colors hover:bg-gray-50/50 cursor-pointer"
+                      onClick={() => handleViewOrderDetails(order)}
+                    >
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="flex items-start md:items-center gap-3">
+                          <span className="inline-flex items-center justify-center bg-primary/10 text-primary h-10 w-10 rounded-full flex-shrink-0">
+                            <Package className="h-5 w-5" />
+                          </span>
+                          <div>
+                            <h3 className="font-semibold text-lg">{order.id}</h3>
+                            <div className="flex items-center text-sm text-muted-foreground mt-1">
+                              <Calendar className="h-4 w-4 ml-1" />
+                              <span>{formatDate(order.createdAt)}</span>
                             </div>
-                            
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                              <div className="flex gap-3 items-center">
-                                <User className="h-4 w-4 text-muted-foreground" />
-                                <div>
-                                  <p className="text-sm text-muted-foreground">العميل</p>
-                                  <p className="font-medium">{order.shipping.name}</p>
-                                </div>
-                              </div>
-                              <div className="flex gap-3 items-center">
-                                <CreditCard className="h-4 w-4 text-muted-foreground" />
-                                <div>
-                                  <p className="text-sm text-muted-foreground">طريقة الدفع</p>
-                                  <p className="font-medium">
-                                    {order.payment.method === 'credit_card' ? 'بطاقة ائتمان' : 
-                                     order.payment.method === 'debit_card' ? 'بطاقة سحب' :
-                                     order.payment.method === 'paypal' ? 'PayPal' : 'الدفع عند الاستلام'}
-                                  </p>
-                                </div>
-                              </div>
-                              <div className="flex gap-3 items-center">
-                                <DollarSign className="h-4 w-4 text-muted-foreground" />
-                                <div>
-                                  <p className="text-sm text-muted-foreground">الإجمالي</p>
-                                  <p className="font-medium">{order.total.toFixed(2)} KWD</p>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="bg-gray-50/70 p-4 md:w-56 flex md:flex-col justify-between gap-2 border-t md:border-t-0 md:border-r">
-                            <Button 
-                              variant="default" 
-                              className="w-full justify-between items-center"
-                              onClick={() => handleViewOrderDetails(order)}
-                            >
-                              <span>عرض التفاصيل</span>
-                              <ChevronRight className="h-4 w-4" />
-                            </Button>
-                            
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="outline" className="w-full justify-between">
-                                  <span>خيارات</span>
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-56">
-                                <DropdownMenuLabel>إدارة الطلب</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => handleViewOrderDetails(order, true)}>
-                                  <FileText className="ml-2 h-4 w-4" />
-                                  عرض كفاتورة
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => {
-                                  setSelectedOrder(order);
-                                  setIsStatusUpdateOpen(true);
-                                }}>
-                                  <Clock className="ml-2 h-4 w-4" />
-                                  تحديث الحالة
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem 
-                                  className="text-red-500 focus:text-red-500"
-                                  onClick={() => handleDeleteOrder(order)}
-                                >
-                                  <XCircle className="ml-2 h-4 w-4" />
-                                  حذف الطلب
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
                           </div>
                         </div>
-                      </CardContent>
-                    </Card>
+                        <div className="flex items-center space-x-4 space-x-reverse">
+                          {getStatusBadge(order.status)}
+                          <span className="text-primary font-bold">{order.total.toFixed(2)} KWD</span>
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mt-4">
+                        <div className="flex gap-2 items-center">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm truncate">{order.shipping.name}</span>
+                        </div>
+                        <div className="flex gap-2 items-center">
+                          <CreditCard className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm truncate">
+                            {order.payment.method === 'credit_card' ? 'بطاقة ائتمان' : 
+                             order.payment.method === 'debit_card' ? 'بطاقة سحب' :
+                             order.payment.method === 'paypal' ? 'PayPal' : 'الدفع عند الاستلام'}
+                          </span>
+                        </div>
+                        <div className="flex gap-2 items-center justify-between w-full">
+                          <div className="flex items-center gap-2">
+                            <Package className="h-4 w-4 text-muted-foreground" />
+                            <span className="text-sm">{order.items.length} منتج</span>
+                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => e.stopPropagation()}>
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-56">
+                              <DropdownMenuLabel>إدارة الطلب</DropdownMenuLabel>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem onClick={(e) => {
+                                e.stopPropagation();
+                                handleViewOrderDetails(order);
+                              }}>
+                                <Package className="ml-2 h-4 w-4" />
+                                عرض التفاصيل
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={(e) => {
+                                e.stopPropagation();
+                                handleViewOrderDetails(order, true);
+                              }}>
+                                <FileText className="ml-2 h-4 w-4" />
+                                عرض كفاتورة
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedOrder(order);
+                                setIsStatusUpdateOpen(true);
+                              }}>
+                                <Truck className="ml-2 h-4 w-4" />
+                                تحديث الحالة
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem 
+                                className="text-red-500 focus:text-red-500"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteOrder(order);
+                                }}
+                              >
+                                <XCircle className="ml-2 h-4 w-4" />
+                                حذف الطلب
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </div>
+                    </div>
                   ))}
                 </div>
               ) : (
@@ -542,7 +534,7 @@ const Orders = () => {
         </TabsContent>
         
         <TabsContent value="recent">
-          <Card>
+          <Card className="border shadow-sm">
             <CardHeader>
               <CardTitle>الطلبات الحديثة</CardTitle>
               <CardDescription>
@@ -551,7 +543,7 @@ const Orders = () => {
             </CardHeader>
             <CardContent>
               <div className="text-center py-10">
-                <Clock className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <h3 className="font-medium text-lg">قريباً</h3>
                 <p className="text-muted-foreground mt-1">
                   سيتم تفعيل هذه الميزة قريباً
@@ -562,7 +554,7 @@ const Orders = () => {
         </TabsContent>
         
         <TabsContent value="processing">
-          <Card>
+          <Card className="border shadow-sm">
             <CardHeader>
               <CardTitle>الطلبات قيد المعالجة</CardTitle>
               <CardDescription>
@@ -582,7 +574,7 @@ const Orders = () => {
         </TabsContent>
         
         <TabsContent value="completed">
-          <Card>
+          <Card className="border shadow-sm">
             <CardHeader>
               <CardTitle>الطلبات المكتملة</CardTitle>
               <CardDescription>
@@ -656,6 +648,7 @@ const Orders = () => {
                       title: "جاري الطباعة",
                       description: "تم إرسال الفاتورة للطباعة",
                     });
+                    window.print();
                   }}
                 >
                   <FileText className="ml-2 h-4 w-4" />

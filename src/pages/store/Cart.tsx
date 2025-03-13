@@ -51,14 +51,14 @@ const Cart = () => {
   return (
     <StoreLayout>
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
           <h1 className="text-2xl md:text-3xl font-bold flex items-center">
             <ShoppingCart className="ml-2" size={28} />
             سلة التسوق
           </h1>
           <Button 
             variant="ghost" 
-            className="flex items-center"
+            className="flex items-center w-full sm:w-auto justify-center"
             onClick={() => navigate(-1)}
           >
             <ArrowLeft size={16} className="ml-1" />
@@ -77,94 +77,96 @@ const Cart = () => {
                   <div className="col-span-2 text-center">الكمية</div>
                   <div className="col-span-2 text-center">المجموع</div>
                 </div>
-                <Separator className="mb-4" />
+                <Separator className="mb-4 hidden md:block" />
 
-                {cartItems.map((item) => (
-                  <div key={item.product.id} className="py-4 border-b last:border-b-0">
-                    <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-                      {/* معلومات المنتج */}
-                      <div className="col-span-1 md:col-span-6 flex items-center">
-                        <div className="w-20 h-20 flex-shrink-0 rounded-md overflow-hidden">
-                          <img 
-                            src={item.product.image}
-                            alt={item.product.name}
-                            className="w-full h-full object-cover"
-                          />
-                        </div>
-                        <div className="mr-4 flex-grow">
-                          <Link 
-                            to={`/store/product/${item.product.id}`} 
-                            className="font-medium hover:text-primary transition-colors line-clamp-2"
-                          >
-                            {item.product.name}
-                          </Link>
-                          <div className="flex items-center justify-between mt-2">
-                            <span className="text-sm text-muted-foreground">
-                              {item.product.category}
-                            </span>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-8 p-0 text-sm text-red-500 hover:text-red-700 hover:bg-transparent md:hidden"
-                              onClick={() => handleRemoveItem(item.product.id)}
+                <div className="space-y-4 md:space-y-0 divide-y md:divide-y-0">
+                  {cartItems.map((item) => (
+                    <div key={item.product.id} className="py-4 md:py-2 md:mb-4 md:border-b md:last:border-b-0">
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
+                        {/* معلومات المنتج */}
+                        <div className="col-span-1 md:col-span-6 flex items-center">
+                          <div className="w-20 h-20 flex-shrink-0 rounded-md overflow-hidden">
+                            <img 
+                              src={item.product.image}
+                              alt={item.product.name}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="mr-4 flex-grow overflow-hidden">
+                            <Link 
+                              to={`/store/product/${item.product.id}`} 
+                              className="font-medium hover:text-primary transition-colors line-clamp-2"
                             >
-                              <Trash2 size={16} className="ml-1" />
-                              إزالة
+                              {item.product.name}
+                            </Link>
+                            <div className="flex items-center justify-between mt-2">
+                              <span className="text-sm text-muted-foreground">
+                                {item.product.category}
+                              </span>
+                              <Button 
+                                variant="ghost" 
+                                size="sm" 
+                                className="h-8 p-0 text-sm text-red-500 hover:text-red-700 hover:bg-transparent md:hidden"
+                                onClick={() => handleRemoveItem(item.product.id)}
+                              >
+                                <Trash2 size={16} className="ml-1" />
+                                إزالة
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* السعر */}
+                        <div className="md:col-span-2 text-center flex justify-between md:block">
+                          <div className="md:hidden text-sm text-muted-foreground">السعر:</div>
+                          <div className="font-bold">{item.product.price.toFixed(3)} KWD</div>
+                        </div>
+
+                        {/* الكمية */}
+                        <div className="md:col-span-2 flex items-center justify-between md:justify-center">
+                          <div className="md:hidden text-sm text-muted-foreground">الكمية:</div>
+                          <div className="flex items-center">
+                            <Button 
+                              variant="outline" 
+                              size="icon" 
+                              className="h-8 w-8 rounded-r-none"
+                              onClick={() => handleQuantityChange(item.product.id, item.quantity - 1)}
+                              disabled={item.quantity <= 1}
+                            >
+                              <Minus size={14} />
+                            </Button>
+                            <div className="h-8 px-3 flex items-center justify-center border-y text-sm">
+                              {item.quantity}
+                            </div>
+                            <Button 
+                              variant="outline" 
+                              size="icon" 
+                              className="h-8 w-8 rounded-l-none"
+                              onClick={() => handleQuantityChange(item.product.id, item.quantity + 1)}
+                              disabled={item.product.stock ? item.quantity >= item.product.stock : false}
+                            >
+                              <Plus size={14} />
                             </Button>
                           </div>
                         </div>
-                      </div>
 
-                      {/* السعر */}
-                      <div className="md:col-span-2 text-center">
-                        <div className="md:hidden text-sm text-muted-foreground mb-1">السعر:</div>
-                        <div className="font-bold">{item.product.price.toFixed(3)} KWD</div>
-                      </div>
-
-                      {/* الكمية */}
-                      <div className="md:col-span-2 flex items-center justify-center">
-                        <div className="md:hidden text-sm text-muted-foreground mb-1 ml-2">الكمية:</div>
-                        <div className="flex items-center">
+                        {/* المجموع */}
+                        <div className="md:col-span-2 flex items-center justify-between md:justify-center">
+                          <div className="md:hidden text-sm text-muted-foreground">المجموع:</div>
+                          <div className="font-bold">{(item.product.price * item.quantity).toFixed(3)} KWD</div>
                           <Button 
-                            variant="outline" 
+                            variant="ghost" 
                             size="icon" 
-                            className="h-8 w-8 rounded-r-none"
-                            onClick={() => handleQuantityChange(item.product.id, item.quantity - 1)}
-                            disabled={item.quantity <= 1}
+                            className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-transparent hidden md:flex"
+                            onClick={() => handleRemoveItem(item.product.id)}
                           >
-                            <Minus size={14} />
-                          </Button>
-                          <div className="h-8 px-3 flex items-center justify-center border-y text-sm">
-                            {item.quantity}
-                          </div>
-                          <Button 
-                            variant="outline" 
-                            size="icon" 
-                            className="h-8 w-8 rounded-l-none"
-                            onClick={() => handleQuantityChange(item.product.id, item.quantity + 1)}
-                            disabled={item.product.stock ? item.quantity >= item.product.stock : false}
-                          >
-                            <Plus size={14} />
+                            <Trash2 size={16} />
                           </Button>
                         </div>
                       </div>
-
-                      {/* المجموع */}
-                      <div className="md:col-span-2 flex items-center justify-between md:justify-center">
-                        <div className="md:hidden text-sm text-muted-foreground">المجموع:</div>
-                        <div className="font-bold">{(item.product.price * item.quantity).toFixed(3)} KWD</div>
-                        <Button 
-                          variant="ghost" 
-                          size="icon" 
-                          className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-transparent hidden md:flex"
-                          onClick={() => handleRemoveItem(item.product.id)}
-                        >
-                          <Trash2 size={16} />
-                        </Button>
-                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
 
               {/* أزرار التحكم في السلة */}

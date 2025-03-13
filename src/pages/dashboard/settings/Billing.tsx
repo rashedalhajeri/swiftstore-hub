@@ -81,8 +81,8 @@ const SettingsBilling = () => {
   };
 
   return (
-    <div>
-      <div className="mb-8">
+    <div className="space-y-8 max-h-[calc(100vh-8rem)] overflow-y-auto pb-8">
+      <div>
         <h1 className="text-3xl font-bold mb-2">الاشتراك والفواتير</h1>
         <p className="text-muted-foreground">
           إدارة اشتراكك وخيارات الدفع ومراجعة الفواتير
@@ -90,16 +90,16 @@ const SettingsBilling = () => {
       </div>
 
       {/* قسم دورة الفوترة */}
-      <div className="mb-8">
+      <div>
         <h2 className="text-xl font-semibold mb-4">دورة الفوترة</h2>
-        <Card>
+        <Card className="border shadow-sm">
           <CardContent className="pt-6">
             <RadioGroup
               defaultValue={billingCycle}
               onValueChange={(value) => setBillingCycle(value as 'monthly' | 'yearly')}
               className="flex flex-col md:flex-row gap-4"
             >
-              <div className="flex items-center space-x-2 space-x-reverse border rounded-md p-4 flex-1">
+              <div className="flex items-center space-x-2 space-x-reverse border rounded-md p-4 flex-1 hover:bg-gray-50/80 transition-colors">
                 <RadioGroupItem value="monthly" id="monthly" />
                 <Label htmlFor="monthly" className="cursor-pointer flex-1">
                   <div className="font-medium mb-1">شهري</div>
@@ -108,7 +108,7 @@ const SettingsBilling = () => {
                   </div>
                 </Label>
               </div>
-              <div className="flex items-center space-x-2 space-x-reverse border rounded-md p-4 flex-1 relative">
+              <div className="flex items-center space-x-2 space-x-reverse border rounded-md p-4 flex-1 relative hover:bg-gray-50/80 transition-colors">
                 <RadioGroupItem value="yearly" id="yearly" />
                 <Label htmlFor="yearly" className="cursor-pointer flex-1">
                   <div className="font-medium mb-1">سنوي</div>
@@ -124,11 +124,14 @@ const SettingsBilling = () => {
       </div>
 
       {/* قسم الخطط */}
-      <div className="mb-8">
+      <div>
         <h2 className="text-xl font-semibold mb-4">اختر خطة</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {plans.map((plan) => (
-            <Card key={plan.id} className={`relative ${plan.current ? 'border-primary' : ''}`}>
+            <Card 
+              key={plan.id} 
+              className={`relative border hover:shadow-md transition-shadow duration-200 ${plan.current ? 'border-primary shadow-sm' : ''}`}
+            >
               {plan.popular && (
                 <Badge 
                   className="absolute top-4 left-4 bg-primary hover:bg-primary"
@@ -147,11 +150,11 @@ const SettingsBilling = () => {
                   </Badge>
                 </div>
               )}
-              <CardHeader>
+              <CardHeader className={`${plan.popular || plan.current ? 'pt-12' : ''}`}>
                 <CardTitle className="flex items-center gap-2">
-                  {plan.id === 'free' && <Package size={20} />}
-                  {plan.id === 'basic' && <Zap size={20} />}
-                  {plan.id === 'pro' && <Gem size={20} />}
+                  {plan.id === 'free' && <Package size={20} className="text-gray-500" />}
+                  {plan.id === 'basic' && <Zap size={20} className="text-yellow-500" />}
+                  {plan.id === 'pro' && <Gem size={20} className="text-purple-500" />}
                   {plan.name}
                 </CardTitle>
                 <div className="mt-2">
@@ -162,7 +165,7 @@ const SettingsBilling = () => {
                 </div>
                 <CardDescription className="mt-2">{plan.description}</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="h-[260px] overflow-y-auto">
                 <ul className="space-y-2">
                   {plan.features.map((feature, idx) => (
                     <li key={idx} className="flex items-center gap-2">
@@ -172,7 +175,7 @@ const SettingsBilling = () => {
                   ))}
                 </ul>
               </CardContent>
-              <CardFooter>
+              <CardFooter className="bg-gray-50/50 border-t p-4">
                 {currentPlan === plan.id ? (
                   <Button className="w-full" variant="outline" disabled>
                     خطتك الحالية
@@ -193,9 +196,9 @@ const SettingsBilling = () => {
       </div>
 
       {/* قسم تفاصيل الفوترة */}
-      <div className="mb-8">
+      <div>
         <h2 className="text-xl font-semibold mb-4">تفاصيل الفوترة</h2>
-        <Card>
+        <Card className="border shadow-sm">
           <CardHeader>
             <CardTitle>طريقة الدفع</CardTitle>
             <CardDescription>
@@ -204,26 +207,30 @@ const SettingsBilling = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center justify-between border p-4 rounded-md">
-                <div className="flex items-center gap-3">
-                  <CreditCard className="text-primary" />
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border p-4 rounded-md hover:bg-gray-50/50 transition-colors">
+                <div className="flex items-center gap-3 mb-2 sm:mb-0">
+                  <div className="bg-primary/10 text-primary p-2 rounded-full">
+                    <CreditCard className="h-5 w-5" />
+                  </div>
                   <div>
                     <div className="font-medium">Visa **** **** **** 4242</div>
                     <div className="text-sm text-muted-foreground">تنتهي في 12/2025</div>
                   </div>
                 </div>
-                <Button variant="ghost" size="sm">تعديل</Button>
+                <Button variant="ghost" size="sm" className="mt-2 sm:mt-0">تعديل</Button>
               </div>
               
-              <div className="flex items-center justify-between border p-4 rounded-md">
-                <div className="flex items-center gap-3">
-                  <Shield className="text-primary" />
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between border p-4 rounded-md hover:bg-gray-50/50 transition-colors">
+                <div className="flex items-center gap-3 mb-2 sm:mb-0">
+                  <div className="bg-primary/10 text-primary p-2 rounded-full">
+                    <Shield className="h-5 w-5" />
+                  </div>
                   <div>
                     <div className="font-medium">فواتير شهرية</div>
                     <div className="text-sm text-muted-foreground">تعديل الفترة الزمنية وتاريخ التجديد</div>
                   </div>
                 </div>
-                <Button variant="ghost" size="sm">تعديل</Button>
+                <Button variant="ghost" size="sm" className="mt-2 sm:mt-0">تعديل</Button>
               </div>
             </div>
           </CardContent>

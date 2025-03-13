@@ -92,7 +92,7 @@ export const OrderDetails: React.FC<OrderDetailsProps> = ({ order, isInvoice = f
   // عرض الفاتورة
   if (isInvoice) {
     return (
-      <div className="bg-white p-6 rounded-lg shadow-md" style={{ direction: "rtl" }}>
+      <div className="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto overflow-y-auto" style={{ direction: "rtl" }}>
         <div className="flex flex-col md:flex-row justify-between items-start mb-8">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">فاتورة</h1>
@@ -141,37 +141,39 @@ export const OrderDetails: React.FC<OrderDetailsProps> = ({ order, isInvoice = f
             <span>المنتجات</span>
           </h3>
           <div className="bg-gray-50 rounded-md overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow className="bg-gray-100">
-                  <TableHead className="font-semibold">المنتج</TableHead>
-                  <TableHead className="text-left font-semibold">السعر</TableHead>
-                  <TableHead className="text-left font-semibold">الكمية</TableHead>
-                  <TableHead className="text-left font-semibold">المجموع</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {order.items.map((item, index) => (
-                  <TableRow key={index} className="border-b border-gray-200">
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-3">
-                        <div className="h-12 w-12 rounded-md overflow-hidden border border-gray-200">
-                          <img 
-                            src={item.product.image} 
-                            alt={item.product.name} 
-                            className="h-full w-full object-cover"
-                          />
-                        </div>
-                        <span>{item.product.name}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>{formatCurrency(item.product.price)}</TableCell>
-                    <TableCell>{item.quantity}</TableCell>
-                    <TableCell>{formatCurrency(item.product.price * item.quantity)}</TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-gray-100">
+                    <TableHead className="font-semibold">المنتج</TableHead>
+                    <TableHead className="text-left font-semibold">السعر</TableHead>
+                    <TableHead className="text-left font-semibold">الكمية</TableHead>
+                    <TableHead className="text-left font-semibold">المجموع</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {order.items.map((item, index) => (
+                    <TableRow key={index} className="border-b border-gray-200">
+                      <TableCell className="font-medium">
+                        <div className="flex items-center gap-3">
+                          <div className="h-12 w-12 rounded-md overflow-hidden border border-gray-200">
+                            <img 
+                              src={item.product.image} 
+                              alt={item.product.name} 
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                          <span>{item.product.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>{formatCurrency(item.product.price)}</TableCell>
+                      <TableCell>{item.quantity}</TableCell>
+                      <TableCell>{formatCurrency(item.product.price * item.quantity)}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
         </div>
 
@@ -187,7 +189,7 @@ export const OrderDetails: React.FC<OrderDetailsProps> = ({ order, isInvoice = f
                 <span className="text-gray-700 mr-2">{getPaymentMethodName(order.payment.method)}</span>
               </div>
               
-              {order.payment.method === 'credit_card' || order.payment.method === 'debit_card' ? (
+              {(order.payment.method === 'credit_card' || order.payment.method === 'debit_card') && (
                 <>
                   <div className="mb-2">
                     <span className="text-gray-500">رقم البطاقة:</span>
@@ -200,7 +202,7 @@ export const OrderDetails: React.FC<OrderDetailsProps> = ({ order, isInvoice = f
                     </div>
                   )}
                 </>
-              ) : null}
+              )}
               
               {order.payment.transactionId && (
                 <div>
@@ -251,10 +253,10 @@ export const OrderDetails: React.FC<OrderDetailsProps> = ({ order, isInvoice = f
 
   // عرض تفاصيل الطلب الاعتيادي
   return (
-    <div className="space-y-6" style={{ direction: "rtl" }}>
+    <div className="space-y-6 max-h-[calc(100vh-12rem)] overflow-y-auto" style={{ direction: "rtl" }}>
       {/* ملخص الطلب */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-0 shadow-sm">
+        <Card className="border shadow-sm">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -265,7 +267,7 @@ export const OrderDetails: React.FC<OrderDetailsProps> = ({ order, isInvoice = f
             </div>
           </CardContent>
         </Card>
-        <Card className="border-0 shadow-sm">
+        <Card className="border shadow-sm">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -276,7 +278,7 @@ export const OrderDetails: React.FC<OrderDetailsProps> = ({ order, isInvoice = f
             </div>
           </CardContent>
         </Card>
-        <Card className="border-0 shadow-sm">
+        <Card className="border shadow-sm">
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -290,7 +292,7 @@ export const OrderDetails: React.FC<OrderDetailsProps> = ({ order, isInvoice = f
       </div>
 
       {/* بطاقة المنتجات */}
-      <Card className="border-0 shadow-sm overflow-hidden">
+      <Card className="border shadow-sm overflow-hidden">
         <CardHeader className="bg-gray-50 border-b pb-4">
           <CardTitle className="text-lg flex items-center gap-2">
             <Package className="h-5 w-5 text-primary" />
@@ -298,37 +300,39 @@ export const OrderDetails: React.FC<OrderDetailsProps> = ({ order, isInvoice = f
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow className="bg-gray-50/50">
-                <TableHead>المنتج</TableHead>
-                <TableHead className="text-left">السعر</TableHead>
-                <TableHead className="text-left">الكمية</TableHead>
-                <TableHead className="text-left">المجموع</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {order.items.map((item, index) => (
-                <TableRow key={index} className="hover:bg-gray-50/50">
-                  <TableCell className="font-medium">
-                    <div className="flex items-center gap-3">
-                      <div className="h-12 w-12 rounded-md overflow-hidden border border-gray-100">
-                        <img 
-                          src={item.product.image} 
-                          alt={item.product.name} 
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                      <span>{item.product.name}</span>
-                    </div>
-                  </TableCell>
-                  <TableCell>{formatCurrency(item.product.price)}</TableCell>
-                  <TableCell>{item.quantity}</TableCell>
-                  <TableCell>{formatCurrency(item.product.price * item.quantity)}</TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-gray-50/50">
+                  <TableHead>المنتج</TableHead>
+                  <TableHead className="text-left">السعر</TableHead>
+                  <TableHead className="text-left">الكمية</TableHead>
+                  <TableHead className="text-left">المجموع</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {order.items.map((item, index) => (
+                  <TableRow key={index} className="hover:bg-gray-50/50">
+                    <TableCell className="font-medium">
+                      <div className="flex items-center gap-3">
+                        <div className="h-12 w-12 rounded-md overflow-hidden border border-gray-100">
+                          <img 
+                            src={item.product.image} 
+                            alt={item.product.name} 
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                        <span>{item.product.name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>{formatCurrency(item.product.price)}</TableCell>
+                    <TableCell>{item.quantity}</TableCell>
+                    <TableCell>{formatCurrency(item.product.price * item.quantity)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </CardContent>
         <CardFooter className="bg-gray-50/50 border-t flex flex-col space-y-2 items-end p-4">
           <div className="w-full md:w-1/3 space-y-2">
@@ -355,7 +359,7 @@ export const OrderDetails: React.FC<OrderDetailsProps> = ({ order, isInvoice = f
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* معلومات العميل */}
-        <Card className="border-0 shadow-sm">
+        <Card className="border shadow-sm">
           <CardHeader className="bg-gray-50 border-b pb-4">
             <CardTitle className="text-lg flex items-center gap-2">
               <User className="h-5 w-5 text-primary" />
@@ -383,7 +387,7 @@ export const OrderDetails: React.FC<OrderDetailsProps> = ({ order, isInvoice = f
         </Card>
 
         {/* معلومات الدفع */}
-        <Card className="border-0 shadow-sm">
+        <Card className="border shadow-sm">
           <CardHeader className="bg-gray-50 border-b pb-4">
             <CardTitle className="text-lg flex items-center gap-2">
               <CreditCard className="h-5 w-5 text-primary" />
@@ -399,7 +403,7 @@ export const OrderDetails: React.FC<OrderDetailsProps> = ({ order, isInvoice = f
               </div>
             </div>
             
-            {order.payment.method === 'credit_card' || order.payment.method === 'debit_card' ? (
+            {(order.payment.method === 'credit_card' || order.payment.method === 'debit_card') && (
               <>
                 <div className="pr-8 space-y-1">
                   <p className="text-sm text-muted-foreground">رقم البطاقة</p>
@@ -412,7 +416,7 @@ export const OrderDetails: React.FC<OrderDetailsProps> = ({ order, isInvoice = f
                   </div>
                 )}
               </>
-            ) : null}
+            )}
             
             {order.payment.transactionId && (
               <div className="pr-8 space-y-1">
@@ -429,7 +433,7 @@ export const OrderDetails: React.FC<OrderDetailsProps> = ({ order, isInvoice = f
           <FileText className="h-4 w-4" />
           طباعة
         </Button>
-        <Button className="gap-2 bg-primary hover:bg-primary/90" onClick={() => { }}>
+        <Button className="gap-2 bg-primary hover:bg-primary/90" onClick={() => window.location.reload()}>
           <Truck className="h-4 w-4" />
           عرض كفاتورة
         </Button>
@@ -437,4 +441,3 @@ export const OrderDetails: React.FC<OrderDetailsProps> = ({ order, isInvoice = f
     </div>
   );
 };
-
