@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingCart, Users, Settings, Menu, X, LogOut, User, Store, CreditCard, Bell, Shield, Globe, HelpCircle, Edit, Tags, Percent, ListFilter, ExternalLink } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, Users, Settings, Menu, X, LogOut, User, Store, CreditCard, Bell, Shield, Globe, HelpCircle, Edit, Tags, Percent, ListFilter, ExternalLink, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Logo from '@/components/Logo';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,11 @@ type SidebarItemType = {
     href: string;
     icon: React.ElementType;
   }[];
+  addNew?: {
+    label: string;
+    href: string;
+    icon: React.ElementType;
+  };
 };
 
 const sidebarItems: SidebarItemType[] = [
@@ -30,7 +35,12 @@ const sidebarItems: SidebarItemType[] = [
   {
     icon: Package,
     label: 'المنتجات',
-    href: '/dashboard/products'
+    href: '/dashboard/products',
+    addNew: {
+      label: 'إضافة منتج جديد',
+      href: '/dashboard/products/new',
+      icon: Plus
+    }
   },
   {
     icon: ListFilter,
@@ -239,7 +249,7 @@ const DashboardLayout = () => {
   const isSettingsPage = location.pathname.includes('/dashboard/settings');
   const currentSettingsPage = isSettingsPage ? location.pathname.split('/dashboard/settings/')[1] || 'account' : '';
 
-  return <div className="flex h-screen bg-secondary/20 overflow-hidden">
+  return <div className="flex h-screen bg-secondary/20 overflow-hidden" dir="rtl">
       {isMobile && sidebarOpen && <div className="fixed inset-0 bg-black/50 z-20" onClick={() => setSidebarOpen(false)} />}
 
       <aside className={cn("bg-sidebar text-sidebar-foreground fixed inset-y-0 right-0 z-30 w-64 flex flex-col h-screen", sidebarOpen ? "translate-x-0" : "translate-x-full", "transition-all duration-300 ease-in-out md:translate-x-0")}>
@@ -255,12 +265,18 @@ const DashboardLayout = () => {
             {sidebarItems.map(item => {
             const isActive = item.href === location.pathname || item.href !== '/dashboard' && location.pathname.startsWith(item.href);
             const hasSubmenu = item.submenu && item.submenu.length > 0;
+            const hasAddNew = item.addNew;
             const isSettingsItem = item.href === '/dashboard/settings';
             return <div key={item.label} className="space-y-1">
                   <Link to={item.href} className={cn("flex items-center gap-3 p-2.5 rounded-md transition-colors sidebar-text", isActive ? "bg-sidebar-accent text-sidebar-accent-foreground" : "hover:bg-sidebar-accent/50")}>
                     <item.icon size={20} className="sidebar-icon" />
                     <span className="sidebar-text">{item.label}</span>
                   </Link>
+                  
+                  {hasAddNew && <Link to={item.addNew.href} className="flex items-center gap-2 p-2 ms-6 text-sm text-green-500 hover:bg-sidebar-accent/30 rounded-md transition-colors">
+                    <item.addNew.icon size={16} className="text-green-500" />
+                    <span>{item.addNew.label}</span>
+                  </Link>}
                   
                   {hasSubmenu && isSettingsItem && isSettingsPage && <div className="mr-6 mt-1 border-r pr-2 border-sidebar-border space-y-1">
                       {item.submenu.map(subItem => {

@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -190,6 +191,11 @@
   color: #ea384c !important;
 }
 
+/* Add new green link styling */
+.text-green-500 {
+  color: #10b981 !important;
+}
+
 /* Ensure good contrast in the sidebar user area */
 .sidebar-user-area {
   color: white;
@@ -200,4 +206,13 @@
   color: #e2e2e2;
   display: flex;
   align-items: center;
+}
+
+/* RTL support improvements */
+[dir="rtl"] .rtl\:space-x-reverse {
+  --tw-space-x-reverse: 1;
+}
+
+[dir="rtl"] .rtl\:ml-0\.5 {
+  margin-left: 0.125rem;
 }
