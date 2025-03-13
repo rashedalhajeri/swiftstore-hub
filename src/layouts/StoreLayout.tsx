@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { 
   ShoppingCart, 
   Search, 
@@ -35,6 +35,8 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
   const location = useLocation();
   const { totalItems } = useCart();
   const { store } = useStore();
+  const [searchParams] = useSearchParams();
+  const storeParam = searchParams.get('store');
   
   const storeInfo = {
     name: store?.name || 'متجر.أنا',
@@ -42,6 +44,11 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
     logo: store?.logo || '',
     primary_color: store?.primary_color || '#8B5CF6',
     currency: 'KWD'
+  };
+
+  // بناء الروابط مع الحفاظ على معلمة المتجر
+  const buildStoreLink = (path: string) => {
+    return storeParam ? `${path}?store=${storeParam}` : path;
   };
 
   // إغلاق القائمة عند تغيير المسار
@@ -89,7 +96,7 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
               >
                 {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
-              <Link to="/store" className="flex items-center">
+              <Link to={buildStoreLink('/store')} className="flex items-center">
                 {storeInfo.logo ? (
                   <img src={storeInfo.logo} alt={storeInfo.name} className="h-10 object-contain" />
                 ) : (
@@ -99,7 +106,7 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
             </div>
             
             <div className="hidden md:flex items-center gap-6">
-              <Link to="/store" className="font-medium hover:text-primary transition-colors py-2 border-b-2 border-transparent hover:border-primary">
+              <Link to={buildStoreLink('/store')} className="font-medium hover:text-primary transition-colors py-2 border-b-2 border-transparent hover:border-primary">
                 الرئيسية
               </Link>
               <div className="relative group">
@@ -112,7 +119,7 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
                     {categories.map(category => (
                       <Link 
                         key={category}
-                        to={`/store?category=${category}`}
+                        to={buildStoreLink(`/store?category=${category}`)}
                         className="block w-full text-right px-4 py-2 text-sm hover:bg-muted transition-colors"
                       >
                         {category}
@@ -121,13 +128,13 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
                   </div>
                 </div>
               </div>
-              <Link to="/store" className="font-medium hover:text-primary transition-colors py-2 border-b-2 border-transparent hover:border-primary">
+              <Link to={buildStoreLink('/store')} className="font-medium hover:text-primary transition-colors py-2 border-b-2 border-transparent hover:border-primary">
                 المنتجات
               </Link>
-              <Link to="/store/about" className="font-medium hover:text-primary transition-colors py-2 border-b-2 border-transparent hover:border-primary">
+              <Link to={buildStoreLink('/store/about')} className="font-medium hover:text-primary transition-colors py-2 border-b-2 border-transparent hover:border-primary">
                 من نحن
               </Link>
-              <Link to="/store/contact" className="font-medium hover:text-primary transition-colors py-2 border-b-2 border-transparent hover:border-primary">
+              <Link to={buildStoreLink('/store/contact')} className="font-medium hover:text-primary transition-colors py-2 border-b-2 border-transparent hover:border-primary">
                 اتصل بنا
               </Link>
             </div>
@@ -149,19 +156,19 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
                 </form>
               </div>
               
-              <Link to="/login" className="hidden md:block">
+              <Link to={buildStoreLink('/login')} className="hidden md:block">
                 <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 hover:text-primary transition-colors">
                   <User size={20} />
                 </Button>
               </Link>
               
-              <Link to="/store/favorites" className="hidden md:block">
+              <Link to={buildStoreLink('/store/favorites')} className="hidden md:block">
                 <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 hover:text-primary transition-colors">
                   <Heart size={20} />
                 </Button>
               </Link>
               
-              <Link to="/store/cart" className="relative group">
+              <Link to={buildStoreLink('/store/cart')} className="relative group">
                 <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 hover:text-primary transition-colors relative">
                   <ShoppingCart size={20} />
                   {totalItems > 0 && (
@@ -181,7 +188,7 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
         }`}>
           <nav className="py-4 px-4">
             <div className="flex flex-col gap-3">
-              <Link to="/store" className="font-medium py-2 hover:text-primary transition-colors">
+              <Link to={buildStoreLink('/store')} className="font-medium py-2 hover:text-primary transition-colors">
                 الرئيسية
               </Link>
               <button 
@@ -195,7 +202,7 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
                 {categories.map(category => (
                   <Link 
                     key={category}
-                    to={`/store?category=${category}`}
+                    to={buildStoreLink(`/store?category=${category}`)}
                     className="block w-full text-right py-1 text-sm hover:text-primary transition-colors"
                     onClick={() => setMobileMenuOpen(false)}
                   >
@@ -203,17 +210,17 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
                   </Link>
                 ))}
               </div>
-              <Link to="/store" className="font-medium py-2 hover:text-primary transition-colors">
+              <Link to={buildStoreLink('/store')} className="font-medium py-2 hover:text-primary transition-colors">
                 المنتجات
               </Link>
-              <Link to="/store/about" className="font-medium py-2 hover:text-primary transition-colors">
+              <Link to={buildStoreLink('/store/about')} className="font-medium py-2 hover:text-primary transition-colors">
                 من نحن
               </Link>
-              <Link to="/store/contact" className="font-medium py-2 hover:text-primary transition-colors">
+              <Link to={buildStoreLink('/store/contact')} className="font-medium py-2 hover:text-primary transition-colors">
                 اتصل بنا
               </Link>
               <div className="flex items-center gap-3 py-2">
-                <Link to="/login" className="font-medium flex items-center gap-2 hover:text-primary transition-colors">
+                <Link to={buildStoreLink('/login')} className="font-medium flex items-center gap-2 hover:text-primary transition-colors">
                   <User size={16} />
                   <span>تسجيل الدخول</span>
                 </Link>
@@ -258,22 +265,22 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
               <h3 className="font-bold text-lg mb-4 text-primary">روابط مهمة</h3>
               <ul className="space-y-3">
                 <li>
-                  <Link to="/store/about" className="text-muted-foreground hover:text-primary transition-colors">
+                  <Link to={buildStoreLink('/store/about')} className="text-muted-foreground hover:text-primary transition-colors">
                     من نحن
                   </Link>
                 </li>
                 <li>
-                  <Link to="/store/contact" className="text-muted-foreground hover:text-primary transition-colors">
+                  <Link to={buildStoreLink('/store/contact')} className="text-muted-foreground hover:text-primary transition-colors">
                     اتصل بنا
                   </Link>
                 </li>
                 <li>
-                  <Link to="/store/privacy" className="text-muted-foreground hover:text-primary transition-colors">
+                  <Link to={buildStoreLink('/store/privacy')} className="text-muted-foreground hover:text-primary transition-colors">
                     سياسة الخصوصية
                   </Link>
                 </li>
                 <li>
-                  <Link to="/store/terms" className="text-muted-foreground hover:text-primary transition-colors">
+                  <Link to={buildStoreLink('/store/terms')} className="text-muted-foreground hover:text-primary transition-colors">
                     الشروط والأحكام
                   </Link>
                 </li>
@@ -285,7 +292,7 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
                 {categories.slice(0, 6).map(category => (
                   <li key={category}>
                     <Link
-                      to={`/store?category=${category}`}
+                      to={buildStoreLink(`/store?category=${category}`)}
                       className="text-muted-foreground hover:text-primary transition-colors"
                     >
                       {category}

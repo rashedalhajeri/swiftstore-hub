@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Product, Store } from '@/types/store';
 import { toast } from 'sonner';
@@ -120,7 +121,7 @@ export const storeService = {
       
       if (!data) return [];
 
-      // Simplified approach to avoid excessive type instantiation
+      // Transform the data to match the Product type
       return data.map(item => ({
         id: item.id || '',
         name: item.name || '',
@@ -128,12 +129,12 @@ export const storeService = {
         image: item.image || '',
         featured: Boolean(item.featured) || false,
         category: typeof item.category === 'object' ? item.category.name : (item.category_id || ''),
-        description: item.description,
-        sku: item.sku,
+        description: item.description || '',
+        sku: item.sku || '',
         stock: item.stock !== undefined ? Number(item.stock) : undefined,
         rating: item.rating !== undefined ? Number(item.rating) : undefined,
-        images: Array.isArray(item.images) ? item.images : undefined,
-        attributes: item.attributes
+        images: Array.isArray(item.images) ? item.images as string[] : [],
+        attributes: item.attributes ? (item.attributes as Record<string, string>) : {}
       }));
     } catch (error) {
       console.error('Error in getStoreProducts:', error);
