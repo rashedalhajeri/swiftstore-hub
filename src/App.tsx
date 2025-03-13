@@ -1,3 +1,5 @@
+
+import React, { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -41,9 +43,9 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
   // تحديد مدة قصوى للتحميل للتخلص من مشكلة العالق
-  const [loadingTimeout, setLoadingTimeout] = React.useState(false);
+  const [loadingTimeout, setLoadingTimeout] = useState(false);
   
-  React.useEffect(() => {
+  useEffect(() => {
     let timeoutId: number;
     
     if (loading) {
@@ -73,9 +75,9 @@ const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
   // تحديد مدة قصوى للتحميل للتخلص من مشكلة العالق
-  const [loadingTimeout, setLoadingTimeout] = React.useState(false);
+  const [loadingTimeout, setLoadingTimeout] = useState(false);
   
-  React.useEffect(() => {
+  useEffect(() => {
     let timeoutId: number;
     
     if (loading) {
