@@ -12,6 +12,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { DialogFooter } from '@/components/ui/dialog';
+import { toast } from 'sonner';
 
 interface UpdateOrderStatusProps {
   order: Order;
@@ -34,7 +35,46 @@ export const UpdateOrderStatus: React.FC<UpdateOrderStatusProps> = ({
     setTimeout(() => {
       onStatusUpdate(status);
       setIsUpdating(false);
+      
+      // Show success toast
+      toast.success(`تم تحديث الحالة إلى ${getStatusLabel(status)}`);
     }, 1000);
+  };
+
+  // Function to get Arabic status label
+  const getStatusLabel = (orderStatus: Order['status']): string => {
+    switch (orderStatus) {
+      case 'pending':
+        return 'قيد الانتظار';
+      case 'processing':
+        return 'قيد المعالجة';
+      case 'shipped':
+        return 'تم الشحن';
+      case 'delivered':
+        return 'تم التوصيل';
+      case 'cancelled':
+        return 'ملغي';
+      default:
+        return orderStatus;
+    }
+  };
+
+  // Function to get status description
+  const getStatusDescription = (orderStatus: Order['status']): string => {
+    switch (orderStatus) {
+      case 'pending':
+        return 'الطلب مستلم وبانتظار المعالجة';
+      case 'processing':
+        return 'جاري تجهيز وتحضير الطلب';
+      case 'shipped':
+        return 'تم إرسال الطلب مع شركة الشحن';
+      case 'delivered':
+        return 'تم توصيل الطلب للعميل بنجاح';
+      case 'cancelled':
+        return 'تم إلغاء الطلب';
+      default:
+        return '';
+    }
   };
 
   return (
@@ -46,41 +86,66 @@ export const UpdateOrderStatus: React.FC<UpdateOrderStatusProps> = ({
       >
         <div className="flex items-center space-x-2 space-x-reverse">
           <RadioGroupItem value="pending" id="pending" />
-          <Label htmlFor="pending" className="flex items-center gap-2 cursor-pointer">
-            <Clock className="h-4 w-4 text-yellow-600" />
-            <span>قيد الانتظار</span>
+          <Label htmlFor="pending" className="flex flex-col cursor-pointer">
+            <span className="flex items-center gap-2">
+              <Clock className="h-4 w-4 text-yellow-600" />
+              <span>قيد الانتظار</span>
+            </span>
+            <span className="text-xs text-muted-foreground pr-6">
+              {getStatusDescription('pending')}
+            </span>
           </Label>
         </div>
         
         <div className="flex items-center space-x-2 space-x-reverse">
           <RadioGroupItem value="processing" id="processing" />
-          <Label htmlFor="processing" className="flex items-center gap-2 cursor-pointer">
-            <Loader2 className="h-4 w-4 text-blue-600" />
-            <span>قيد المعالجة</span>
+          <Label htmlFor="processing" className="flex flex-col cursor-pointer">
+            <span className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 text-blue-600" />
+              <span>قيد المعالجة</span>
+            </span>
+            <span className="text-xs text-muted-foreground pr-6">
+              {getStatusDescription('processing')}
+            </span>
           </Label>
         </div>
         
         <div className="flex items-center space-x-2 space-x-reverse">
           <RadioGroupItem value="shipped" id="shipped" />
-          <Label htmlFor="shipped" className="flex items-center gap-2 cursor-pointer">
-            <Truck className="h-4 w-4 text-indigo-600" />
-            <span>تم الشحن</span>
+          <Label htmlFor="shipped" className="flex flex-col cursor-pointer">
+            <span className="flex items-center gap-2">
+              <Truck className="h-4 w-4 text-indigo-600" />
+              <span>تم الشحن</span>
+            </span>
+            <span className="text-xs text-muted-foreground pr-6">
+              {getStatusDescription('shipped')}
+            </span>
           </Label>
         </div>
         
         <div className="flex items-center space-x-2 space-x-reverse">
           <RadioGroupItem value="delivered" id="delivered" />
-          <Label htmlFor="delivered" className="flex items-center gap-2 cursor-pointer">
-            <CheckCircle className="h-4 w-4 text-green-600" />
-            <span>تم التوصيل</span>
+          <Label htmlFor="delivered" className="flex flex-col cursor-pointer">
+            <span className="flex items-center gap-2">
+              <CheckCircle className="h-4 w-4 text-green-600" />
+              <span>تم التوصيل</span>
+            </span>
+            <span className="text-xs text-muted-foreground pr-6">
+              {getStatusDescription('delivered')}
+            </span>
           </Label>
         </div>
         
         <div className="flex items-center space-x-2 space-x-reverse">
           <RadioGroupItem value="cancelled" id="cancelled" />
-          <Label htmlFor="cancelled" className="flex items-center gap-2 cursor-pointer">
-            <XCircle className="h-4 w-4 text-red-600" />
-            <span>ملغي</span>
+          <Label htmlFor="cancelled" className="flex flex-col cursor-pointer">
+            <span className="flex items-center gap-2">
+              <XCircle className="h-4 w-4 text-red-600" />
+              <span>ملغي</span>
+            </span>
+            <span className="text-xs text-muted-foreground pr-6">
+              {getStatusDescription('cancelled')}
+            </span>
           </Label>
         </div>
       </RadioGroup>
@@ -92,6 +157,7 @@ export const UpdateOrderStatus: React.FC<UpdateOrderStatusProps> = ({
         <Button 
           disabled={status === order.status || isUpdating}
           onClick={handleStatusUpdate}
+          className={status === order.status ? "opacity-50" : ""}
         >
           {isUpdating ? (
             <>
