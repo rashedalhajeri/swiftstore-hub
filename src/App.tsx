@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -33,7 +32,7 @@ import SettingsNotifications from "./pages/dashboard/settings/Notifications";
 import SettingsSecurity from "./pages/dashboard/settings/Security";
 import SettingsDomains from "./pages/dashboard/settings/Domains";
 import SettingsSupport from "./pages/dashboard/settings/Support";
-import { Loader2 } from "lucide-react";
+import LoadingScreen from "./components/LoadingScreen";
 
 const queryClient = new QueryClient();
 
@@ -42,12 +41,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
   if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-secondary/20">
-        <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-        <p className="text-lg font-medium text-muted-foreground">جاري التحميل...</p>
-      </div>
-    );
+    return <LoadingScreen />;
   }
   
   if (!user) {
@@ -62,12 +56,7 @@ const PublicOnlyRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
   
   if (loading) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-secondary/20">
-        <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-        <p className="text-lg font-medium text-muted-foreground">جاري التحميل...</p>
-      </div>
-    );
+    return <LoadingScreen />;
   }
   
   if (user) {
