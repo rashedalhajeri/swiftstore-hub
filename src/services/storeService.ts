@@ -3,6 +3,26 @@ import { supabase } from '@/integrations/supabase/client';
 import { Product, Store } from '@/types/store';
 import { toast } from 'sonner';
 
+// Create an interface for raw product data from database to avoid deep type instantiation
+interface RawProductData {
+  id: string;
+  name: string;
+  price: number | string;
+  image: string;
+  featured?: boolean;
+  category?: { name: string } | string;
+  description?: string;
+  sku?: string;
+  stock?: number;
+  rating?: number;
+  images?: any[];
+  attributes?: Record<string, any>;
+  store_id?: string;
+  created_at?: string;
+  updated_at?: string;
+  category_id?: string;
+}
+
 export const storeService = {
   // Get store by user ID
   async getStoreByUserId(userId: string): Promise<Store | null> {
@@ -107,7 +127,7 @@ export const storeService = {
         return [];
       }
       
-      // Then get products related to that store
+      // Then get products related to that store using the new store_id column
       const { data, error } = await supabase
         .from('products')
         .select('*, category:categories(name)')
@@ -121,10 +141,11 @@ export const storeService = {
       
       if (!data || !Array.isArray(data)) return [];
       
-      // Rewrite using a standard for loop to avoid complex type transformations
+      // Use explicit typing to avoid deep type instantiation
+      const rawProducts = data as unknown as RawProductData[];
       const products: Product[] = [];
       
-      for (const item of data) {
+      for (const item of rawProducts) {
         let categoryValue: string | { name: string } = '';
         
         // Handle category safely
@@ -134,7 +155,7 @@ export const storeService = {
           categoryValue = item.category;
         }
         
-        // Create a product object with explicit type casting to avoid deep type instantiation
+        // Create a product object with explicit type casting
         const product: Product = {
           id: String(item.id || ''),
           name: String(item.name || ''),
@@ -176,4 +197,3 @@ export const storeService = {
     }
   }
 };
-
