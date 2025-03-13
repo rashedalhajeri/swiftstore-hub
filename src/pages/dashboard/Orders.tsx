@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { 
   Package, 
-  Search, 
-  Filter,
+  Search,
   ChevronRight,
   Calendar,
   Clock,
@@ -21,7 +20,7 @@ import {
 } from 'lucide-react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { 
@@ -431,7 +430,7 @@ const Orders = () => {
               {filteredOrders.length > 0 ? (
                 <div className="grid gap-4">
                   {filteredOrders.map((order) => (
-                    <Card key={order.id} className="overflow-hidden border-0 shadow-sm hover:shadow transition-shadow duration-200">
+                    <Card key={order.id} className="overflow-hidden border border-muted/50 shadow-sm hover:shadow transition-shadow duration-200">
                       <CardContent className="p-0">
                         <div className="flex flex-col md:flex-row">
                           <div className="flex-grow p-4 space-y-4">
@@ -485,7 +484,7 @@ const Orders = () => {
                           <div className="bg-gray-50/70 p-4 md:w-56 flex md:flex-col justify-between gap-2 border-t md:border-t-0 md:border-r">
                             <Button 
                               variant="default" 
-                              className="w-full justify-between"
+                              className="w-full justify-between items-center"
                               onClick={() => handleViewOrderDetails(order)}
                             >
                               <span>عرض التفاصيل</span>
@@ -605,17 +604,17 @@ const Orders = () => {
 
       {isMobile ? (
         <Drawer open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-          <DrawerContent>
-            <DrawerHeader>
+          <DrawerContent className="max-h-[90vh] overflow-y-auto">
+            <DrawerHeader className="sticky top-0 z-10 bg-background">
               <DrawerTitle>تفاصيل الطلب #{selectedOrder?.id}</DrawerTitle>
               <DrawerDescription>
                 عرض معلومات الطلب والمنتجات والشحن والدفع
               </DrawerDescription>
             </DrawerHeader>
-            <div className="px-4 pb-4">
+            <div className="px-4 py-2 overflow-y-auto">
               {selectedOrder && <OrderDetails order={selectedOrder} isInvoice={isInvoiceView} />}
             </div>
-            <DrawerFooter>
+            <DrawerFooter className="sticky bottom-0 z-10 bg-background">
               <Button variant="outline" onClick={() => setIsDetailsOpen(false)}>
                 إغلاق
               </Button>
@@ -624,8 +623,8 @@ const Orders = () => {
         </Drawer>
       ) : (
         <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+            <DialogHeader className="sticky top-0 z-10 bg-background">
               <DialogTitle>
                 {isInvoiceView ? (
                   <div className="flex items-center gap-2">
@@ -643,11 +642,26 @@ const Orders = () => {
                 {isInvoiceView ? 'عرض فاتورة الطلب وطباعتها' : 'عرض معلومات الطلب والمنتجات والشحن والدفع'}
               </DialogDescription>
             </DialogHeader>
-            {selectedOrder && <OrderDetails order={selectedOrder} isInvoice={isInvoiceView} />}
-            <DialogFooter>
+            <div className="overflow-y-auto flex-1 px-1 py-2">
+              {selectedOrder && <OrderDetails order={selectedOrder} isInvoice={isInvoiceView} />}
+            </div>
+            <DialogFooter className="sticky bottom-0 pt-2 bg-background border-t mt-auto">
               <Button variant="outline" onClick={() => setIsDetailsOpen(false)}>
                 إغلاق
               </Button>
+              {isInvoiceView && (
+                <Button 
+                  onClick={() => {
+                    toast({
+                      title: "جاري الطباعة",
+                      description: "تم إرسال الفاتورة للطباعة",
+                    });
+                  }}
+                >
+                  <FileText className="ml-2 h-4 w-4" />
+                  طباعة الفاتورة
+                </Button>
+              )}
             </DialogFooter>
           </DialogContent>
         </Dialog>
