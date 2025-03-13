@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { useLocation, useSearchParams } from 'react-router-dom';
+import { useLocation, useSearchParams, useNavigate } from 'react-router-dom';
 import StoreHeader from '@/components/store/StoreHeader';
 import StoreFooter from '@/components/store/StoreFooter';
 import { useCart } from '@/contexts/CartContext';
@@ -14,6 +14,7 @@ interface StoreLayoutProps {
 
 const StoreLayout = ({ children }: StoreLayoutProps) => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { totalItems } = useCart();
   
@@ -41,6 +42,7 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
       try {
         if (!storeSlug) {
           setStoreLoading(false);
+          toast.error('لم يتم تحديد متجر');
           return;
         }
         
@@ -50,7 +52,7 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
           console.log('Store data fetched:', storeData);
           setStoreInfo({
             id: storeData.id,
-            name: storeData.name || 'متجر.أنا',
+            name: storeData.name,
             slug: storeData.slug || storeSlug,
             logo: storeData.logo || '',
             description: storeData.description || '',
@@ -62,12 +64,21 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
           
           // Apply store's primary color to theme
           storeService.applyStoreTheme(storeData.primary_color);
+          
+          // Store the store slug in localStorage
+          localStorage.setItem('storeSlug', storeData.slug);
         } else {
           console.warn('No store data found for slug:', storeSlug);
           toast.error('المتجر غير موجود أو غير منشور');
+          
+          // Navigate to dashboard if in dashboard
+          if (location.pathname.includes('/dashboard')) {
+            navigate('/dashboard/settings/store');
+          }
         }
       } catch (err) {
         console.error('Error in fetchStoreInfo:', err);
+        toast.error('حدث خطأ أثناء تحميل بيانات المتجر');
       } finally {
         setStoreLoading(false);
       }
@@ -80,7 +91,7 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
       document.documentElement.style.removeProperty('--primary');
       document.documentElement.style.removeProperty('--primary-hover');
     };
-  }, [storeSlug]);
+  }, [storeSlug, navigate, location.pathname]);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);

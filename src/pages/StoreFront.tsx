@@ -59,7 +59,7 @@ const StoreFront = () => {
           console.log('Store data for front page:', storeData);
           setStoreInfo({
             id: storeData.id,
-            name: storeData.name || 'متجر.أنا',
+            name: storeData.name,
             slug: storeData.slug || storeSlug,
             logo: storeData.logo || '',
             banner: storeData.banner || '',
@@ -71,6 +71,9 @@ const StoreFront = () => {
           // Apply store's primary color to theme
           storeService.applyStoreTheme(storeData.primary_color);
           
+          // Store the store slug in localStorage for future use
+          localStorage.setItem('storeSlug', storeData.slug);
+          
           // Fetch store products
           const storeProducts = await storeService.getStoreProducts(storeData.id);
           console.log('Products fetched:', storeProducts);
@@ -79,6 +82,9 @@ const StoreFront = () => {
         } else {
           toast.error('المتجر غير موجود أو غير منشور');
           setIsLoading(false);
+          
+          // Redirect to home if store not found
+          navigate('/');
         }
       } catch (err) {
         console.error('Error in fetchStoreInfo:', err);
@@ -94,7 +100,7 @@ const StoreFront = () => {
       document.documentElement.style.removeProperty('--primary');
       document.documentElement.style.removeProperty('--primary-hover');
     };
-  }, [storeSlug]);
+  }, [storeSlug, navigate]);
 
   // Filter products based on search and category
   const filteredProducts = products.filter(product => {

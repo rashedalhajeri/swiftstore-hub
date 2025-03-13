@@ -18,7 +18,8 @@ interface StoreInfo {
   user_id: string;
 }
 
-interface ProductResponse {
+// Separate interface for product response to avoid deep type inference
+type ProductResponse = {
   id: string;
   name: string;
   price: number;
@@ -35,7 +36,7 @@ interface ProductResponse {
   store_id: string;
   created_at: string | null;
   updated_at: string | null;
-}
+};
 
 export const storeService = {
   /**
@@ -48,6 +49,7 @@ export const storeService = {
         .from('stores')
         .select('*')
         .eq('slug', slug)
+        .eq('is_published', true) // Only get published stores
         .maybeSingle();
         
       if (error) {
@@ -77,8 +79,11 @@ export const storeService = {
         return [];
       }
       
-      // Safely convert the data to our Product type
-      return (data as ProductResponse[] || []).map((item) => ({
+      // Use type assertion with a simpler approach to avoid deep type inference
+      const products = data as unknown as ProductResponse[];
+      
+      // Map the data to our Product type
+      return (products || []).map(item => ({
         id: item.id,
         name: item.name,
         price: item.price,
