@@ -119,7 +119,7 @@ const DashboardLayout = () => {
     location.pathname.split('/dashboard/settings/')[1] || 'account' : '';
 
   return (
-    <div className="min-h-screen flex bg-secondary/20">
+    <div className="flex h-screen overflow-hidden bg-secondary/20">
       {/* Sidebar Overlay */}
       {isMobile && sidebarOpen && (
         <div 
@@ -128,11 +128,11 @@ const DashboardLayout = () => {
         />
       )}
 
-      {/* Sidebar - Now fixed position */}
+      {/* Sidebar - Fixed position */}
       <aside 
         className={cn(
-          "bg-sidebar text-sidebar-foreground fixed inset-y-0 left-0 z-30 w-64 flex flex-col h-screen",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full",
+          "bg-sidebar text-sidebar-foreground fixed inset-y-0 right-0 z-30 w-64 flex flex-col h-screen",
+          sidebarOpen ? "translate-x-0" : "translate-x-full",
           "transition-all duration-300 ease-in-out md:translate-x-0"
         )}
       >
@@ -217,10 +217,10 @@ const DashboardLayout = () => {
         </div>
       </aside>
 
-      {/* Main Content - With sidebar width offset */}
+      {/* Main Content - Adjusted for sidebar width */}
       <div className={cn(
-        "flex-1 flex flex-col min-h-screen w-full",
-        sidebarOpen ? "md:mr-64" : ""
+        "flex-1 flex flex-col h-screen w-full",
+        sidebarOpen ? "md:ml-64" : ""
       )}>
         {/* Header - Fixed at top */}
         <header className="bg-background/95 backdrop-blur-md border-b h-16 flex items-center px-4 sticky top-0 z-10">
@@ -309,8 +309,10 @@ const DashboardLayout = () => {
         )}
 
         {/* Page Content - Scrollable with fixed header */}
-        <main className="flex-1 container py-6 px-4 md:px-6 overflow-y-auto">
-          <Outlet />
+        <main className="flex-1 overflow-y-auto">
+          <div className="container py-6 px-4 md:px-6">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>
