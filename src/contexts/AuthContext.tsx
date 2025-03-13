@@ -69,18 +69,36 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(data.session.user);
 
         try {
+          // Use maybeSingle instead of single to prevent the error when no row is found
           const { data: profileData, error: profileError } = await supabase
             .from('profiles')
             .select('is_admin')
             .eq('id', data.session.user.id)
-            .single();
+            .maybeSingle();
           
           if (profileError) {
             console.error('Error fetching profile:', profileError);
             setIsAdmin(false);
-          } else {
+          } else if (profileData) {
             console.log('Profile data:', profileData);
-            setIsAdmin(!!profileData?.is_admin);
+            setIsAdmin(!!profileData.is_admin);
+          } else {
+            console.log('No profile found, creating one...');
+            // Create a profile for the user if it doesn't exist
+            const { error: insertError } = await supabase
+              .from('profiles')
+              .insert({
+                id: data.session.user.id,
+                email: data.session.user.email,
+                is_admin: false
+              });
+            
+            if (insertError) {
+              console.error('Error creating profile:', insertError);
+            } else {
+              console.log('Profile created successfully');
+            }
+            setIsAdmin(false);
           }
         } catch (profileErr) {
           console.error('Unexpected error checking admin status:', profileErr);
@@ -102,7 +120,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, newSession) => {
       console.log('Auth state changed:', event, newSession ? 'with session' : 'no session');
       
-      if (event === 'SIGNED_OUT' as AuthChangeEvent) {
+      if (event === 'SIGNED_OUT') {
         console.log('User signed out, clearing state');
         setSession(null);
         setUser(null);
@@ -111,23 +129,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return;
       }
       
-      if (event === 'SIGNED_IN' as AuthChangeEvent && newSession) {
+      if (event === 'SIGNED_IN' && newSession) {
         console.log('User signed in, setting session:', newSession.user.id);
         setSession(newSession);
         setUser(newSession.user);
         
         try {
+          // Use maybeSingle instead of single to prevent the error when no row is found
           const { data: profileData, error: profileError } = await supabase
             .from('profiles')
             .select('is_admin')
             .eq('id', newSession.user.id)
-            .single();
+            .maybeSingle();
           
           if (profileError) {
             console.error('Error fetching profile on auth change:', profileError);
             setIsAdmin(false);
+          } else if (profileData) {
+            setIsAdmin(!!profileData.is_admin);
           } else {
-            setIsAdmin(!!profileData?.is_admin);
+            console.log('No profile found, creating one...');
+            // Create a profile for the user if it doesn't exist
+            const { error: insertError } = await supabase
+              .from('profiles')
+              .insert({
+                id: newSession.user.id,
+                email: newSession.user.email,
+                is_admin: false
+              });
+            
+            if (insertError) {
+              console.error('Error creating profile:', insertError);
+            } else {
+              console.log('Profile created successfully');
+            }
+            setIsAdmin(false);
           }
         } catch (err) {
           console.error('Error checking admin status on auth change:', err);
@@ -141,17 +177,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(newSession.user);
         
         try {
+          // Use maybeSingle instead of single to prevent the error when no row is found
           const { data: profileData, error: profileError } = await supabase
             .from('profiles')
             .select('is_admin')
             .eq('id', newSession.user.id)
-            .single();
+            .maybeSingle();
           
           if (profileError) {
             console.error('Error fetching profile on auth change:', profileError);
             setIsAdmin(false);
+          } else if (profileData) {
+            setIsAdmin(!!profileData.is_admin);
           } else {
-            setIsAdmin(!!profileData?.is_admin);
+            console.log('No profile found, creating one...');
+            // Create a profile for the user if it doesn't exist
+            const { error: insertError } = await supabase
+              .from('profiles')
+              .insert({
+                id: newSession.user.id,
+                email: newSession.user.email,
+                is_admin: false
+              });
+            
+            if (insertError) {
+              console.error('Error creating profile:', insertError);
+            } else {
+              console.log('Profile created successfully');
+            }
+            setIsAdmin(false);
           }
         } catch (err) {
           console.error('Error checking admin status on auth change:', err);
@@ -159,7 +213,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         } finally {
           setLoading(false); // Ensure loading is set to false after fetching profile
         }
-      } else if (event !== 'SIGNED_OUT' as AuthChangeEvent) {
+      } else if (event !== 'SIGNED_OUT') {
         console.log('No session in auth change event');
         setSession(null);
         setUser(null);
@@ -205,14 +259,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // نقوم بتحديث حالة isAdmin بعد تسجيل الدخول مباشرة
       if (data.user) {
         try {
+          // Use maybeSingle instead of single to prevent the error when no row is found
           const { data: profileData, error: profileError } = await supabase
             .from('profiles')
             .select('is_admin')
             .eq('id', data.user.id)
-            .single();
+            .maybeSingle();
           
-          if (!profileError && profileData) {
+          if (profileError) {
+            console.error('Error checking admin status after sign in:', profileError);
+          } else if (profileData) {
             setIsAdmin(!!profileData.is_admin);
+          } else {
+            console.log('No profile found, creating one...');
+            // Create a profile for the user if it doesn't exist
+            const { error: insertError } = await supabase
+              .from('profiles')
+              .insert({
+                id: data.user.id,
+                email: data.user.email,
+                is_admin: false
+              });
+            
+            if (insertError) {
+              console.error('Error creating profile:', insertError);
+            } else {
+              console.log('Profile created successfully');
+            }
           }
         } catch (err) {
           console.error('Error checking admin status after sign in:', err);
