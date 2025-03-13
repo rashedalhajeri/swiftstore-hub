@@ -13,6 +13,10 @@ export interface Product {
   attributes?: Record<string, string>;
   rating?: number;
   reviews?: Review[];
+  // Add fields to help with API responses
+  category_id?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Review {

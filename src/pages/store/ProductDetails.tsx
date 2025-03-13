@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Minus, Plus, ShoppingCart, Heart, Share2, Star } from 'lucide-react';
@@ -29,13 +30,56 @@ const ProductDetails = () => {
         setLoading(true);
         try {
           const fetchedProduct = await productService.getProductById(id);
-          setProduct(fetchedProduct);
-          setSelectedImage(fetchedProduct.image);
           
-          // Fetch related products (implement this logic on the server if possible)
+          // Convert the Supabase response to match our Product interface
+          const productData: Product = {
+            id: fetchedProduct.id,
+            name: fetchedProduct.name,
+            price: fetchedProduct.price,
+            image: fetchedProduct.image,
+            category: typeof fetchedProduct.category === 'string' 
+              ? fetchedProduct.category 
+              : fetchedProduct.category?.name || '',
+            category_id: fetchedProduct.category_id,
+            featured: !!fetchedProduct.featured,
+            description: fetchedProduct.description,
+            images: fetchedProduct.images as string[] || [],
+            sku: fetchedProduct.sku,
+            stock: fetchedProduct.stock,
+            attributes: fetchedProduct.attributes as Record<string, string> || {},
+            rating: fetchedProduct.rating,
+            created_at: fetchedProduct.created_at,
+            updated_at: fetchedProduct.updated_at
+          };
+          
+          setProduct(productData);
+          setSelectedImage(productData.image);
+          
+          // Fetch related products
           const allProducts = await productService.getAllProducts();
-          const related = allProducts.filter(p => p.category === fetchedProduct.category && p.id !== fetchedProduct.id);
-          setRelatedProducts(related.slice(0, 4)); // Get first 4 related products
+          
+          // Convert all products to match our Product interface
+          const relatedProductsData: Product[] = allProducts
+            .filter(p => p.category_id === productData.category_id && p.id !== productData.id)
+            .map(p => ({
+              id: p.id,
+              name: p.name,
+              price: p.price,
+              image: p.image,
+              category: typeof p.category === 'string' ? p.category : p.category?.name || '',
+              category_id: p.category_id,
+              featured: !!p.featured,
+              description: p.description,
+              images: p.images as string[] || [],
+              sku: p.sku,
+              stock: p.stock,
+              attributes: p.attributes as Record<string, string> || {},
+              rating: p.rating,
+              created_at: p.created_at,
+              updated_at: p.updated_at
+            }));
+            
+          setRelatedProducts(relatedProductsData.slice(0, 4)); // Get first 4 related products
         } catch (error) {
           console.error("Failed to fetch product:", error);
           toast({

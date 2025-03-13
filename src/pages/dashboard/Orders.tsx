@@ -294,6 +294,7 @@ const Orders = () => {
     }
   };
 
+  // Fix icon rendering in the return statement
   return (
     <div className="space-y-6" style={{ direction: "rtl" }}>
       <div className="flex flex-col md:flex-row justify-between items-start gap-4">
@@ -366,7 +367,7 @@ const Orders = () => {
                       <TableCell>{order.total.toFixed(3)} KWD</TableCell>
                       <TableCell>
                         <Badge className={`bg-${statusMap[order.status].color}-500 hover:bg-${statusMap[order.status].color}-600`}>
-                          {React.createElement(statusMap[order.status].icon, { className: "ml-2 h-4 w-4" })}
+                          {React.createElement(statusMap[order.status].icon, { size: 16, className: "ml-2 h-4 w-4" })}
                           {statusMap[order.status].label}
                         </Badge>
                       </TableCell>
@@ -444,7 +445,7 @@ const Orders = () => {
                           <TableCell>{order.total.toFixed(3)} KWD</TableCell>
                           <TableCell>
                             <Badge className={`bg-${statusMap[order.status].color}-500 hover:bg-${statusMap[order.status].color}-600`}>
-                              {React.createElement(statusMap[order.status].icon, { className: "ml-2 h-4 w-4" })}
+                              {React.createElement(statusMap[order.status].icon, { size: 16, className: "ml-2 h-4 w-4" })}
                               {statusMap[order.status].label}
                             </Badge>
                           </TableCell>
