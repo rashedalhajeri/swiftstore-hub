@@ -59,24 +59,24 @@ export const storeService = {
         return [];
       }
       
-      // Fix the type conversion by properly mapping the data
-      // We need to handle the absence of store_id in the response type
+      // Map the data to the Product type explicitly
+      // This avoids deep type instantiation issues
       return (data || []).map(item => ({
         id: item.id,
         name: item.name,
         price: item.price,
         image: item.image,
-        category: item.category,
+        category: typeof item.category === 'object' ? item.category?.name || '' : item.category,
         featured: !!item.featured,
         description: item.description,
-        images: item.images,
+        images: Array.isArray(item.images) ? item.images : [],
         sku: item.sku,
         stock: item.stock,
-        attributes: item.attributes,
+        attributes: item.attributes || {},
         rating: item.rating,
         category_id: item.category_id,
-        // Only include store_id if it exists
-        ...(item.store_id ? { store_id: item.store_id } : {}),
+        // Only conditionally add store_id if it exists in the data
+        ...(item.store_id !== undefined ? { store_id: item.store_id } : {}),
         created_at: item.created_at,
         updated_at: item.updated_at
       }));
