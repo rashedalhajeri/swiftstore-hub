@@ -6,6 +6,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { CartProvider } from "./contexts/CartContext";
+import { StoreProvider } from "./contexts/StoreContext";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -19,7 +21,6 @@ import ProductDetails from "./pages/store/ProductDetails";
 import Cart from "./pages/store/Cart";
 import Checkout from "./pages/store/Checkout";
 import OrderConfirmation from "./pages/store/OrderConfirmation";
-import { CartProvider } from "./contexts/CartContext";
 import Categories from "./pages/dashboard/Categories";
 import Promotions from "./pages/dashboard/Promotions";
 import Products from "./pages/dashboard/Products";
@@ -120,66 +121,68 @@ const App = () => (
       <Sonner />
       <AuthProvider>
         <CartProvider>
-          <BrowserRouter>
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={<Index />} />
-              <Route path="/login" element={
-                <PublicOnlyRoute>
-                  <Login />
-                </PublicOnlyRoute>
-              } />
-              <Route path="/register" element={
-                <PublicOnlyRoute>
-                  <Register />
-                </PublicOnlyRoute>
-              } />
-              <Route path="/reset-password" element={
-                <PublicOnlyRoute>
-                  <ResetPassword />
-                </PublicOnlyRoute>
-              } />
-              <Route path="/update-password" element={
-                <PublicOnlyRoute>
-                  <UpdatePassword />
-                </PublicOnlyRoute>
-              } />
-              <Route path="/store" element={<StoreFront />} />
-              <Route path="/store/product/:id" element={<ProductDetails />} />
-              <Route path="/store/cart" element={<Cart />} />
-              <Route path="/store/checkout" element={<Checkout />} />
-              <Route path="/store/order-confirmation" element={<OrderConfirmation />} />
-              
-              {/* Dashboard Routes (Protected) */}
-              <Route path="/dashboard" element={
-                <ProtectedRoute>
-                  <DashboardLayout />
-                </ProtectedRoute>
-              }>
-                <Route index element={<Dashboard />} />
-                <Route path="products" element={<Products />} />
-                <Route path="products/new" element={<NewProduct />} />
-                <Route path="products/:id/edit" element={<EditProduct />} />
-                <Route path="categories" element={<Categories />} />
-                <Route path="promotions" element={<Promotions />} />
-                <Route path="orders" element={<Orders />} />
-                <Route path="customers" element={<Customers />} />
+          <StoreProvider>
+            <BrowserRouter>
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<Index />} />
+                <Route path="/login" element={
+                  <PublicOnlyRoute>
+                    <Login />
+                  </PublicOnlyRoute>
+                } />
+                <Route path="/register" element={
+                  <PublicOnlyRoute>
+                    <Register />
+                  </PublicOnlyRoute>
+                } />
+                <Route path="/reset-password" element={
+                  <PublicOnlyRoute>
+                    <ResetPassword />
+                  </PublicOnlyRoute>
+                } />
+                <Route path="/update-password" element={
+                  <PublicOnlyRoute>
+                    <UpdatePassword />
+                  </PublicOnlyRoute>
+                } />
+                <Route path="/store" element={<StoreFront />} />
+                <Route path="/store/product/:id" element={<ProductDetails />} />
+                <Route path="/store/cart" element={<Cart />} />
+                <Route path="/store/checkout" element={<Checkout />} />
+                <Route path="/store/order-confirmation" element={<OrderConfirmation />} />
                 
-                {/* Settings Routes */}
-                <Route path="settings" element={<SettingsAccount />} />
-                <Route path="settings/account" element={<SettingsAccount />} />
-                <Route path="settings/store" element={<SettingsStore />} />
-                <Route path="settings/billing" element={<SettingsBilling />} />
-                <Route path="settings/notifications" element={<SettingsNotifications />} />
-                <Route path="settings/security" element={<SettingsSecurity />} />
-                <Route path="settings/domains" element={<SettingsDomains />} />
-                <Route path="settings/support" element={<SettingsSupport />} />
-              </Route>
-              
-              {/* 404 Route */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
+                {/* Dashboard Routes (Protected) */}
+                <Route path="/dashboard" element={
+                  <ProtectedRoute>
+                    <DashboardLayout />
+                  </ProtectedRoute>
+                }>
+                  <Route index element={<Dashboard />} />
+                  <Route path="products" element={<Products />} />
+                  <Route path="products/new" element={<NewProduct />} />
+                  <Route path="products/:id/edit" element={<EditProduct />} />
+                  <Route path="categories" element={<Categories />} />
+                  <Route path="promotions" element={<Promotions />} />
+                  <Route path="orders" element={<Orders />} />
+                  <Route path="customers" element={<Customers />} />
+                  
+                  {/* Settings Routes */}
+                  <Route path="settings" element={<SettingsAccount />} />
+                  <Route path="settings/account" element={<SettingsAccount />} />
+                  <Route path="settings/store" element={<SettingsStore />} />
+                  <Route path="settings/billing" element={<SettingsBilling />} />
+                  <Route path="settings/notifications" element={<SettingsNotifications />} />
+                  <Route path="settings/security" element={<SettingsSecurity />} />
+                  <Route path="settings/domains" element={<SettingsDomains />} />
+                  <Route path="settings/support" element={<SettingsSupport />} />
+                </Route>
+                
+                {/* 404 Route */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </BrowserRouter>
+          </StoreProvider>
         </CartProvider>
       </AuthProvider>
     </TooltipProvider>

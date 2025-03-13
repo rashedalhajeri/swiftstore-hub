@@ -61,3 +61,21 @@ export interface PaymentInfo {
   cvv?: string;
   transactionId?: string;
 }
+
+// Add a Store interface to match our database
+export interface Store {
+  id: string;
+  name: string;
+  description?: string;
+  logo?: string;
+  banner?: string;
+  primary_color?: string;
+  is_published: boolean;
+  user_id: string;
+  slug?: string;
+  facebook?: string;
+  twitter?: string;
+  instagram?: string;
+  created_at?: string;
+  updated_at?: string;
+}
