@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Package, 
@@ -92,7 +93,7 @@ const Orders = () => {
       });
     },
     staleTime: 1000 * 60 * 5, // 5 دقائق قبل إعادة جلب البيانات
-    cacheTime: 1000 * 60 * 30, // 30 دقيقة للاحتفاظ بالبيانات في الذاكرة
+    gcTime: 1000 * 60 * 30, // 30 دقيقة للاحتفاظ بالبيانات في الذاكرة - replaced cacheTime with gcTime
   });
 
   const updateOrderMutation = useMutation({

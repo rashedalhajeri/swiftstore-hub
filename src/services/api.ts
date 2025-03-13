@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Product, Order, CartItem } from '@/types/store';
 import { Json } from '@/integrations/supabase/types';
@@ -8,12 +9,12 @@ export const productService = {
   async getAllProducts() {
     // استخدام خيار abortSignal لإلغاء الطلبات غير الضرورية
     const abortController = new AbortController();
-    const { signal } = abortController;
     
     try {
+      // Removed the abortSignal parameter since it's not supported in Supabase
       const { data, error } = await supabase
         .from('products')
-        .select('*, category:categories(name)', { abortSignal: signal });
+        .select('*, category:categories(name)');
       
       if (error) {
         console.error('Error fetching products:', error);

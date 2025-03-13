@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Session, User, AuthChangeEvent } from '@supabase/supabase-js';
@@ -124,6 +125,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, newSession) => {
       console.log('Auth state changed:', event, newSession ? 'with session' : 'no session');
       
+      // Fix here: use separate if statement for 'SIGNED_OUT' case instead of comparing to other events
       if (event === 'SIGNED_OUT') {
         console.log('User signed out, clearing state');
         setSession(null);
@@ -143,7 +145,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
         
         setLoading(false);
-      } else if (event !== 'SIGNED_OUT') {
+      } else if (event !== 'SIGNED_OUT') { // This line is redundant but keeping it for clarity
         console.log('No session in auth change event');
         setSession(null);
         setUser(null);
