@@ -60,6 +60,7 @@ export const storeService = {
       }
       
       // Fix the type conversion by properly mapping the data
+      // We need to handle the absence of store_id in the response type
       return (data || []).map(item => ({
         id: item.id,
         name: item.name,
@@ -74,7 +75,8 @@ export const storeService = {
         attributes: item.attributes,
         rating: item.rating,
         category_id: item.category_id,
-        store_id: item.store_id,
+        // Only include store_id if it exists
+        ...(item.store_id ? { store_id: item.store_id } : {}),
         created_at: item.created_at,
         updated_at: item.updated_at
       }));
