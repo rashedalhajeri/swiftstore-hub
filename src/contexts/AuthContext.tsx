@@ -85,7 +85,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, newSession) => {
       console.log('Auth state changed:', event, newSession ? 'with session' : 'no session');
       
-      if (event === 'SIGNED_OUT') {
+      if (event === 'SIGNED_OUT' as AuthChangeEvent) {
         console.log('User signed out, clearing state');
         setSession(null);
         setUser(null);
@@ -116,7 +116,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.error('Error checking admin status on auth change:', err);
           setIsAdmin(false);
         }
-      } else if (event !== 'SIGNED_OUT') {
+      } else if (event !== 'SIGNED_OUT' as AuthChangeEvent) {
         console.log('No session in auth change event');
         setSession(null);
         setUser(null);
