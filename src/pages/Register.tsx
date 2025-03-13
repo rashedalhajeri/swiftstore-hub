@@ -8,16 +8,20 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { CheckCircle2, ArrowRight, Loader2 } from 'lucide-react';
 import Logo from '@/components/Logo';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [storeName, setStoreName] = useState('');
   const [storeUrl, setStoreUrl] = useState('');
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { signUp } = useAuth();
 
   // Remember store URL between steps
   useEffect(() => {
@@ -51,10 +55,10 @@ const Register = () => {
     e.preventDefault();
     
     if (step === 1) {
-      if (!email || !password) {
+      if (!email || !password || !firstName || !lastName) {
         toast({
           title: "يجب ملء جميع الحقول",
-          description: "يرجى إدخال البريد الإلكتروني وكلمة المرور",
+          description: "يرجى إدخال جميع البيانات المطلوبة",
           variant: "destructive",
         });
         return;
@@ -88,26 +92,45 @@ const Register = () => {
   const handleRegister = async () => {
     setIsLoading(true);
     
-    // Save store URL permanently
-    localStorage.setItem('storeUrl', storeUrl);
-    
-    // Simulate API request
-    setTimeout(() => {
+    try {
+      // Save store URL permanently
+      localStorage.setItem('storeUrl', storeUrl);
+      
+      // Register user with Supabase
+      const userData = {
+        first_name: firstName,
+        last_name: lastName,
+        store_name: storeName,
+        store_url: storeUrl
+      };
+      
+      const result = await signUp(email, password, userData);
+      
+      if (!result) {
+        // تسجيل ناجح
+        sessionStorage.removeItem('tempStoreUrl');
+        
+        toast({
+          title: "تم إنشاء حسابك بنجاح!",
+          description: "جاري تحويلك إلى لوحة التحكم...",
+        });
+        
+        // Redirect to dashboard
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 1500);
+      } else {
+        // تم التعامل مع الخطأ في وظيفة signUp
+        setIsLoading(false);
+      }
+    } catch (error) {
       setIsLoading(false);
-      
       toast({
-        title: "تم إنشاء حسابك بنجاح!",
-        description: "جاري تحويلك إلى لوحة التحكم...",
+        title: "حدث خطأ",
+        description: "حدث خطأ أثناء محاولة إنشاء الحساب",
+        variant: "destructive",
       });
-      
-      // Remove temporary storage
-      sessionStorage.removeItem('tempStoreUrl');
-      
-      // Redirect to dashboard
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 1500);
-    }, 2000);
+    }
   };
 
   return (
@@ -140,6 +163,26 @@ const Register = () => {
             {step === 1 ? (
               // Step 1: Account Info
               <>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName">الاسم الأول</Label>
+                    <Input
+                      id="firstName"
+                      placeholder="محمد"
+                      value={firstName}
+                      onChange={(e) => setFirstName(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">الاسم الأخير</Label>
+                    <Input
+                      id="lastName"
+                      placeholder="أحمد"
+                      value={lastName}
+                      onChange={(e) => setLastName(e.target.value)}
+                    />
+                  </div>
+                </div>
                 <div className="space-y-2">
                   <Label htmlFor="email">البريد الإلكتروني</Label>
                   <Input
@@ -177,7 +220,6 @@ const Register = () => {
                     value={storeName}
                     onChange={(e) => {
                       setStoreName(e.target.value);
-                      // Don't automatically clear store URL when editing name
                     }}
                     onBlur={handleGenerateStoreUrl}
                   />
@@ -212,11 +254,13 @@ const Register = () => {
               {isLoading ? (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : step === 1 ? (
-                'التالي'
+                <>
+                  <span>التالي</span>
+                  <ArrowRight className="mr-2 h-4 w-4" />
+                </>
               ) : (
                 'إنشاء المتجر'
               )}
-              {!isLoading && step === 1 && <ArrowRight className="mr-2 h-4 w-4" />}
             </Button>
             <div className="text-center text-sm">
               لديك حساب بالفعل؟{' '}

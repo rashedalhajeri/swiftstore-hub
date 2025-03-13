@@ -3,7 +3,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -33,51 +34,72 @@ import SettingsSupport from "./pages/dashboard/settings/Support";
 
 const queryClient = new QueryClient();
 
+// غلاف حماية للمسارات التي تتطلب تسجيل الدخول
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">جاري التحميل...</div>;
+  }
+  
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  return <>{children}</>;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <CartProvider>
-        <BrowserRouter>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/store" element={<StoreFront />} />
-            <Route path="/store/product/:id" element={<ProductDetails />} />
-            <Route path="/store/cart" element={<Cart />} />
-            <Route path="/store/checkout" element={<Checkout />} />
-            <Route path="/store/order-confirmation" element={<OrderConfirmation />} />
-            
-            {/* Dashboard Routes */}
-            <Route path="/dashboard" element={<DashboardLayout />}>
-              <Route index element={<Dashboard />} />
-              <Route path="products" element={<Products />} />
-              <Route path="products/new" element={<NewProduct />} />
-              <Route path="products/:id/edit" element={<EditProduct />} />
-              <Route path="categories" element={<Categories />} />
-              <Route path="promotions" element={<Promotions />} />
-              <Route path="orders" element={<Orders />} />
-              <Route path="customers" element={<Customers />} />
+      <AuthProvider>
+        <CartProvider>
+          <BrowserRouter>
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<Index />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/store" element={<StoreFront />} />
+              <Route path="/store/product/:id" element={<ProductDetails />} />
+              <Route path="/store/cart" element={<Cart />} />
+              <Route path="/store/checkout" element={<Checkout />} />
+              <Route path="/store/order-confirmation" element={<OrderConfirmation />} />
               
-              {/* Settings Routes */}
-              <Route path="settings" element={<SettingsAccount />} />
-              <Route path="settings/account" element={<SettingsAccount />} />
-              <Route path="settings/store" element={<SettingsStore />} />
-              <Route path="settings/billing" element={<SettingsBilling />} />
-              <Route path="settings/notifications" element={<SettingsNotifications />} />
-              <Route path="settings/security" element={<SettingsSecurity />} />
-              <Route path="settings/domains" element={<SettingsDomains />} />
-              <Route path="settings/support" element={<SettingsSupport />} />
-            </Route>
-            
-            {/* 404 Route */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </CartProvider>
+              {/* Dashboard Routes (Protected) */}
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <DashboardLayout />
+                </ProtectedRoute>
+              }>
+                <Route index element={<Dashboard />} />
+                <Route path="products" element={<Products />} />
+                <Route path="products/new" element={<NewProduct />} />
+                <Route path="products/:id/edit" element={<EditProduct />} />
+                <Route path="categories" element={<Categories />} />
+                <Route path="promotions" element={<Promotions />} />
+                <Route path="orders" element={<Orders />} />
+                <Route path="customers" element={<Customers />} />
+                
+                {/* Settings Routes */}
+                <Route path="settings" element={<SettingsAccount />} />
+                <Route path="settings/account" element={<SettingsAccount />} />
+                <Route path="settings/store" element={<SettingsStore />} />
+                <Route path="settings/billing" element={<SettingsBilling />} />
+                <Route path="settings/notifications" element={<SettingsNotifications />} />
+                <Route path="settings/security" element={<SettingsSecurity />} />
+                <Route path="settings/domains" element={<SettingsDomains />} />
+                <Route path="settings/support" element={<SettingsSupport />} />
+              </Route>
+              
+              {/* 404 Route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </CartProvider>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

@@ -9,6 +9,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Loader2 } from 'lucide-react';
 import Logo from '@/components/Logo';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -17,6 +18,7 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { signIn } = useAuth();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,20 +34,26 @@ const Login = () => {
     
     setIsLoading(true);
     
-    // Simulate API request
-    setTimeout(() => {
+    try {
+      const result = await signIn(email, password);
+      
+      if (!result) {
+        // تم تسجيل الدخول بنجاح، سيتم التوجيه تلقائيًا
+        setTimeout(() => {
+          navigate('/dashboard');
+        }, 1000);
+      } else {
+        // تم التعامل مع الخطأ في وظيفة signIn
+        setIsLoading(false);
+      }
+    } catch (error) {
       setIsLoading(false);
-      
       toast({
-        title: "تم تسجيل الدخول بنجاح!",
-        description: "جاري تحويلك إلى لوحة التحكم...",
+        title: "حدث خطأ",
+        description: "حدث خطأ أثناء محاولة تسجيل الدخول",
+        variant: "destructive",
       });
-      
-      // Redirect to dashboard
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 1500);
-    }, 2000);
+    }
   };
 
   return (
