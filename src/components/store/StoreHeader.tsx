@@ -46,44 +46,41 @@ const StoreHeader = ({ store, error, isLoading }: StoreHeaderProps) => {
   }
 
   return (
-    <div className="w-full mb-8">
-      {/* Banner */}
-      <div className="w-full h-48 md:h-64 relative overflow-hidden">
+    <div className="relative w-full mb-20">
+      {/* البنر */}
+      <div className="w-full h-56 md:h-64 relative">
         {store.banner ? (
           <img 
             src={store.banner} 
-            alt="" 
+            alt="Store Banner" 
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-r from-gray-900 to-gray-600"></div>
+          <div className="w-full h-full bg-gradient-to-r from-green-700 to-green-500"></div>
         )}
-        
-        {/* Overlay for better text visibility */}
+        {/* Overlay for better visibility */}
         <div className="absolute inset-0 bg-black/30"></div>
       </div>
-      
-      {/* Logo, Store Name, Cart & Favorites - Centered under banner */}
-      <div className="container mx-auto px-4 -mt-16 relative z-10 flex flex-col items-center">
-        {/* Store Logo */}
+
+      {/* الشعار واسم المتجر */}
+      <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2 flex flex-col items-center">
+        {/* الشعار */}
         {store.logo && (
-          <div className="w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-lg bg-white mb-4">
-            <img 
-              src={store.logo} 
-              alt={`${store.name} logo`}
-              className="w-full h-full object-cover"
-            />
-          </div>
+          <img 
+            src={store.logo} 
+            alt={`${store.name} logo`} 
+            className="w-24 h-24 md:w-32 md:h-32 rounded-full border-4 border-white shadow-lg bg-white"
+          />
         )}
+
+        {/* معلومات المتجر */}
+        <h1 className="text-2xl md:text-3xl font-bold mt-4">{store.name}</h1>
         
-        {/* Store Name */}
-        <h1 className="text-3xl md:text-4xl font-bold text-center mb-6">{store.name}</h1>
-        
-        {/* Cart & Favorites Buttons */}
-        <div className="flex items-center gap-4 mb-8">
+        {/* أزرار السلة والمفضلة */}
+        <div className="flex items-center gap-4 mt-4">
           <Link to="/store/cart">
-            <Button variant="default" size="lg" className="group bg-primary hover:bg-primary/90 rounded-full px-6">
-              <ShoppingCart className="h-5 w-5 mr-2" />
+            <Button variant="default" size="sm" className="group bg-primary hover:bg-primary/90 rounded-full px-4">
+              <ShoppingCart className="h-4 w-4 mr-2" />
               <span>السلة</span>
               {totalItems > 0 && (
                 <span className="ml-2 bg-white text-primary text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
@@ -94,8 +91,8 @@ const StoreHeader = ({ store, error, isLoading }: StoreHeaderProps) => {
           </Link>
           
           <Link to="/store/favorites">
-            <Button variant="outline" size="lg" className="bg-transparent border-primary text-primary hover:bg-primary/10 rounded-full px-6">
-              <Heart className="h-5 w-5 mr-2" />
+            <Button variant="outline" size="sm" className="bg-transparent border-primary text-primary hover:bg-primary/10 rounded-full px-4">
+              <Heart className="h-4 w-4 mr-2" />
               <span>المفضلة</span>
             </Button>
           </Link>

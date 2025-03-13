@@ -121,19 +121,21 @@ export const storeService = {
       
       if (!data) return [];
 
-      // Process and return products with simplified type handling
+      // Fixed processing to handle type issues
       return data.map(item => ({
-        id: item.id,
+        id: item.id || '',
         name: item.name || '',
         price: Number(item.price) || 0,
         image: item.image || '',
         category: item.category || { name: '' },
         featured: Boolean(item.featured) || false,
         description: item.description || '',
-        images: Array.isArray(item.images) ? item.images : item.images ? [item.images] : [],
+        images: Array.isArray(item.images) 
+          ? item.images.map(img => typeof img === 'string' ? img : '')
+          : [],
         sku: item.sku || '',
         stock: Number(item.stock) || 0,
-        attributes: item.attributes ? { ...item.attributes } : {},
+        attributes: item.attributes || {},
         rating: Number(item.rating) || 0,
         category_id: item.category_id || '',
         created_at: item.created_at || '',
