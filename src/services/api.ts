@@ -1,6 +1,6 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Product, Order, CartItem } from '@/types/store';
+import { Json } from '@/integrations/supabase/types';
 
 // خدمات المنتجات
 export const productService = {
@@ -53,7 +53,19 @@ export const productService = {
   async addProduct(product: Omit<Product, 'id'>) {
     const { data, error } = await supabase
       .from('products')
-      .insert(product)
+      .insert({
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        category_id: product.category,
+        featured: product.featured,
+        description: product.description,
+        images: product.images as unknown as Json,
+        sku: product.sku,
+        stock: product.stock,
+        attributes: product.attributes as unknown as Json,
+        rating: product.rating
+      })
       .select()
       .single();
     
@@ -66,10 +78,24 @@ export const productService = {
   },
 
   // تحديث منتج
-  async updateProduct(id: string, product: Partial<Product>) {
+  async updateProduct(id: string, product: Partial<Omit<Product, 'id'>>) {
+    const updateData: Record<string, any> = {};
+    
+    if (product.name) updateData.name = product.name;
+    if (product.price !== undefined) updateData.price = product.price;
+    if (product.image) updateData.image = product.image;
+    if (product.category) updateData.category_id = product.category;
+    if (product.featured !== undefined) updateData.featured = product.featured;
+    if (product.description) updateData.description = product.description;
+    if (product.images) updateData.images = product.images as unknown as Json;
+    if (product.sku) updateData.sku = product.sku;
+    if (product.stock !== undefined) updateData.stock = product.stock;
+    if (product.attributes) updateData.attributes = product.attributes as unknown as Json;
+    if (product.rating !== undefined) updateData.rating = product.rating;
+    
     const { data, error } = await supabase
       .from('products')
-      .update(product)
+      .update(updateData)
       .eq('id', id)
       .select()
       .single();

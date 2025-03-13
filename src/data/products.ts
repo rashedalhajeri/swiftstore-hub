@@ -1,10 +1,9 @@
-
 import { Product } from '../types/store';
 
 // بيانات المنتجات النموذجية للمتجر
 export const products: Product[] = [
   {
-    id: 1,
+    id: '1',
     name: 'سماعات لاسلكية بلوتوث',
     price: 29.990,
     image: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
@@ -27,14 +26,14 @@ export const products: Product[] = [
     rating: 4.8,
     reviews: [
       {
-        id: 1,
+        id: '1',
         userName: 'أحمد محمد',
         rating: 5,
         comment: 'جودة صوت رائعة وعزل ممتاز للضوضاء، أنصح بها بشدة!',
         date: '2023-11-15',
       },
       {
-        id: 2,
+        id: '2',
         userName: 'سارة العلي',
         rating: 4,
         comment: 'منتج ممتاز، البطارية تدوم طويلاً لكن العلبة كبيرة قليلاً.',
@@ -43,7 +42,7 @@ export const products: Product[] = [
     ],
   },
   {
-    id: 2,
+    id: '2',
     name: 'حقيبة ظهر عصرية',
     price: 49.990,
     image: 'https://images.unsplash.com/photo-1491637639811-60e2756cc1c7?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
@@ -66,7 +65,7 @@ export const products: Product[] = [
     rating: 4.6,
     reviews: [
       {
-        id: 1,
+        id: '1',
         userName: 'محمد العبدالله',
         rating: 5,
         comment: 'حقيبة ممتازة وخامة عالية! تتسع لكل احتياجاتي وتحمي الكمبيوتر جيداً.',
@@ -75,7 +74,7 @@ export const products: Product[] = [
     ],
   },
   {
-    id: 3,
+    id: '3',
     name: 'ساعة ذكية متطورة',
     price: 89.990,
     image: 'https://images.unsplash.com/photo-1579586337278-3befd40fd17a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
@@ -98,14 +97,14 @@ export const products: Product[] = [
     rating: 4.7,
     reviews: [
       {
-        id: 1,
+        id: '1',
         userName: 'فهد الخالد',
         rating: 5,
         comment: 'أفضل ساعة ذكية استخدمتها، البطارية تدوم طويلاً وتطبيقاتها ممتازة!',
         date: '2023-11-20',
       },
       {
-        id: 2,
+        id: '2',
         userName: 'نوف السالم',
         rating: 4,
         comment: 'تصميم أنيق وخفيفة الوزن، لكن تستغرق وقتًا للشحن.',
@@ -114,7 +113,7 @@ export const products: Product[] = [
     ],
   },
   {
-    id: 4,
+    id: '4',
     name: 'نظارة شمسية أنيقة',
     price: 35.500,
     image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
@@ -137,7 +136,7 @@ export const products: Product[] = [
     rating: 4.5,
   },
   {
-    id: 5,
+    id: '5',
     name: 'آيفون 15 برو ماكس',
     price: 399.990,
     image: 'https://images.unsplash.com/photo-1696446701632-4a873b922b80?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
@@ -160,21 +159,21 @@ export const products: Product[] = [
     rating: 4.9,
     reviews: [
       {
-        id: 1,
+        id: '1',
         userName: 'عبدالله المطيري',
         rating: 5,
         comment: 'أداء خارق وكاميرا استثنائية! يستحق كل فلس.',
         date: '2023-12-10',
       },
       {
-        id: 2,
+        id: '2',
         userName: 'سارة الحمد',
         rating: 5,
         comment: 'الجهاز مذهل وبطاريته تدوم طوال اليوم.',
         date: '2023-11-30',
       },
       {
-        id: 3,
+        id: '3',
         userName: 'خالد العنزي',
         rating: 4,
         comment: 'ممتاز لكن السعر مرتفع قليلاً مقارنة بالإصدارات السابقة.',
@@ -183,7 +182,7 @@ export const products: Product[] = [
     ],
   },
   {
-    id: 6,
+    id: '6',
     name: 'لوح تزلج خشبي',
     price: 65.000,
     image: 'https://images.unsplash.com/photo-1547447134-cd3f5c716030?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
@@ -206,7 +205,7 @@ export const products: Product[] = [
     rating: 4.4,
   },
   {
-    id: 7,
+    id: '7',
     name: 'سلسلة مفاتيح معدنية',
     price: 12.990,
     image: 'https://images.unsplash.com/photo-1542826384-ef195733747c?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
@@ -227,7 +226,7 @@ export const products: Product[] = [
     rating: 4.2,
   },
   {
-    id: 8,
+    id: '8',
     name: 'لابتوب ماك بوك برو',
     price: 499.990,
     image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3',
@@ -250,14 +249,14 @@ export const products: Product[] = [
     rating: 4.9,
     reviews: [
       {
-        id: 1,
+        id: '1',
         userName: 'أحمد العبدالله',
         rating: 5,
         comment: 'أداء خارق للبرامج الثقيلة والتصميم، بطارية ممتازة أيضاً.',
         date: '2023-12-15',
       },
       {
-        id: 2,
+        id: '2',
         userName: 'سارة المهنا',
         rating: 5,
         comment: 'أفضل لابتوب استخدمته على الإطلاق. سريع وخفيف ويدوم طويلاً.',
@@ -276,11 +275,13 @@ export const categories = [
   'رياضة',
 ];
 
-export const getProductById = (id: number): Product | undefined => {
+// Update the getProductById function to handle string IDs
+export const getProductById = (id: string): Product | undefined => {
   return products.find(product => product.id === id);
 };
 
-export const getRelatedProducts = (category: string, currentId: number): Product[] => {
+// Update the getRelatedProducts function to handle string IDs
+export const getRelatedProducts = (category: string, currentId: string): Product[] => {
   return products
     .filter(product => product.category === category && product.id !== currentId)
     .slice(0, 4);

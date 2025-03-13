@@ -1,6 +1,6 @@
 
 export interface Product {
-  id: number;
+  id: string; // Changed from number to string to match Supabase
   name: string;
   price: number;
   image: string;
@@ -16,7 +16,7 @@ export interface Product {
 }
 
 export interface Review {
-  id: number;
+  id: string; // Changed from number to string
   userName: string;
   rating: number;
   comment: string;
