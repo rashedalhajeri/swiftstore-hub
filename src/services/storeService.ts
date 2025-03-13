@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Product, Store } from '@/types/store';
 import { toast } from 'sonner';
@@ -120,51 +121,24 @@ export const storeService = {
       
       if (!data) return [];
 
-      // Process each product to ensure proper type conversion
-      return data.map(item => {
-        // Handle images - ensure it's always an array of strings
-        let processedImages: string[] = [];
-        if (item.images) {
-          if (Array.isArray(item.images)) {
-            processedImages = item.images.filter(img => typeof img === 'string') as string[];
-          } else if (typeof item.images === 'string') {
-            processedImages = [item.images];
-          }
-        }
-
-        // Handle attributes - simplify to avoid deep type instantiation
-        let processedAttributes: Record<string, string> = {};
-        
-        if (item.attributes && typeof item.attributes === 'object') {
-          try {
-            // Convert each attribute value to string directly
-            const attrObj = item.attributes as Record<string, any>;
-            Object.keys(attrObj).forEach(key => {
-              processedAttributes[key] = String(attrObj[key] || '');
-            });
-          } catch (err) {
-            console.error('Error processing product attributes:', err);
-          }
-        }
-
-        return {
-          id: item.id,
-          name: item.name || '',
-          price: Number(item.price) || 0,
-          image: item.image || '',
-          category: item.category || { name: '' },
-          featured: Boolean(item.featured) || false,
-          description: item.description || '',
-          images: processedImages,
-          sku: item.sku || '',
-          stock: Number(item.stock) || 0,
-          attributes: processedAttributes,
-          rating: Number(item.rating) || 0,
-          category_id: item.category_id || '',
-          created_at: item.created_at || '',
-          updated_at: item.updated_at || ''
-        };
-      });
+      // Process and return products with simplified type handling
+      return data.map(item => ({
+        id: item.id,
+        name: item.name || '',
+        price: Number(item.price) || 0,
+        image: item.image || '',
+        category: item.category || { name: '' },
+        featured: Boolean(item.featured) || false,
+        description: item.description || '',
+        images: Array.isArray(item.images) ? item.images : item.images ? [item.images] : [],
+        sku: item.sku || '',
+        stock: Number(item.stock) || 0,
+        attributes: item.attributes ? { ...item.attributes } : {},
+        rating: Number(item.rating) || 0,
+        category_id: item.category_id || '',
+        created_at: item.created_at || '',
+        updated_at: item.updated_at || ''
+      }));
     } catch (error) {
       console.error('Error in getStoreProducts:', error);
       return [];
