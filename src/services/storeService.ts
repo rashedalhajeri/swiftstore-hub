@@ -121,38 +121,44 @@ export const storeService = {
       
       if (!data) return [];
 
-      // Transform the data to match the Product type with careful type checking
-      return data.map(item => {
-        // Type-safe handling of category
+      // Transform the data to match the Product type
+      const products: Product[] = data.map(item => {
+        // Handle category
         let categoryName = '';
         if (item.category && typeof item.category === 'object' && 'name' in item.category) {
-          categoryName = String(item.category.name);
+          categoryName = String(item.category.name || '');
         } else if (typeof item.category === 'string') {
           categoryName = item.category;
         } else {
           categoryName = String(item.category_id || '');
         }
 
-        // Handle images
+        // Handle images - explicitly process as string array
         let processedImages: string[] = [];
         if (item.images) {
           if (Array.isArray(item.images)) {
-            processedImages = item.images.filter(img => typeof img === 'string').map(img => String(img));
+            processedImages = item.images
+              .filter(img => img !== null && img !== undefined)
+              .map(img => String(img));
           }
         }
 
-        // Handle attributes
+        // Handle attributes - safely convert to Record<string, string>
         let processedAttributes: Record<string, string> = {};
         if (item.attributes && typeof item.attributes === 'object' && !Array.isArray(item.attributes)) {
-          Object.entries(item.attributes).forEach(([key, value]) => {
-            if (value !== null && value !== undefined) {
-              processedAttributes[key] = String(value);
+          // Loop through the keys in a type-safe way
+          for (const key in item.attributes) {
+            if (Object.prototype.hasOwnProperty.call(item.attributes, key)) {
+              const val = item.attributes[key];
+              if (val !== null && val !== undefined) {
+                processedAttributes[key] = String(val);
+              }
             }
-          });
+          }
         }
 
-        // Build the product object with explicit types
-        const product: Product = {
+        // Return the product with proper type conversions
+        return {
           id: String(item.id || ''),
           name: String(item.name || ''),
           price: Number(item.price) || 0,
@@ -167,9 +173,9 @@ export const storeService = {
           attributes: processedAttributes,
           store_id: storeId
         };
-
-        return product;
       });
+
+      return products;
     } catch (error) {
       console.error('Error in getStoreProducts:', error);
       return [];
