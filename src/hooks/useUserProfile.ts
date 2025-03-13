@@ -12,9 +12,11 @@ export const useUserProfile = (): UseUserProfileResult => {
 
   const fetchUserProfile = async (userId: string) => {
     try {
+      const { data: userData } = await supabase.auth.getUser(userId);
+      
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
-        .select('is_admin')
+        .select('is_admin, first_name, last_name')
         .eq('id', userId)
         .maybeSingle();
       
@@ -29,17 +31,22 @@ export const useUserProfile = (): UseUserProfileResult => {
         return true;
       } 
       
+      // If no profile exists, create one using user metadata if available
+      const userMetadata = userData?.user?.user_metadata;
       const { error: insertError } = await supabase
         .from('profiles')
         .insert({
           id: userId,
-          is_admin: false
+          is_admin: false,
+          first_name: userMetadata?.first_name || null,
+          last_name: userMetadata?.last_name || null,
+          email: userData?.user?.email || null
         });
       
       if (insertError) {
         console.error('Error creating profile:', insertError);
       } else {
-        console.log('Profile created successfully');
+        console.log('Profile created successfully with metadata');
       }
       
       setIsAdmin(false);

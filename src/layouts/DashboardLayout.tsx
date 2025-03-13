@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Package, ShoppingCart, Users, Settings, Menu, X, LogOut, User, Store, CreditCard, Bell, Shield, Globe, HelpCircle, Edit, Tags, Percent, ListFilter, ExternalLink } from 'lucide-react';
@@ -132,8 +131,27 @@ const DashboardLayout = () => {
           if (data) {
             const firstName = data.first_name || '';
             const lastName = data.last_name || '';
-            setUserFullName(`${firstName} ${lastName}`.trim() || 'مستخدم متجر.أنا');
+            if (firstName || lastName) {
+              setUserFullName(`${firstName} ${lastName}`.trim());
+            } else {
+              if (user.user_metadata && (user.user_metadata.first_name || user.user_metadata.last_name)) {
+                const metaFirstName = user.user_metadata.first_name || '';
+                const metaLastName = user.user_metadata.last_name || '';
+                setUserFullName(`${metaFirstName} ${metaLastName}`.trim());
+              } else {
+                setUserFullName('مستخدم متجر.أنا');
+              }
+            }
             setUserEmail(data.email || user.email || '');
+          } else {
+            if (user.user_metadata && (user.user_metadata.first_name || user.user_metadata.last_name)) {
+              const metaFirstName = user.user_metadata.first_name || '';
+              const metaLastName = user.user_metadata.last_name || '';
+              setUserFullName(`${metaFirstName} ${metaLastName}`.trim());
+            } else {
+              setUserFullName('مستخدم متجر.أنا');
+            }
+            setUserEmail(user.email || '');
           }
         } catch (error) {
           console.error('Unexpected error fetching profile:', error);
@@ -170,18 +188,32 @@ const DashboardLayout = () => {
             }
             if (data.slug) {
               setStoreSlug(data.slug);
+              localStorage.setItem('storeSlug', data.slug);
             }
           } else {
-            // إنشاء متجر افتراضي إذا لم يكن هناك متجر
-            const randomSlug = `store-${Math.random().toString(36).substring(2, 8)}`;
-            const { error: insertError } = await supabase
+            const storedSlug = localStorage.getItem('storeSlug');
+            const randomSlug = storedSlug || `store-${Math.random().toString(36).substring(2, 8)}`;
+            
+            let storeName = 'متجر.أنا';
+            let storeUrl = randomSlug;
+            
+            if (user.user_metadata) {
+              if (user.user_metadata.store_name) {
+                storeName = user.user_metadata.store_name;
+              }
+              if (user.user_metadata.store_url) {
+                storeUrl = user.user_metadata.store_url;
+              }
+            }
+            
+            const { error: insertError, data: newStore } = await supabase
               .from('stores')
               .insert({
                 user_id: user.id,
-                name: 'متجر.أنا',
+                name: storeName,
                 logo: null,
                 description: 'متجر للملابس والإكسسوارات',
-                slug: randomSlug
+                slug: storeUrl
               })
               .select()
               .single();
@@ -189,7 +221,13 @@ const DashboardLayout = () => {
             if (insertError) {
               console.error('Error creating default store:', insertError);
             } else {
-              setStoreSlug(randomSlug);
+              if (newStore && newStore.slug) {
+                setStoreSlug(newStore.slug);
+                localStorage.setItem('storeSlug', newStore.slug);
+              } else {
+                setStoreSlug(storeUrl);
+                localStorage.setItem('storeSlug', storeUrl);
+              }
             }
           }
         } catch (error) {
@@ -259,7 +297,7 @@ const DashboardLayout = () => {
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate sidebar-text">{userFullName || 'مستخدم متجر.أنا'}</p>
+                <p className="text-sm font-medium truncate sidebar-text">{userFullName}</p>
                 {storeSlug && (
                   <div className="flex items-center text-xs text-sidebar-foreground/70 truncate sidebar-text gap-1">
                     <span className="rtl:ml-0.5">linok.me/</span>
