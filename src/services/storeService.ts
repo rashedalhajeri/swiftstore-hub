@@ -59,7 +59,25 @@ export const storeService = {
         return [];
       }
       
-      return data as unknown as Product[] || [];
+      // Fix the type conversion by properly mapping the data
+      return (data || []).map(item => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        image: item.image,
+        category: item.category,
+        featured: !!item.featured,
+        description: item.description,
+        images: item.images,
+        sku: item.sku,
+        stock: item.stock,
+        attributes: item.attributes,
+        rating: item.rating,
+        category_id: item.category_id,
+        store_id: item.store_id,
+        created_at: item.created_at,
+        updated_at: item.updated_at
+      }));
     } catch (err) {
       console.error('Unexpected error fetching store products:', err);
       return [];

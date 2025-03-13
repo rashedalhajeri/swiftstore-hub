@@ -248,7 +248,7 @@ const ProductDetails = () => {
           </TabsContent>
           <TabsContent value="details" className="mt-4">
             <ul className="list-disc list-inside">
-              {product.attributes && Object.entries(product.attributes).map(([key, value]) => (
+              {product.attributes && Object.entries(product.attributes as Record<string, string>).map(([key, value]) => (
                 <li key={key}>
                   <strong>{key}:</strong> {value}
                 </li>
