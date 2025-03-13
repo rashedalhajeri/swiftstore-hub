@@ -284,29 +284,50 @@ export type Database = {
       }
       stores: {
         Row: {
+          banner: string | null
           created_at: string | null
           description: string | null
+          facebook: string | null
           id: string
+          instagram: string | null
+          is_published: boolean | null
           logo: string | null
           name: string
+          primary_color: string | null
+          slug: string | null
+          twitter: string | null
           updated_at: string | null
           user_id: string
         }
         Insert: {
+          banner?: string | null
           created_at?: string | null
           description?: string | null
+          facebook?: string | null
           id?: string
+          instagram?: string | null
+          is_published?: boolean | null
           logo?: string | null
           name: string
+          primary_color?: string | null
+          slug?: string | null
+          twitter?: string | null
           updated_at?: string | null
           user_id: string
         }
         Update: {
+          banner?: string | null
           created_at?: string | null
           description?: string | null
+          facebook?: string | null
           id?: string
+          instagram?: string | null
+          is_published?: boolean | null
           logo?: string | null
           name?: string
+          primary_color?: string | null
+          slug?: string | null
+          twitter?: string | null
           updated_at?: string | null
           user_id?: string
         }

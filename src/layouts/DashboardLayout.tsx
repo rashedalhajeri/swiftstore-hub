@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, ShoppingCart, Users, Settings, Menu, X, LogOut, User, Store, CreditCard, Bell, Shield, Globe, HelpCircle, Edit, Tags, Percent, ListFilter } from 'lucide-react';
+import { LayoutDashboard, Package, ShoppingCart, Users, Settings, Menu, X, LogOut, User, Store, CreditCard, Bell, Shield, Globe, HelpCircle, Edit, Tags, Percent, ListFilter, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Logo from '@/components/Logo';
 import { Button } from '@/components/ui/button';
@@ -94,6 +93,7 @@ const DashboardLayout = () => {
   const [userFullName, setUserFullName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [storeLogo, setStoreLogo] = useState<string | null>(null);
+  const [storeSlug, setStoreSlug] = useState<string | null>(null);
   const location = useLocation();
   const isMobile = useIsMobile();
   const {
@@ -148,33 +148,37 @@ const DashboardLayout = () => {
       setStoreLogo(storedLogo);
     }
     
-    const fetchStoreLogo = async () => {
+    const fetchStoreInfo = async () => {
       if (user) {
         try {
-          // Using the appropriate database table and column names
           const { data, error } = await supabase
             .from('stores')
-            .select('logo')
+            .select('logo, slug')
             .eq('user_id', user.id)
             .maybeSingle();
             
           if (error) {
-            console.error('Error fetching store logo:', error);
+            console.error('Error fetching store info:', error);
             return;
           }
           
-          if (data && data.logo) {
-            setStoreLogo(data.logo);
-            localStorage.setItem('storeLogo', data.logo);
+          if (data) {
+            if (data.logo) {
+              setStoreLogo(data.logo);
+              localStorage.setItem('storeLogo', data.logo);
+            }
+            if (data.slug) {
+              setStoreSlug(data.slug);
+            }
           } else {
-            // Create a default store for the user if none exists
             const { error: insertError } = await supabase
               .from('stores')
               .insert({
                 user_id: user.id,
                 name: 'متجر.أنا',
                 logo: null,
-                description: 'متجر للملابس والإكسسوارات'
+                description: 'متجر للملابس والإكسسوارات',
+                slug: `store-${Math.random().toString(36).substring(2, 8)}`
               })
               .select()
               .single();
@@ -184,12 +188,12 @@ const DashboardLayout = () => {
             }
           }
         } catch (error) {
-          console.error('Error in fetchStoreLogo:', error);
+          console.error('Error in fetchStoreInfo:', error);
         }
       }
     };
     
-    fetchStoreLogo();
+    fetchStoreInfo();
   }, [user]);
 
   const handleSignOut = async () => {
@@ -251,7 +255,12 @@ const DashboardLayout = () => {
               </Avatar>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium truncate sidebar-text">{userFullName}</p>
-                <p className="text-xs text-sidebar-foreground/70 truncate sidebar-text">{userEmail}</p>
+                {storeSlug && (
+                  <div className="flex items-center text-xs text-sidebar-foreground/70 truncate sidebar-text">
+                    <span>{storeSlug}</span>
+                    <ExternalLink size={12} className="ms-1 sidebar-icon" />
+                  </div>
+                )}
               </div>
               <Button variant="ghost" size="icon" className="text-sidebar-foreground" onClick={handleSignOut}>
                 <LogOut size={18} className="sidebar-logout-icon" />
@@ -277,8 +286,6 @@ const DashboardLayout = () => {
       </aside>
 
       <div className={cn("flex-1 flex flex-col h-screen w-full", sidebarOpen ? "md:mr-64" : "")}>
-        {/* Header */}
-        
         {isSettingsPage && !isMobile && <div className="bg-background border-b p-0 w-full sticky top-16 z-10">
             <div className="container flex-shrink-0 h-14 flex items-center overflow-x-auto">
               <nav className="flex items-center space-x-4 rtl:space-x-reverse">
