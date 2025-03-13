@@ -133,14 +133,19 @@ export const storeService = {
           }
         }
 
-        // Handle attributes - ensure it's always a Record<string, string>
-        let processedAttributes: Record<string, string> = {};
-        if (item.attributes && typeof item.attributes === 'object' && !Array.isArray(item.attributes)) {
-          // Using a type assertion to avoid deep recursion in type checking
-          const attrs = item.attributes as Record<string, unknown>;
-          Object.entries(attrs).forEach(([key, value]) => {
-            processedAttributes[key] = String(value);
-          });
+        // Handle attributes - simplified to avoid deep type instantiation
+        const processedAttributes: Record<string, string> = {};
+        try {
+          if (item.attributes && typeof item.attributes === 'object') {
+            // Use a simple type cast to avoid TypeScript's deep type checking
+            const attributesObj = item.attributes as Record<string, any>;
+            Object.keys(attributesObj).forEach(key => {
+              const value = attributesObj[key];
+              processedAttributes[key] = String(value);
+            });
+          }
+        } catch (err) {
+          console.error('Error processing product attributes:', err);
         }
 
         return {
