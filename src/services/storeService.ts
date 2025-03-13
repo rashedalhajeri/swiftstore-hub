@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/types/store';
 import { toast } from 'sonner';
@@ -58,15 +59,19 @@ export const storeService = {
         return [];
       }
       
-      // Simplified approach to avoid deep type inference issues
-      const products = data as any[];
+      // Use any[] type to avoid complex type inference issues
+      const rawProducts = data as any[];
       
-      // Map the data to our Product type
-      return (products || []).map(item => ({
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        image: item.image,
+      if (!rawProducts || !Array.isArray(rawProducts)) {
+        return [];
+      }
+      
+      // Map the data to our Product type with explicit conversion
+      return rawProducts.map(item => ({
+        id: item.id || '',
+        name: item.name || '',
+        price: typeof item.price === 'number' ? item.price : 0,
+        image: item.image || '',
         category: item.category?.name || '',
         featured: Boolean(item.featured),
         description: item.description || '',
@@ -76,7 +81,7 @@ export const storeService = {
         attributes: item.attributes || {},
         rating: typeof item.rating === 'number' ? item.rating : 0,
         category_id: item.category_id || '',
-        store_id: item.store_id,
+        store_id: item.store_id || '',
         created_at: item.created_at || '',
         updated_at: item.updated_at || ''
       }));
