@@ -1,30 +1,43 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { useUserProfile } from '@/hooks/useUserProfile';
 
 export const findUserByEmail = async (email: string) => {
   try {
-    // Find user by email
-    const { data: userData, error: userError } = await supabase.auth.admin.listUsers();
+    // Find user by email using a different approach
+    // The previous code was trying to use auth.admin which requires admin privileges
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, email, first_name, last_name')
+      .eq('email', email)
+      .maybeSingle();
     
-    if (userError) {
-      console.error('Error fetching users:', userError);
-      return { error: 'Failed to fetch users' };
+    if (error) {
+      console.error('Error fetching user profile:', error);
+      return { error: 'Failed to fetch user profile' };
     }
     
-    // Find the user with matching email
-    const user = userData?.users?.find(u => u.email === email);
-    
-    if (!user) {
+    if (!data) {
       return { error: 'User not found' };
     }
     
-    // Get user's store information
-    const { getUserStore } = useUserProfile();
-    const storeData = await getUserStore(user.id);
+    // Get user's store information directly without using the hook
+    const { data: storeData, error: storeError } = await supabase
+      .from('stores')
+      .select('*')
+      .eq('user_id', data.id)
+      .maybeSingle();
+    
+    if (storeError) {
+      console.error('Error fetching store data:', storeError);
+      return { 
+        user: data,
+        hasStore: false,
+        error: 'Failed to fetch store data'
+      };
+    }
     
     return {
-      user,
+      user: data,
       store: storeData,
       hasStore: !!storeData,
       subdomain: storeData?.slug || null
