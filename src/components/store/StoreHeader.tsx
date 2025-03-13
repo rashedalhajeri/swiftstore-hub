@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Store } from '@/types/store';
 import { Bell, Heart, Home, Search, ShoppingCart, User } from 'lucide-react';
@@ -8,19 +7,21 @@ import { Link } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-
 interface StoreHeaderProps {
   store: Store | null;
   error: string | null;
   isLoading: boolean;
 }
-
-const StoreHeader = ({ store, error, isLoading }: StoreHeaderProps) => {
-  const { totalItems } = useCart();
-
+const StoreHeader = ({
+  store,
+  error,
+  isLoading
+}: StoreHeaderProps) => {
+  const {
+    totalItems
+  } = useCart();
   if (isLoading) {
-    return (
-      <div className="w-full flex flex-col gap-4">
+    return <div className="w-full flex flex-col gap-4">
         <div className="w-full h-48 md:h-64 bg-gray-100 animate-pulse rounded-lg"></div>
         <div className="flex gap-4">
           <div className="w-16 h-16 rounded-full bg-gray-100 animate-pulse"></div>
@@ -29,22 +30,16 @@ const StoreHeader = ({ store, error, isLoading }: StoreHeaderProps) => {
             <div className="h-4 bg-gray-100 animate-pulse rounded w-2/3"></div>
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
   if (error) {
-    return (
-      <Alert variant="destructive" className="mb-6">
+    return <Alert variant="destructive" className="mb-6">
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>خطأ</AlertTitle>
         <AlertDescription>{error}</AlertDescription>
-      </Alert>
-    );
+      </Alert>;
   }
-
-  return (
-    <div className="w-full bg-background">
+  return <div className="w-full bg-background">
       {/* Top header with profile and notification */}
       <div className="flex items-center justify-between py-3 px-4">
         <div className="flex items-center gap-2">
@@ -72,11 +67,7 @@ const StoreHeader = ({ store, error, isLoading }: StoreHeaderProps) => {
               </Button>
             </div>
             <div className="w-1/2">
-              <img 
-                src="/lovable-uploads/a8406f59-b32a-4672-af43-f1de97a76465.png" 
-                alt="Promotion" 
-                className="object-cover w-full h-auto"
-              />
+              
             </div>
           </div>
         </div>
@@ -120,11 +111,9 @@ const StoreHeader = ({ store, error, isLoading }: StoreHeaderProps) => {
           <Link to="/store/cart" className="flex flex-col items-center relative">
             <div className="w-12 h-12 bg-black text-white rounded-full flex items-center justify-center -mt-5">
               <ShoppingCart className="w-6 h-6" />
-              {totalItems > 0 && (
-                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center">
+              {totalItems > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-4 h-4 flex items-center justify-center">
                   {totalItems}
-                </span>
-              )}
+                </span>}
             </div>
           </Link>
           
@@ -137,8 +126,6 @@ const StoreHeader = ({ store, error, isLoading }: StoreHeaderProps) => {
           </Link>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default StoreHeader;
