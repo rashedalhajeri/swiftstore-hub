@@ -18,6 +18,25 @@ interface StoreInfo {
   user_id: string;
 }
 
+interface ProductResponse {
+  id: string;
+  name: string;
+  price: number;
+  image: string;
+  category: { name: string } | null;
+  featured: boolean | null;
+  description: string | null;
+  images: any[] | null;
+  sku: string | null;
+  stock: number | null;
+  attributes: Record<string, any> | null;
+  rating: number | null;
+  category_id: string | null;
+  store_id: string;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
 export const storeService = {
   /**
    * Fetch store information by slug
@@ -48,26 +67,6 @@ export const storeService = {
    */
   async getStoreProducts(storeId: string): Promise<Product[]> {
     try {
-      // Define a simple interface for the raw product data
-      interface RawProductData {
-        id: string;
-        name: string;
-        price: number;
-        image: string;
-        category: { name: string } | null;
-        featured: boolean | null;
-        description: string | null;
-        images: any[] | null;
-        sku: string | null;
-        stock: number | null;
-        attributes: Record<string, any> | null;
-        rating: number | null;
-        category_id: string | null;
-        store_id: string;
-        created_at: string | null;
-        updated_at: string | null;
-      }
-      
       const { data, error } = await supabase
         .from('products')
         .select('*, category:categories(name)')
@@ -78,8 +77,8 @@ export const storeService = {
         return [];
       }
       
-      // Explicitly map the data to our Product type to avoid deep type inference issues
-      return (data || []).map((item: any) => ({
+      // Safely convert the data to our Product type
+      return (data as ProductResponse[] || []).map((item) => ({
         id: item.id,
         name: item.name,
         price: item.price,

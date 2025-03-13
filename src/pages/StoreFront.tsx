@@ -35,7 +35,7 @@ const StoreFront = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [storeInfo, setStoreInfo] = useState({
     id: '',
-    name: 'متجر.أنا',
+    name: '',
     slug: storeSlug,
     logo: '',
     banner: '',
@@ -48,11 +48,15 @@ const StoreFront = () => {
   useEffect(() => {
     const fetchStoreInfo = async () => {
       try {
-        if (!storeSlug) return;
+        if (!storeSlug) {
+          setIsLoading(false);
+          return;
+        }
         
         const storeData = await storeService.getStoreBySlug(storeSlug);
         
         if (storeData) {
+          console.log('Store data for front page:', storeData);
           setStoreInfo({
             id: storeData.id,
             name: storeData.name || 'متجر.أنا',
@@ -69,6 +73,7 @@ const StoreFront = () => {
           
           // Fetch store products
           const storeProducts = await storeService.getStoreProducts(storeData.id);
+          console.log('Products fetched:', storeProducts);
           setProducts(storeProducts);
           setIsLoading(false);
         } else {

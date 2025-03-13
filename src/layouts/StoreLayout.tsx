@@ -22,9 +22,10 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('الكل');
+  const [storeLoading, setStoreLoading] = useState(true);
   const [storeInfo, setStoreInfo] = useState({
     id: '',
-    name: 'متجر.أنا',
+    name: '',
     slug: storeSlug,
     logo: '',
     description: '',
@@ -38,11 +39,15 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
   useEffect(() => {
     const fetchStoreInfo = async () => {
       try {
-        if (!storeSlug) return;
+        if (!storeSlug) {
+          setStoreLoading(false);
+          return;
+        }
         
         const storeData = await storeService.getStoreBySlug(storeSlug);
         
         if (storeData) {
+          console.log('Store data fetched:', storeData);
           setStoreInfo({
             id: storeData.id,
             name: storeData.name || 'متجر.أنا',
@@ -57,9 +62,14 @@ const StoreLayout = ({ children }: StoreLayoutProps) => {
           
           // Apply store's primary color to theme
           storeService.applyStoreTheme(storeData.primary_color);
+        } else {
+          console.warn('No store data found for slug:', storeSlug);
+          toast.error('المتجر غير موجود أو غير منشور');
         }
       } catch (err) {
         console.error('Error in fetchStoreInfo:', err);
+      } finally {
+        setStoreLoading(false);
       }
     };
     
