@@ -390,6 +390,7 @@ const Orders = () => {
             <UpdateOrderStatus
               order={selectedOrder}
               onStatusUpdate={handleStatusUpdate}
+              onCancel={() => setIsUpdateStatusOpen(false)}
             />
           )}
           <DialogFooter>
