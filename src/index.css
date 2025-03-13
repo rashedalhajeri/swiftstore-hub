@@ -216,3 +216,8 @@
 [dir="rtl"] .rtl\:ml-0\.5 {
   margin-left: 0.125rem;
 }
+
+/* Text shadow for better readability on image backgrounds */
+.text-shadow {
+  text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.5);
+}

@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Product, Store } from '@/types/store';
 import { toast } from 'sonner';
@@ -133,20 +132,15 @@ export const storeService = {
           }
         }
 
-        // Handle attributes - using a simple approach to avoid type problems
-        const processedAttributes: Record<string, string> = {};
+        // Handle attributes - simplify to avoid deep type instantiation
+        let processedAttributes: Record<string, string> = {};
         
-        // Safely process attributes to avoid type instantiation issues
         if (item.attributes && typeof item.attributes === 'object') {
           try {
-            // Convert to simple object and stringify values
-            Object.keys(item.attributes).forEach(key => {
-              try {
-                const value = item.attributes[key];
-                processedAttributes[key] = String(value);
-              } catch {
-                processedAttributes[key] = '';
-              }
+            // Convert each attribute value to string directly
+            const attrObj = item.attributes as Record<string, any>;
+            Object.keys(attrObj).forEach(key => {
+              processedAttributes[key] = String(attrObj[key] || '');
             });
           } catch (err) {
             console.error('Error processing product attributes:', err);
