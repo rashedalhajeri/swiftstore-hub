@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { 
   Package, 
@@ -64,7 +63,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Order } from "@/types/store";
 import { useIsMobile } from "@/hooks/use-mobile";
 
-// Sample orders data
 const SAMPLE_ORDERS: Order[] = [
   {
     id: "ORD-001",
@@ -273,7 +271,6 @@ const Orders = () => {
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
-  // الطلبات المصفاة بناءً على مصطلح البحث وتصفية الحالة
   const filteredOrders = orders.filter(order => {
     const matchesSearch = 
       order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -483,18 +480,6 @@ const Orders = () => {
                                 </div>
                               </div>
                             </div>
-                            
-                            <div className="bg-gray-50 p-3 rounded-md">
-                              <p className="text-sm text-muted-foreground mb-2">المنتجات:</p>
-                              <div className="flex flex-wrap gap-2">
-                                {order.items.map((item, idx) => (
-                                  <div key={idx} className="flex items-center gap-2 bg-white px-3 py-1.5 rounded-full border text-sm">
-                                    <span className="font-medium">{item.product.name}</span>
-                                    <span className="text-muted-foreground">×{item.quantity}</span>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
                           </div>
                           
                           <div className="bg-gray-50/70 p-4 md:w-56 flex md:flex-col justify-between gap-2 border-t md:border-t-0 md:border-r">
@@ -618,7 +603,6 @@ const Orders = () => {
         </TabsContent>
       </Tabs>
 
-      {/* عرض تفاصيل الطلب (الجوال) */}
       {isMobile ? (
         <Drawer open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
           <DrawerContent>
@@ -669,7 +653,6 @@ const Orders = () => {
         </Dialog>
       )}
 
-      {/* تحديث حالة الطلب */}
       <Dialog open={isStatusUpdateOpen} onOpenChange={setIsStatusUpdateOpen}>
         <DialogContent>
           <DialogHeader>
@@ -688,7 +671,6 @@ const Orders = () => {
         </DialogContent>
       </Dialog>
 
-      {/* نافذة تأكيد الحذف */}
       <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
         <DialogContent>
           <DialogHeader>
@@ -719,4 +701,3 @@ const Orders = () => {
 };
 
 export default Orders;
-
