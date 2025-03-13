@@ -1,6 +1,5 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Store } from '@/types/store';
 import { storeService } from '@/services/storeService';
 import { useAuthSession } from '@/hooks/useAuthSession';
@@ -26,8 +25,18 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { session } = useAuthSession();
-  const [searchParams] = useSearchParams();
-  const storeSlug = searchParams.get('store');
+  
+  // Get store slug from URL if available
+  const getStoreSlug = () => {
+    // Check if window is available (for SSR)
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('store');
+    }
+    return null;
+  };
+  
+  const storeSlug = getStoreSlug();
 
   const fetchStore = async () => {
     setIsLoading(true);
