@@ -3,7 +3,6 @@ import React, { createContext, useContext, useState, useEffect, ReactNode } from
 import { Store } from '@/types/store';
 import { storeService } from '@/services/storeService';
 import { useAuthSession } from '@/hooks/useAuthSession';
-import { useLocation, useParams } from 'react-router-dom';
 
 interface StoreContextType {
   store: Store | null;
@@ -26,18 +25,18 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { session } = useAuthSession();
-  const location = useLocation();
-  const params = useParams();
   
-  // Get store slug from URL path or query parameter
+  // Get store slug from URL path or query parameter without using useLocation or useParams
   const getStoreSlug = () => {
-    // First check for direct path parameter (/:storeSlug)
-    if (params.storeSlug) {
-      return params.storeSlug;
-    }
-    
-    // Next check for query parameter (legacy support)
+    // Check if window is available (client-side)
     if (typeof window !== 'undefined') {
+      // First check for direct path parameter (/:storeSlug)
+      const pathSegments = window.location.pathname.split('/');
+      if (pathSegments.length > 1 && pathSegments[1] && !['store', 'login', 'register', 'dashboard', 'reset-password', 'update-password'].includes(pathSegments[1])) {
+        return pathSegments[1];
+      }
+      
+      // Next check for query parameter (legacy support)
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get('store');
     }
@@ -45,13 +44,13 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     return null;
   };
   
-  const storeSlug = getStoreSlug();
-
   const fetchStore = async () => {
     setIsLoading(true);
     setError(null);
     
     try {
+      const storeSlug = getStoreSlug();
+      
       // If we have a store slug, fetch store by slug
       if (storeSlug) {
         console.log('Fetching store by slug:', storeSlug);
@@ -78,10 +77,22 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Fetch store when component mounts or when store slug or user session changes
+  // Add a function to check if the URL has changed
+  const handleURLChange = () => {
+    fetchStore();
+  };
+
+  // Fetch store when component mounts or when user session changes
   useEffect(() => {
     fetchStore();
-  }, [storeSlug, session?.user?.id, location.pathname]);
+    
+    // Listen for URL changes
+    window.addEventListener('popstate', handleURLChange);
+    
+    return () => {
+      window.removeEventListener('popstate', handleURLChange);
+    };
+  }, [session?.user?.id]);
 
   return (
     <StoreContext.Provider value={{ store, isLoading, error, refetch: fetchStore }}>
