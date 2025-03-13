@@ -200,12 +200,16 @@ const DashboardLayout = () => {
             }
             
             try {
-              const { error: insertError, data: newStore } = await supabase.rpc('create_store', {
-                user_id_val: user.id,
-                name_val: storeName,
-                slug_val: storeUrl,
-                description_val: 'متجر للملابس والإكسسوارات'
-              });
+              const { error: insertError, data: newStore } = await supabase
+                .from('stores')
+                .insert({
+                  user_id: user.id,
+                  name: storeName,
+                  slug: storeUrl,
+                  description: 'متجر للملابس والإكسسوارات'
+                })
+                .select()
+                .single();
                 
               if (insertError) {
                 console.error('Error creating default store:', insertError);
