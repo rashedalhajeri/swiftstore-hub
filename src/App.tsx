@@ -43,7 +43,7 @@ const queryClient = new QueryClient({
       refetchOnWindowFocus: true, // Always refetch when window gets focus
       refetchOnMount: 'always', // Always refetch when component mounts
       staleTime: 0, // Data is immediately stale
-      cacheTime: 0, // Don't cache the data at all
+      gcTime: 0, // Don't cache the data at all (renamed from cacheTime)
       retry: 1, // Only retry once on failure
     },
   },

@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { Product } from '@/types/store';
 import { toast } from 'sonner';
 
 interface StoreInfo {
@@ -46,7 +47,7 @@ export const storeService = {
   /**
    * Get all products for a store by store ID
    */
-  async getStoreProducts(storeId: string) {
+  async getStoreProducts(storeId: string): Promise<Product[]> {
     try {
       const { data, error } = await supabase
         .from('products')
@@ -58,7 +59,7 @@ export const storeService = {
         return [];
       }
       
-      return data || [];
+      return data as unknown as Product[] || [];
     } catch (err) {
       console.error('Unexpected error fetching store products:', err);
       return [];

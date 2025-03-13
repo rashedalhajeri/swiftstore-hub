@@ -7,10 +7,10 @@ export interface Product {
   category: string | { name: string };
   featured: boolean;
   description?: string;
-  images?: string[];
+  images?: string[] | any; // Updated to handle Json type from Supabase
   sku?: string;
   stock?: number;
-  attributes?: Record<string, string>;
+  attributes?: Record<string, string> | any; // Updated to handle Json type from Supabase
   rating?: number;
   reviews?: Review[];
   // Add fields to help with API responses
