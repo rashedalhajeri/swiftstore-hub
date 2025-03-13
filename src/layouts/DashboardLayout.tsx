@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Link, useLocation, Outlet } from 'react-router-dom';
+import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Package, 
@@ -28,6 +28,8 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 
 type SidebarItemType = {
   icon: React.ElementType;
@@ -85,10 +87,12 @@ const sidebarItems: SidebarItemType[] = [
 
 const DashboardLayout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [userName, setUserName] = useState('مستخدم متجر.أنا');
-  const [storeUrl, setStoreUrl] = useState('linok.me/store');
+  const [userFullName, setUserFullName] = useState('');
+  const [userEmail, setUserEmail] = useState('');
   const location = useLocation();
   const isMobile = useIsMobile();
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
 
   // Auto collapse sidebar on mobile
   useEffect(() => {
@@ -106,13 +110,41 @@ const DashboardLayout = () => {
     }
   }, [location.pathname, isMobile]);
 
-  // Retrieve store URL from localStorage if available
+  // Fetch user profile data from Supabase
   useEffect(() => {
-    const savedStoreUrl = localStorage.getItem('storeUrl');
-    if (savedStoreUrl) {
-      setStoreUrl(`linok.me/${savedStoreUrl}`);
-    }
-  }, []);
+    const fetchUserProfile = async () => {
+      if (user) {
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('first_name, last_name, email')
+            .eq('id', user.id)
+            .single();
+          
+          if (error) {
+            console.error('Error fetching user profile:', error);
+            return;
+          }
+          
+          if (data) {
+            const firstName = data.first_name || '';
+            const lastName = data.last_name || '';
+            setUserFullName(`${firstName} ${lastName}`.trim() || 'مستخدم متجر.أنا');
+            setUserEmail(data.email || user.email || '');
+          }
+        } catch (error) {
+          console.error('Unexpected error fetching profile:', error);
+        }
+      }
+    };
+    
+    fetchUserProfile();
+  }, [user]);
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/login');
+  };
 
   const isSettingsPage = location.pathname.includes('/dashboard/settings');
   const currentSettingsPage = isSettingsPage ? 
@@ -205,13 +237,20 @@ const DashboardLayout = () => {
             <div className="flex items-center gap-3">
               <Avatar className="h-9 w-9 border border-sidebar-accent">
                 <AvatarImage src="https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=100&h=100&auto=format&fit=crop" alt="User Avatar" />
-                <AvatarFallback>U</AvatarFallback>
+                <AvatarFallback>
+                  {userFullName ? userFullName.charAt(0).toUpperCase() : 'U'}
+                </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{userName}</p>
-                <p className="text-xs text-sidebar-foreground/70 truncate">{storeUrl}</p>
+                <p className="text-sm font-medium truncate">{userFullName}</p>
+                <p className="text-xs text-sidebar-foreground/70 truncate">{userEmail}</p>
               </div>
-              <Button variant="ghost" size="icon" className="text-sidebar-foreground">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="text-sidebar-foreground"
+                onClick={handleSignOut}
+              >
                 <LogOut size={18} />
               </Button>
             </div>
