@@ -44,8 +44,8 @@ import {
   DialogFooter
 } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
-import OrderDetails from "@/components/dashboard/OrderDetails";
-import UpdateOrderStatus from "@/components/dashboard/UpdateOrderStatus";
+import { OrderDetails } from "@/components/dashboard/OrderDetails";
+import { UpdateOrderStatus } from "@/components/dashboard/UpdateOrderStatus";
 import { Order } from "@/types/store";
 
 // نماذج بيانات طلبات مؤقتة (سيتم استبدالها بالبيانات من قاعدة البيانات)
@@ -281,12 +281,12 @@ const Orders = () => {
     setIsUpdateStatusOpen(true);
   };
 
-  const handleStatusUpdate = (newStatus: string) => {
+  const handleStatusUpdate = (newStatus: Order['status']) => {
     if (selectedOrder) {
       setIsLoading(true);
       setTimeout(() => {
         setOrders(orders.map(order =>
-          order.id === selectedOrder.id ? { ...order, status: newStatus } : order
+          order.id === selectedOrder.id ? { ...order, status: newStatus as Order['status'] } : order
         ));
         setIsUpdateStatusOpen(false);
         setIsLoading(false);
@@ -516,7 +516,7 @@ const Orders = () => {
             <UpdateOrderStatus
               order={selectedOrder}
               onStatusUpdate={handleStatusUpdate}
-              isLoading={isLoading}
+              onCancel={() => setIsUpdateStatusOpen(false)}
             />
           )}
           <DialogFooter>
