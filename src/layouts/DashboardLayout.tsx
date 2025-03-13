@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Package, ShoppingCart, Users, Settings, Menu, X, LogOut, User, Store, CreditCard, Bell, Shield, Globe, HelpCircle, Edit, Tags, Percent, ListFilter, ExternalLink, Plus } from 'lucide-react';
@@ -104,6 +105,7 @@ const DashboardLayout = () => {
   const [userEmail, setUserEmail] = useState('');
   const [storeLogo, setStoreLogo] = useState<string | null>(null);
   const [storeSlug, setStoreSlug] = useState<string | null>(null);
+  const [isCreatingStore, setIsCreatingStore] = useState(false);
   const location = useLocation();
   const isMobile = useIsMobile();
   const {
@@ -172,8 +174,9 @@ const DashboardLayout = () => {
     }
     
     const fetchStoreInfo = async () => {
-      if (user) {
+      if (user && !isCreatingStore) {
         try {
+          // Check if the user already has a store
           const { data, error } = await supabase
             .from('stores')
             .select('logo, slug')
@@ -187,6 +190,7 @@ const DashboardLayout = () => {
           }
           
           if (data) {
+            // Store found, update local state and localStorage
             if (data.logo) {
               setStoreLogo(data.logo);
               localStorage.setItem('storeLogo', data.logo);
@@ -196,6 +200,9 @@ const DashboardLayout = () => {
               localStorage.setItem('storeSlug', data.slug);
             }
           } else {
+            // No store found, create one only if we're not already in the process
+            setIsCreatingStore(true);
+            
             const storedSlug = localStorage.getItem('storeSlug');
             let storeName = 'متجر.أنا';
             let storeUrl = storedSlug || `store-${Math.random().toString(36).substring(2, 8)}`;
@@ -210,6 +217,23 @@ const DashboardLayout = () => {
             }
             
             try {
+              // Check one more time to make sure no store was created in another request
+              const { data: existingStore } = await supabase
+                .from('stores')
+                .select('id, slug')
+                .eq('user_id', user.id)
+                .limit(1)
+                .maybeSingle();
+                
+              if (existingStore) {
+                // Store was found in the second check, use that
+                setStoreSlug(existingStore.slug);
+                localStorage.setItem('storeSlug', existingStore.slug);
+                setIsCreatingStore(false);
+                return;
+              }
+              
+              // Create a new store
               const { error: insertError, data: newStore } = await supabase
                 .from('stores')
                 .insert({
@@ -224,6 +248,7 @@ const DashboardLayout = () => {
               if (insertError) {
                 console.error('Error creating default store:', insertError);
               } else {
+                console.log('New store created successfully:', newStore);
                 setStoreSlug(storeUrl);
                 localStorage.setItem('storeSlug', storeUrl);
               }
@@ -231,16 +256,19 @@ const DashboardLayout = () => {
               console.error('Error in store creation:', error);
               setStoreSlug(storeUrl);
               localStorage.setItem('storeSlug', storeUrl);
+            } finally {
+              setIsCreatingStore(false);
             }
           }
         } catch (error) {
           console.error('Error in fetchStoreInfo:', error);
+          setIsCreatingStore(false);
         }
       }
     };
     
     fetchStoreInfo();
-  }, [user]);
+  }, [user, isCreatingStore]);
 
   const handleSignOut = async () => {
     await signOut();
