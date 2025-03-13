@@ -121,51 +121,23 @@ export const storeService = {
       
       if (!data) return [];
 
-      // Simplified approach to avoid excessive type instantiation
-      return data.map(item => {
-        // Create a base product with required fields
-        const product: Product = {
-          id: item.id || '',
-          name: item.name || '',
-          price: Number(item.price) || 0,
-          image: item.image || '',
-          featured: Boolean(item.featured) || false,
-        };
-        
-        // Add optional fields if they exist
-        if (item.description) product.description = item.description;
-        if (item.sku) product.sku = item.sku;
-        if (item.stock !== undefined) product.stock = Number(item.stock);
-        if (item.rating !== undefined) product.rating = Number(item.rating);
-        
-        // Handle category with simple type checking
-        if (item.category) {
-          if (typeof item.category === 'object' && 'name' in item.category) {
-            product.category = { name: item.category.name || '' };
-          } else {
-            product.category = item.category_id || '';
-          }
-        } else {
-          product.category = '';
-        }
-        
-        // Handle images array if it exists
-        if (Array.isArray(item.images)) {
-          product.images = item.images.filter(img => typeof img === 'string');
-        }
-        
-        // Handle attributes object if it exists
-        if (item.attributes && typeof item.attributes === 'object' && !Array.isArray(item.attributes)) {
-          product.attributes = {};
-          for (const [key, value] of Object.entries(item.attributes)) {
-            if (product.attributes) {
-              product.attributes[key] = String(value);
-            }
-          }
-        }
-        
-        return product;
-      });
+      // Fixed approach to avoid excessive type instantiation
+      return data.map(item => ({
+        id: item.id || '',
+        name: item.name || '',
+        price: Number(item.price) || 0,
+        image: item.image || '',
+        featured: Boolean(item.featured) || false,
+        category: item.category ? (typeof item.category === 'object' ? item.category.name : item.category_id) : '',
+        description: item.description,
+        sku: item.sku,
+        stock: item.stock !== undefined ? Number(item.stock) : undefined,
+        rating: item.rating !== undefined ? Number(item.rating) : undefined,
+        images: Array.isArray(item.images) ? item.images.filter(img => typeof img === 'string') : undefined,
+        attributes: item.attributes && typeof item.attributes === 'object' ? Object.fromEntries(
+          Object.entries(item.attributes).map(([key, value]) => [key, String(value)])
+        ) : undefined
+      }));
     } catch (error) {
       console.error('Error in getStoreProducts:', error);
       return [];

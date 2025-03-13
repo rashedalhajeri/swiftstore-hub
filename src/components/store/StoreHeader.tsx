@@ -7,19 +7,22 @@ import { Link } from 'react-router-dom';
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useIsMobile } from '@/hooks/use-mobile';
+
 interface StoreHeaderProps {
   store: Store | null;
   error: string | null;
   isLoading: boolean;
 }
+
 const StoreHeader = ({
   store,
   error,
   isLoading
 }: StoreHeaderProps) => {
-  const {
-    totalItems
-  } = useCart();
+  const { totalItems } = useCart();
+  const isMobile = useIsMobile();
+
   if (isLoading) {
     return <div className="w-full flex flex-col gap-4">
         <div className="w-full h-48 md:h-64 bg-gray-100 animate-pulse rounded-lg"></div>
@@ -32,6 +35,7 @@ const StoreHeader = ({
         </div>
       </div>;
   }
+
   if (error) {
     return <Alert variant="destructive" className="mb-6">
         <AlertCircle className="h-4 w-4" />
@@ -39,6 +43,7 @@ const StoreHeader = ({
         <AlertDescription>{error}</AlertDescription>
       </Alert>;
   }
+
   return <div className="w-full bg-background">
       {/* Top header with profile and notification */}
       <div className="flex items-center justify-between py-3 px-4">
@@ -66,8 +71,12 @@ const StoreHeader = ({
                 SHOP NOW
               </Button>
             </div>
-            <div className="w-1/2">
-              
+            <div className="w-1/2 h-full relative">
+              <img 
+                src="/lovable-uploads/a8406f59-b32a-4672-af43-f1de97a76465.png" 
+                alt="Promotion" 
+                className="object-cover w-full h-full max-h-24 absolute top-0 right-0"
+              />
             </div>
           </div>
         </div>
@@ -128,4 +137,5 @@ const StoreHeader = ({
       </div>
     </div>;
 };
+
 export default StoreHeader;
