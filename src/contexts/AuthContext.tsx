@@ -125,7 +125,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent, newSession) => {
       console.log('Auth state changed:', event, newSession ? 'with session' : 'no session');
       
-      // Fix here: use separate if statement for 'SIGNED_OUT' case instead of comparing to other events
       if (event === 'SIGNED_OUT') {
         console.log('User signed out, clearing state');
         setSession(null);
@@ -145,7 +144,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
         
         setLoading(false);
-      } else if (event !== 'SIGNED_OUT') { // This line is redundant but keeping it for clarity
+      } else {
+        // Changed comparison to avoid TypeScript error and handle all non-sign-out events without sessions
         console.log('No session in auth change event');
         setSession(null);
         setUser(null);
@@ -248,11 +248,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(true);
       console.log('Attempting to sign out...');
       
-      const { error } = await supabase.auth.signOut();
-      
+      // First clear the local state BEFORE calling sign out
       setSession(null);
       setUser(null);
       setIsAdmin(false);
+      
+      // Then call supabase signOut
+      const { error } = await supabase.auth.signOut();
       
       if (error) {
         console.error('Error during sign out:', error);
@@ -271,6 +273,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         title: "تم تسجيل الخروج",
         description: "تم تسجيل خروجك بنجاح",
       });
+      
+      // Force page reload to ensure clean state
+      window.location.href = '/';
     } catch (error) {
       console.error('Unexpected error during sign out:', error);
       toast({

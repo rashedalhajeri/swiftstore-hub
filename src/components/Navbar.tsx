@@ -45,8 +45,8 @@ const Navbar = () => {
     console.log('Sign out button clicked');
     try {
       setIsMenuOpen(false);
-      navigate('/', { replace: true });
       await signOut();
+      // Remove explicit navigation as we're now handling it in the AuthContext
     } catch (error) {
       console.error('Error in handleSignOut:', error);
     }

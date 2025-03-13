@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Link, useLocation, Outlet, useNavigate } from 'react-router-dom';
 import { 
@@ -143,7 +142,7 @@ const DashboardLayout = () => {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/login');
+    // Remove explicit navigation as we're now handling it in the AuthContext
   };
 
   const isSettingsPage = location.pathname.includes('/dashboard/settings');
