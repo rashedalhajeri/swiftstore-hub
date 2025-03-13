@@ -11,9 +11,7 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
   },
   plugins: [
-    react({
-      jsxImportSource: 'react',  // Use this instead of jsxRuntime
-    }),
+    react(),
     mode === 'development' &&
     componentTagger(),
   ].filter(Boolean),
@@ -21,13 +19,6 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-  },
-  esbuild: {
-    jsxInject: `import React from 'react'`,  // This will inject React import into every file
-    logOverride: { 'this-is-undefined-in-esm': 'silent' }
-  },
-  optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom', '@supabase/supabase-js'], // Pre-bundle common dependencies
   },
   build: {
     sourcemap: mode !== 'production', // Only include sourcemaps in development
