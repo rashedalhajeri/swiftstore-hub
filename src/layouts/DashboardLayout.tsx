@@ -119,7 +119,7 @@ const DashboardLayout = () => {
     location.pathname.split('/dashboard/settings/')[1] || 'account' : '';
 
   return (
-    <div className="flex h-screen overflow-hidden bg-secondary/20">
+    <div className="flex h-screen bg-secondary/20 overflow-hidden">
       {/* Sidebar Overlay */}
       {isMobile && sidebarOpen && (
         <div 
@@ -160,7 +160,7 @@ const DashboardLayout = () => {
                   <Link
                     to={item.href}
                     className={cn(
-                      "flex items-center gap-3 p-2 rounded-md transition-colors",
+                      "flex items-center gap-3 p-2.5 rounded-md transition-colors",
                       isActive
                         ? "bg-sidebar-accent text-sidebar-accent-foreground"
                         : "hover:bg-sidebar-accent/50"
@@ -201,18 +201,46 @@ const DashboardLayout = () => {
 
         {/* Sidebar Footer */}
         <div className="p-4 border-t border-sidebar-border shrink-0">
-          <div className="flex items-center gap-3">
-            <Avatar className="h-9 w-9 border border-sidebar-accent">
-              <AvatarImage src="https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=100&h=100&auto=format&fit=crop" alt="User Avatar" />
-              <AvatarFallback>U</AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{userName}</p>
-              <p className="text-xs text-sidebar-foreground/70 truncate">{storeUrl}</p>
+          <div className="flex flex-col gap-3">
+            <div className="flex items-center gap-3">
+              <Avatar className="h-9 w-9 border border-sidebar-accent">
+                <AvatarImage src="https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=100&h=100&auto=format&fit=crop" alt="User Avatar" />
+                <AvatarFallback>U</AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">{userName}</p>
+                <p className="text-xs text-sidebar-foreground/70 truncate">{storeUrl}</p>
+              </div>
+              <Button variant="ghost" size="icon" className="text-sidebar-foreground">
+                <LogOut size={18} />
+              </Button>
             </div>
-            <Button variant="ghost" size="icon" className="text-sidebar-foreground">
-              <LogOut size={18} />
-            </Button>
+            
+            {/* Store Control Buttons */}
+            <div className="grid grid-cols-2 gap-2 mt-1">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="bg-sidebar-accent/50 border-sidebar-border text-sidebar-foreground w-full"
+                asChild
+              >
+                <Link to="/store" className="flex items-center justify-center gap-1">
+                  <Store size={14} />
+                  <span className="text-xs">عرض المتجر</span>
+                </Link>
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="bg-sidebar-accent/50 border-sidebar-border text-sidebar-foreground w-full"
+                asChild
+              >
+                <Link to="/dashboard/settings/store" className="flex items-center justify-center gap-1">
+                  <Edit size={14} />
+                  <span className="text-xs">تحرير المتجر</span>
+                </Link>
+              </Button>
+            </div>
           </div>
         </div>
       </aside>
@@ -250,31 +278,6 @@ const DashboardLayout = () => {
                   )}
                 </div>
               )}
-            </div>
-            
-            <div className="flex items-center gap-3">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="h-9"
-                asChild
-              >
-                <Link to="/store" className="flex items-center gap-2">
-                  <Store size={16} />
-                  <span>عرض المتجر</span>
-                </Link>
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="h-9 border-dashed"
-                asChild
-              >
-                <Link to="/dashboard/settings/store" className="flex items-center gap-2">
-                  <Edit size={16} />
-                  <span>تحرير المتجر</span>
-                </Link>
-              </Button>
             </div>
           </div>
         </header>
