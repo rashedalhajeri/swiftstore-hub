@@ -1,4 +1,6 @@
-# Welcome to your Lovable project
+# SwiftStore Hub
+
+منصة متكاملة لإدارة المتاجر الإلكترونية بواجهة سهلة الاستخدام...
 
 ## Project info
 
