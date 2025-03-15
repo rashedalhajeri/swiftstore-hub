@@ -30,16 +30,19 @@ const Logo = ({ className, size = 'default', variant = 'dark', animated = false 
   }[size];
 
   const textColor = variant === 'light' ? 'text-white' : 'text-slate-800';
+  const gradientColors = variant === 'light' 
+    ? 'from-indigo-400 to-purple-400' 
+    : 'from-indigo-500 to-purple-500';
 
   return (
     <div className={cn("flex items-center gap-2", className)}>
       <div className={cn("relative group", animated && "hover:scale-105 transition-transform duration-300")}>
         <div className={cn(
-          "absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl blur-lg opacity-75",
+          "absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-xl blur-lg opacity-75",
           animated && "group-hover:opacity-100 transition-all duration-500"
         )}></div>
         <div className={cn(
-          "relative bg-gradient-to-r from-purple-500 to-pink-500 p-2 md:p-2.5 rounded-xl",
+          `relative bg-gradient-to-r ${gradientColors} p-2 md:p-2.5 rounded-xl`,
           animated && "transform-gpu group-hover:scale-105 group-hover:rotate-3 transition-all duration-500"
         )}>
           <ShoppingBag className={cn(
@@ -51,7 +54,10 @@ const Logo = ({ className, size = 'default', variant = 'dark', animated = false 
       </div>
       <div>
         <h1 className={cn("font-bold tracking-tight", textSize)}>
-          <span className="bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
+          <span className={cn(
+            "bg-gradient-to-r bg-clip-text text-transparent",
+            variant === 'light' ? 'from-indigo-300 to-purple-300' : 'from-indigo-500 to-purple-500'
+          )}>
             Linok
           </span>
           <span className={textColor}>.me</span>
