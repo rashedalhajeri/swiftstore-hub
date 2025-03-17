@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -106,14 +107,6 @@ export default {
 					'0%': { borderRadius: '40% 60% 60% 40% / 60% 30% 70% 40%' },
 					'50%': { borderRadius: '30% 60% 70% 40% / 50% 60% 30% 60%' },
 					'100%': { borderRadius: '40% 60% 60% 40% / 60% 30% 70% 40%' }
-				},
-				'sidebar-slide-in': {
-					'0%': { transform: 'translateX(-100%)' },
-					'100%': { transform: 'translateX(0)' }
-				},
-				'sidebar-slide-out': {
-					'0%': { transform: 'translateX(0)' },
-					'100%': { transform: 'translateX(-100%)' }
 				}
 			},
 			animation: {
@@ -125,9 +118,7 @@ export default {
 				'pulse-light': 'pulse-light 2s ease-in-out infinite',
 				'logo-animation': 'logo-animation 2s ease-in-out infinite',
 				'spin-slow': 'spin-slow 8s linear infinite',
-				'morph': 'morph 8s ease-in-out infinite',
-				'sidebar-in': 'sidebar-slide-in 0.3s ease-out',
-				'sidebar-out': 'sidebar-slide-out 0.3s ease-out'
+				'morph': 'morph 8s ease-in-out infinite'
 			}
 		}
 	},
