@@ -33,29 +33,23 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
       // First check for direct path parameter (/:storeSlug)
       const pathSegments = window.location.pathname.split('/');
       
-      // Special case for index route with a single segment after the domain
-      if (pathSegments.length === 2 && pathSegments[1] !== '') {
-        // If we're on a route like example.com/my-store (not a reserved route)
-        const reservedRoutes = ['store', 'login', 'register', 'reset-password', 'update-password', 'dashboard'];
-        if (!reservedRoutes.includes(pathSegments[1])) {
-          console.log('Found potential store slug in direct path:', pathSegments[1]);
-          return pathSegments[1];
-        }
+      // We need to check if we're in the store route or if the first segment is not a reserved route
+      const reservedRoutes = ['store', 'login', 'register', 'reset-password', 'update-password'];
+      const isDashboard = pathSegments[1] === 'dashboard';
+      
+      // Don't try to get store by slug if we're in the dashboard
+      if (!isDashboard && pathSegments[1] && !reservedRoutes.includes(pathSegments[1])) {
+        return pathSegments[1];
       }
       
-      // Regular store route check: /store/:slug
+      // If we're in the store route, check for the second segment
       if (pathSegments[1] === 'store' && pathSegments[2]) {
-        console.log('Found store slug in /store/ path:', pathSegments[2]);
         return pathSegments[2];
       }
       
-      // Check for query parameter (legacy support)
+      // Next check for query parameter (legacy support)
       const urlParams = new URLSearchParams(window.location.search);
-      const storeParam = urlParams.get('store');
-      if (storeParam) {
-        console.log('Found store slug in query parameter:', storeParam);
-        return storeParam;
-      }
+      return urlParams.get('store');
     }
     
     return null;
@@ -68,18 +62,10 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
     try {
       const storeSlug = getStoreSlug();
       const isDashboard = window.location.pathname.startsWith('/dashboard');
-      const isHomePage = window.location.pathname === '/' || window.location.pathname === '';
-      
-      console.log('Current route info:', {
-        path: window.location.pathname,
-        isDashboard,
-        isHomePage,
-        storeSlug
-      });
       
       // If we're logged in and we're in dashboard, prioritize fetching by user ID
       if (session?.user?.id && isDashboard) {
-        console.log('Fetching store for user in dashboard:', session.user.id);
+        console.log('Fetching store for user:', session.user.id);
         const storeData = await storeService.getStoreByUserId(session.user.id);
         if (storeData) {
           setStore(storeData);
@@ -104,19 +90,15 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
         if (storeData) {
           setStore(storeData);
           setError(null);
-          setIsLoading(false);
-          return;
         } else {
           console.error('Store not found with slug:', storeSlug);
           setError('لم يتم العثور على المتجر');
           setStore(null);
-          setIsLoading(false);
-          return;
         }
       } 
-      
-      // If we're logged in but don't have a store slug, try to fetch the user's store
-      if (session?.user?.id) {
+      // If we're logged in but don't have a store slug and we're not in dashboard,
+      // try to fetch the user's store as a fallback
+      else if (session?.user?.id && !isDashboard) {
         console.log('Fetching store for user (fallback):', session.user.id);
         const storeData = await storeService.getStoreByUserId(session.user.id);
         
@@ -130,8 +112,8 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
           }
           setStore(null);
         }
-      } else if (window.location.pathname === '/store' || isHomePage) {
-        // We're explicitly in store route or home page but no slug and no session
+      } else if (window.location.pathname === '/store') {
+        // We're explicitly in store route but no slug and no session
         setError('لم يتم العثور على المتجر');
         setStore(null);
       }
@@ -146,7 +128,6 @@ export const StoreProvider = ({ children }: { children: ReactNode }) => {
 
   // Add a function to check if the URL has changed
   const handleURLChange = () => {
-    console.log('URL changed, refetching store...');
     fetchStore();
   };
 

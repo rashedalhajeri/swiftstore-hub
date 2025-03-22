@@ -44,7 +44,6 @@ const StoreFront = () => {
       
       setIsLoading(true);
       try {
-        console.log('Loading products for store:', store.id);
         const storeProducts = await storeService.getStoreProducts(store.id);
         
         // Filter products by category if a filter is applied
@@ -109,7 +108,6 @@ const StoreFront = () => {
   
   // Handle retry
   const handleRetry = () => {
-    console.log('Manually retrying store fetch...');
     refetch();
   };
   
