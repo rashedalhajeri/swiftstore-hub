@@ -1,6 +1,4 @@
-# SwiftStore Hub
-
-منصة متكاملة لإدارة المتاجر الإلكترونية بواجهة سهلة الاستخدام...
+# Welcome to your Lovable project
 
 ## Project info
 
